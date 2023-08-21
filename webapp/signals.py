@@ -21,8 +21,7 @@ def userLogin(sender, request, user, signal, *args, **kwargs):
     """
     Signal to process UserLogin
     """
-    from .tasks import syncPramariToHubspot
-    syncPramariToHubspot.delay(user.pk)
+    pass
 
 
 def create_user_profile(sender, instance, created, **kwargs):

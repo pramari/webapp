@@ -1,12 +1,7 @@
 from celery import shared_task
-from crmeta import getSecret
-from pprint import pprint
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 
-import json
-import requests
 
 import logging
 
@@ -20,78 +15,6 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-fieldmapping_google_to_hubspot = {
-    "Prefix": "Salutation",
-    "First Name": "First Name",
-    "Last Name": "Last Name",
-    "Company": "Associated Company Name",
-    "Job Title": "Job Title",
-    "Emails": "Primary Email",
-    "Phones": "Phone Number",
-    "Phones (mobile)": "Mobile Phone",
-    "Phones (fax)": "Fax",
-    "Websites": "Website URL",
-    "Addresses": "Address",
-}
-
-
-@shared_task
-def insertContactFromHubspotToGoogle():
-    """
-    syncContacts from Hubspot to Google
-
-    .. todo::
-        Implement
-    """
-    try:
-        import hubspot
-        from hubspot.crm.contacts import ApiException
-    except ImportError:
-        raise NotImplementedError
-
-    api_key = getSecret("pramari-de", "dbdetail", "19").get("KEYS")
-    client = hubspot.Client.create(api_key=api_key["HUBSPOT"])
-
-    try:
-        api_response = client.crm.contacts.basic_api.get_page(limit=10,
-                                                              archived=False)
-        pprint(api_response)
-    except ApiException as e:
-        print("Exception when calling basic_api->get_page: %s\n" % e)
-
-
-@shared_task
-def insertContactFromGoogleToHubspot(googleContact):
-    """
-    syncContacts from Google to HubSpot
-
-    .. todo::
-        Implement
-    """
-    if not settings.HUBSPOT_API_KEY:
-        raise NotImplementedError
-    hapi = "https://api.hubapi.com/contacts/v1/contact/?hapikey="
-    endpoint = f"{hapi}{settings.HUBSPOT_API_KEY}"
-    headers = {"Content-Type": "application/json"}
-    data = json.dumps(
-        {
-            "properties": [
-                {"property": "email", "value": "testingapis@hubspot.com"},
-                {"property": "firstname", "value": "test"},
-                {"property": "lastname", "value": "testerson"},
-                # {
-                #  "property": "website", "company", "phone","address", "city",
-                # "state", "zip",
-                #    "value": "http://hubspot.com"
-                #    },
-            ]
-        }
-    )
-
-    r = requests.post(url=endpoint, data=data, headers=headers)
-    print(r.text)
-
-
 @shared_task
 def getAppAndAccessToken(
     user: User, provider: str = "google"
@@ -100,7 +23,7 @@ def getAppAndAccessToken(
         app = SocialApp.objects.get(provider=provider)
     except SocialApp.DoesNotExist:
         app = None
-    
+
     try:
         accessToken = SocialToken.objects.get(  # pylint: disable=no-member
             account__user=user, account__provider=app  # provider
@@ -109,6 +32,7 @@ def getAppAndAccessToken(
         accessToken = None
 
     return (app, accessToken)
+
 
 @shared_task
 def generateProfileKeyPair(
@@ -202,24 +126,3 @@ def getGoogleContact(
 def updateGoogleContact(contact: dict):
     """
     """
-
-
-# @shared_task
-# def updateHubspotContact(contact: dict):
-    """
-    update a contact in crm
-
-    .. input::
-      contact details
-
-    .. todo::
-        implement
-    """
-
-    # logger.error("Implement this!")
-
-@shared_task
-def syncPramariToHubspot(contact: dict):
-    """
-    """
-    logger.error("Implement this!")
