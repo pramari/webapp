@@ -1,0 +1,66 @@
+- model: flatpages.flatpage
+  pk: 8
+  fields:
+    url: /terms/
+    title: Terms & Conditions
+    content: "<h1>Terms and Conditions</h1>\r\n\r\n<p>By registering or logging in,
+      you consent in using a private site, that is meant as an software development
+      project.</p>\r\n\r\n<p>Permission is hereby granted, free of charge, to any
+      person using this service and associated documentation files (the \"Service\"),
+      to deal in the Service without restriction, including without limitation the
+      rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+      sell copies of the Software, and to permit persons to whom the Software is furnished
+      to do so, subject to the following conditions: The above copyright notice and
+      this permission notice shall be included in all copies or substantial portions
+      of the Software. THE SOFTWARE AND SERVICE ARE PROVIDED \"AS IS\", WITHOUT WARRANTY
+      OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+      NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+      OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR SERVICE OR THE USE OR OTHER
+      DEALINGS IN THE SOFTWARE OR SERVICE.</p>"
+    enable_comments: false
+    template_name: ''
+    registration_required: false
+    sites:
+    - 1
+- model: flatpages.flatpage
+  pk: 9
+  fields:
+    url: /imprint/
+    title: Imprint / Impressum
+    content: "<h1>Impressum</h1>\r\n                        <p>pramari.de ist ein
+      Softwareprojekt von Andreas Neumeier</p>\r\n                        <p>Inhaltlich
+      verantwortlich gemäß § 6 MDStV: Andreas Neumeier</p>\r\n<pre>Andreas Neumeier\r\nLudwig-Specht-Str.
+      18\r\n82008 Unterhaching\r\nTel: +49 (0)89 - 61098960\r\nandreas(at)neumeier(dot)org\r\n</pre>\r\n<p>Copyright-Notiz:
+      Der gesamte Inhalt dieser Homepage (inklusive jeglichem Multimedia-Material)
+      ist urheberrechtlich geschünd darf nicht ohne vorherige schriftliche Genehmigung
+      der Sitebetreiber anderweitig verwendet und/oder irgendwo zusälich veröntlicht,
+      sowie kommerziell vermarktet werden.</p>\r\n<p><b>Haftungshinweis:</b> Trotz
+      sorgfäiger inhaltlicher Kontrolle ühmen wir keine Haftung fü Inhalte externer
+      Links. Fü Inhalt der verlinkten Seiten sind ausschließich deren Betreiber verantwortlich.</p>\r\n<p>Copyright-Notice:
+      All content of this homepage (inclusive all multimedia material) is copyrighted
+      to their respective owners/creators and must not be used and/or published (commercially)
+      anywhere else without prior written permission of the site-owners here.\r\n<b>Disclaimer:</b>
+      Although we verify the content of this website carefully, we do not take responsibility
+      for the content of any external links. The respective operators are solely responsible
+      for the content of the pages we provide links to.</p>"
+    enable_comments: false
+    template_name: ''
+    registration_required: false
+    sites:
+    - 1
+- model: flatpages.flatpage
+  pk: 10
+  fields:
+    url: /privacy/
+    title: Privacy Policy
+    content: "<h1>Privacy and Data Use</h1>\r\n<p>We try to work with technology here
+      and try to avoid collection and in particular evaluation of personal data. For
+      most of the fuctionality, cookies are required. The application, at the time
+      of this writing, runs on google cloud and leverages google analytics for transparency.</p>"
+    enable_comments: false
+    template_name: ''
+    registration_required: false
+    sites:
+    - 1

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">{% trans "Home" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Status" %}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+    {{ DEBUG }}
+
+<div class="row">
+  <div class="col">
+    Deployment
+  </div>
+  <div class="col">
+    <img src="https://build.pramari.de/badges/deploy.svg">
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    Documentation
+  </div>
+  <div class="col">
+    <img src="https://build.pramari.de/badges/documentation.svg">
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    Quality
+  </div>
+  <div class="col">
+    <img src="https://build.pramari.de/badges/quality.svg">
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    Static files
+  </div>
+  <div class="col">
+    <img src="https://build.pramari.de/badges/staticfiles.svg">
+  </div>
+</div>
+
+{% endblock %}

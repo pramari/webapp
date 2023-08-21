@@ -1,0 +1,21 @@
+{% load i18n %}
+{% load release %}
+      <p class="credit text-justify text-muted">
+        {% blocktrans %} &copy; <a href="https://www.pramari.de">Pramari</a> ist ein Projekt von <a href="https://www.neumeier.org">Andreas Neumeier</a>.<br>
+        <strong>Alle Rechte an den Inhalten verbleiben bei den verlinkten  Urhebern.</strong>
+        {% endblocktrans %}
+      </p>
+    </div>
+    <div class="col-6 col-md">
+      <ul class="list-unstyled text-small">
+        <li><span class="credit text-muted">{% trans "Build" %} {% release %}</span></li>
+        <li><a class="text-muted credit" href="/health/">{% trans "System" %}</a></li>
+        <li><a class="text-muted credit" href="/status/">{% trans "Status" %}</a></li>
+        <li><a class="text-muted credit" href="/pages/imprint/">{% trans "Impressum" %}</a></li>
+        <li><a class="text-muted credit" href="/pages/terms/">{% trans "Terms and Privacy" %}</a></li>
+        <li><button type="button" data-cc="c-settings">Manage cookie settings</button></li>
+        {% if user.is_staff %}
+        <li><a class="text-muted credit" href="/admin/">{% trans "Admin" %}</a></li>
+        {% endif %}
+
+      </ul>

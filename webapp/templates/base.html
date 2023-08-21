@@ -1,0 +1,125 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# pramari: http://ogp.me/ns/fb/pramari#">
+    <!-- Matomo Tag Manager -->
+    <script>
+    var _mtm = window._mtm = window._mtm || [];
+    _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src='https://track.pramari.de/js/container_m5M9zB0H.js'; s.parentNode.insertBefore(g,s);
+    </script>
+    <!-- End Matomo Tag Manager -->
+    <script type="text/plain" data-category="analytics">
+     _paq.push(['setConsentGiven']);
+    </script>
+    <script type="text/plain" data-category="!analytics">
+     _paq.push(['forgetConsentGiven']);
+    </script>
+    <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "92f133fcbc084844800d9fbf788bd7da"}'></script><!-- End Cloudflare Web Analytics -->
+    <!-- Mailchimp -->
+    <!-- <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/e2934b313d22bb2d224b5d948/cd7c42791498de2538c728279.js");</script> -->
+    <!-- End Mailchimp -->
+    <!-- Google Adsense -->
+    <!-- <script data-ad-client="ca-pub-7442794642525929" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> -->
+    <!-- End Adsense -->
+
+    <title> {% block title %} Pramari {% endblock %} </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="text/plain" rel="author" href="https://pramari.de/humans.txt" />
+    {% block og %}
+    {% endblock %}
+
+    {% block basecss %}
+      <!-- Bootstrap 5.3.x -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+      <!-- <link rel="stylesheet" href="{% static "bs5/css/bootstrap.min.css" %}"> -->
+      <!-- <link rel="stylesheet" href="{% static "bs5/icons/bootstrap-icons.css" %}"> -->
+      <link rel="stylesheet" href="{% static "base.css" %}" media="screen">
+      <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+      <link rel="stylesheet" href="{% static "cookieconsent/cookieconsent.css" %}" media="print" onload="this.media='all'">
+
+    {% endblock %}
+
+    {% block css %}
+    <!-- custom css -->
+    {% endblock %}
+  </head>
+
+  <body itemscope itemtype="http://schema.org/WebPage">
+
+    <div class="container">
+
+      <header class="py-3 my-3 border-bottom"> <!-- p-3 mb-3-->
+        {% block nav %}
+        {% include "partials/nav.html" %}
+        {% endblock  %}
+      </header>
+
+      {% block messages %}
+      {% if messages %}
+      <div class="row">
+	      <div class="col">
+		      {% include "partials/messages.html" %}
+	      </div>
+      </div>
+      {% endif %}
+      {% endblock %}
+
+      {% block breadcrumb %}
+      <div class="row">
+	      <div class="col">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item active" aria-current="page">Home</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+      {% endblock %}
+
+      <div class="row">
+        <div class="col">
+      {% block appmenu %}
+      {% endblock %}
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col">
+      {% block content %}
+      {% endblock %}
+        </div>
+      </div>
+
+      <footer class="py-3 border-top">
+        <div class="row">
+          <div class="col">
+          {% include "partials/footer.html" %}
+          </div>
+        </div>
+      </footer>
+
+    </div> <!-- container -->
+
+
+    {% block basejs %}
+      <!-- JavaScript jQuery) -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+      <script src="{% static "base.js" %}"></script>
+      <script defer src="{% static "cookieconsent/cookieconsent.js" %}"></script>
+      <script defer src="{% static "cookieconsent-ini.js" %}"></script>
+    {% endblock %}
+
+    {% block js %}
+      <!-- additional js goes here -->
+    {% endblock %}
+
+    {% block login %}
+      {% include 'partials/modal.html' %}
+    {% endblock %}
+  </body>
+</html>

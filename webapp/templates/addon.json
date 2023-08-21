@@ -1,0 +1,29 @@
+{
+  "action": {
+    "navigations": [
+      {
+        "pushCard": {
+          "header": {
+            "title": "Cats!"
+          },
+          "sections": [
+            {
+              "widgets": [
+                {
+                  "textParagraph": {
+                    "text": "Your random cat:"
+                  }
+                },
+                {
+                  "image": {
+                    "imageUrl": "https://cataas.com/cat"
+                   }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

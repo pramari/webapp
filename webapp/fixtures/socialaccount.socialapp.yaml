@@ -1,0 +1,36 @@
+- model: socialaccount.socialapp
+  pk: 1
+  fields:
+    provider: facebook
+    name: Facebook
+    client_id: '362904360559308'
+    secret: 58cc48c4ae420e8e7b61f84ede6cf8a0
+    key: ''
+    sites: [1]
+- model: socialaccount.socialapp
+  pk: 2
+  fields:
+    provider: github
+    name: Github
+    client_id: Iv1.1aca8449c733d791
+    secret: 2031be1d070542cc0894a2c078cc8bf479440d8b
+    key: ''
+    sites: [1]
+- model: socialaccount.socialapp
+  pk: 3
+  fields:
+    provider: twitter
+    name: Twitter
+    client_id: Ym3vZ2kCj6Xw9ZoI8eh7FUlpQ
+    secret: 926AN8H8xT1P3XS2ZgzLaNqfhvw4LZZUMG6UhcNtet1EKv4ood
+    key: ''
+    sites: [1]
+- model: socialaccount.socialapp
+  pk: 4
+  fields:
+    provider: linkedin
+    name: LinkedIn
+    client_id: 77ujogkt09m6zh
+    secret: sHR7AqTQJ12wm3cp
+    key: ''
+    sites: [1]

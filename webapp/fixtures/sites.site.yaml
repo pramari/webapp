@@ -1,0 +1,4 @@
+- model: sites.site
+  pk: 1
+  fields: {domain: pramari.de, name: pramari.de}
+

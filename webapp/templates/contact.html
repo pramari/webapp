@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">{% trans "Home" %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% trans "Google Contacts" %}</li>
+    </ol>
+  </nav></nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    {% if contacts %}
+    <h1>Contacts</h1>
+    <ul>
+      {% for contact in contacts %}
+      <li>
+        <p><a href="/contacts/{{contact.resourceName}}">{{contact.names.displayName}}</a></li></p>
+        <p>{{contact}}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if jsoncontacts %}
+    <h1>Contacts</h1>
+    <ul>
+      {% for contact in jsoncontacts %}
+      <li>
+        <a href="/contacts/{{contact.resourceName}}">{{contact.names}}</a>
+        {{contact}}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

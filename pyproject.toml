@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pramari-webapp"
+version = "1.1.23"
+authors = [
+  { name="Andreas Neumeier", email="andreas@neumeier.org" },
+]
+description = "Authentication and Userprofiles in  pramari.de"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "django>4.2",
+  "django-allauth",
+  "django-activity-stream",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://www.pramari.de"
+"Bug Tracker" = "https://github.com/pramari/apc/issues"
