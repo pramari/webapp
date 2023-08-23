@@ -12,6 +12,7 @@ class WebAppConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
 
     def ready(self):
+        if self.is_installed("")
         # pylint: disable=C0415,C0103
         from django.contrib.auth import get_user_model
         from django.db.models.signals import pre_save, post_save
@@ -39,3 +40,10 @@ class WebAppConfig(AppConfig):
         email_confirmed.connect(signal_logger)  # , sender=EmailAddress)
         email_removed.connect(signal_logger)  # , sender=EmailAddress)
         logger.info("WebApp ready.")
+
+
+class SocialAuthConfig(AppConfig):
+    name = 'allauth'
+    # 'allauth.account',
+    # 'allauth.socialaccount',
+

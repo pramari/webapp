@@ -12,7 +12,7 @@ description = "Authentication and Userprofiles in  pramari.de"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "django>4.2",
+  "django>=4.2",
   "django-allauth",
   "django-activity-stream",
 ]
