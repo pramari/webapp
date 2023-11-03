@@ -14,8 +14,8 @@ from django.contrib.auth.forms import (
     UsernameField, ReadOnlyPasswordHashField
 )
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
+# from crispy_forms.helper import FormHelper
+# from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 
 from .models import Profile
 User = get_user_model()
@@ -35,24 +35,24 @@ class ProfileForm(forms.ModelForm):
             'follows',
         ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
-        self.helper.layout = Layout(
-            Fieldset(
-                'User Profile',
-                # 'username',
-                # 'first_name',
-                # 'last_name',
-                'public',
-                'consent',
-                'dob',
-                'follows',
-            ),
-            ButtonHolder(
-                Submit('submit', 'Submit', css_class='button white')
-            )
-        )
+    # def __init__(self, *args, **kwargs):
+    #    super().__init__(*args, **kwargs)
+    #    self.helper = FormHelper(self)
+    #    self.helper.layout = Layout(
+    #        Fieldset(
+    #            'User Profile',
+    #            # 'username',
+    #            # 'first_name',
+    #            # 'last_name',
+    #            'public',
+    #            'consent',
+    #            'dob',
+    #            'follows',
+    #        ),
+    #        ButtonHolder(
+    #            Submit('submit', 'Submit', css_class='button white')
+    #        )
+    #    )
 
 
 class UserCreationForm(forms.ModelForm):
