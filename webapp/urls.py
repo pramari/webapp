@@ -67,11 +67,11 @@ urlpatterns = [
         GithubView.as_view(),
         name="github-detail"
     ),
-    path(r"health/", HealthCheckView.as_view(), name="health"),
     path(r'search/', SearchView.as_view(), name='search_result'),
 ]
 
 urlpatterns += [
+    path(r'accounts/account/', AccountView.as_view(), name='user-detail'),
     path(r'accounts/account/', AccountView.as_view(), name='user_account'),
     path(r'accounts/profile/', ProfileView.as_view(), name='user_profile'),
     path(r'accounts/', include('allauth.urls')),
