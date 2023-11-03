@@ -74,47 +74,44 @@ urlpatterns += [
     path(r'accounts/account/', AccountView.as_view(), name='user-detail'),
     path(r'accounts/account/', AccountView.as_view(), name='user_account'),
     path(r'accounts/profile/', ProfileView.as_view(), name='user_profile'),
+    path(r'accounts/<slug:slug>/', ProfileDetailView.as_view(), name='profile-detail'),
     path(r'accounts/', include('allauth.urls')),
 ]
 
 urlpatterns += [
     path('.well-known/webfinger', WebFingerView.as_view(), name='webfinger'),
-    path('activity/', include('actstream.urls')),
-    path('inbox/', InboxView.as_view(), name='profile-inbox'),
-    path(
-        r'accounts/<slug:slug>/inbox',
-        InboxView.as_view(),
-        name='profile-inbox'
-    ),
-    path('outbox/', OutboxView.as_view(), name='profile-outbox'),
-    path(
-        r'accounts/<slug:slug>/outbox',
-        OutboxView.as_view(),
-        name='profile-outbox'
-    ),
-    path('follow/', FollowView.as_view(), name='profile-follow'),
-    path(r'accounts/<slug:slug>/',
-         ProfileDetailView.as_view(),
-         name='profile-detail'
-         ),
+    # path('activity/', include('actstream.urls')),
+    # path('inbox/', InboxView.as_view(), name='profile-inbox'),
+    # path(
+    #     r'accounts/<slug:slug>/inbox',
+    #     InboxView.as_view(),
+    #     name='profile-inbox'
+    # ),
+    # path('outbox/', OutboxView.as_view(), name='profile-outbox'),
+    # path(
+    #     r'accounts/<slug:slug>/outbox',
+    #     OutboxView.as_view(),
+    #     name='profile-outbox'
+    # ),
+    # path('follow/', FollowView.as_view(), name='profile-follow'),
     # path(
     #    'activity/<str:activity_id>/',
     #    ActivityView.as_view(),
     #    name='activity-detail'
     # ),
-    path(
-        r'accounts/<slug:slug>/actor',
-        ActorView.as_view(),
-        name='activity-view'
-    ),
-    path(r'accounts/<slug:slug>/followers',
-         FollowersView.as_view(),
-         name='profile-followers'
-         ),
-    path(r'accounts/<slug:slug>/following',
-         FollowingView.as_view(),
-         name='profile-following'
-         ),
+    #path(
+    #    r'accounts/<slug:slug>/actor',
+    #    ActorView.as_view(),
+    #    name='activity-view'
+    #),
+    #path(r'accounts/<slug:slug>/followers',
+    #     FollowersView.as_view(),
+    #     name='profile-followers'
+    #     ),
+    #path(r'accounts/<slug:slug>/following',
+    #     FollowingView.as_view(),
+    #     name='profile-following'
+    #     ),
 ]
 
 urlpatterns += [
