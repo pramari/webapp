@@ -32,15 +32,15 @@ from webapp.views import (
     SearchView
 )
 
-from webapp.ActivityView import (
-    WebFingerView,
-    ActorView,
-    InboxView,
-    OutboxView,
-    FollowView,
-    FollowersView,
-    FollowingView
-)
+# from webapp.ActivityView import (
+#    WebFingerView,
+#    ActorView,
+#    InboxView,
+#    OutboxView,
+#    FollowView,
+#    FollowersView,
+#    FollowingView
+#)
 
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path('.well-known/webfinger', WebFingerView.as_view(), name='webfinger'),
+    # path('.well-known/webfinger', WebFingerView.as_view(), name='webfinger'),
     # path('activity/', include('actstream.urls')),
     # path('inbox/', InboxView.as_view(), name='profile-inbox'),
     # path(
