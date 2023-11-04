@@ -71,11 +71,11 @@ urlpatterns = [
 ]
 
 urlpatterns += [
+    path(r'accounts/', include('allauth.urls')),
+    path(r'accounts/profile/', ProfileView.as_view(), name='user_profile'),
     path(r'accounts/account/', AccountView.as_view(), name='user-detail'),
     path(r'accounts/account/', AccountView.as_view(), name='user_account'),
-    path(r'accounts/profile/', ProfileView.as_view(), name='user_profile'),
     path(r'accounts/<slug:slug>/', ProfileDetailView.as_view(), name='profile-detail'),
-    path(r'accounts/', include('allauth.urls')),
 ]
 
 urlpatterns += [
