@@ -1,10 +1,10 @@
 from allauth.socialaccount.tests import OAuth2TestsMixin
 from allauth.tests import MockedResponse, TestCase
 
-from .provider import HSProvider
+from .provider import MastoProvider
 
 
-class HSTests(OAuth2TestsMixin, TestCase):
+class MastoTests(OAuth2TestsMixin, TestCase):
 
     provider_id = HSProvider.id
 
@@ -12,9 +12,9 @@ class HSTests(OAuth2TestsMixin, TestCase):
         return MockedResponse(
             200,
             """{
-                    "token": "CNye4dqFMBICAAEYhOKlDZZ_z6IVKI_xMjIUgmFsNQzgBjNE9YBmhAhNOtfN0ak6BAAAAEFCFIIwn2EVRLpvJI9hP4tbIeKHw7ZXSgNldTFSAFoA",
+                    "token": "",
                     "user": "m@acme.com",
-                    "hub_domain": "acme.com",
+                    "domain": "acme.com",
                     "scopes": ["oauth"],
                     "scope_to_scope_group_pks": [25, 31],
                     "trial_scopes": [],
