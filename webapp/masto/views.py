@@ -16,7 +16,7 @@ class MastoOAuth2Adapter(OAuth2Adapter):
     provider_id = MastoProvider.id
 
     access_token_url = "https://mastodon.social/oauth/token"
-    profile_url = "https://mastodon.social/oauth/access-tokens"
+    profile_url = "https://mastodon.social/oauth/token"
 
     @property
     def authorize_url(self):
