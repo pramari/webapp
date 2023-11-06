@@ -12,8 +12,8 @@ class MastoProvider(OAuth2Provider):
     name = "Mastodon"
     account_class = MastoAccount
 
-    def get_default_scope(self):
-        return ["oauth"]
+    # def get_default_scope(self):
+    #     return ["oauth"]
 
     def extract_uid(self, data):
         return str(data["user_id"])
