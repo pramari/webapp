@@ -19,5 +19,16 @@ class MastoOAuth2Adapter(OAuth2Adapter):
     profile_url = "https://mastodon.social/oauth/token"
     authorize_url = "https://mastodon.social/oauth/authorize"
 
+    def complete_login(self, request, app, access_token, **kwargs):
+        headers = {"Content-Type": "application/json"}
+        response = requests.get(self.profile_url, params={"access_token": token.token})
+        extra_data = resp.json()
+        return self.get_provider().sociallogin_from_response(request, extra_data)
+
+        response.raise_for_status()
+        extra_data = response.json()
+        return self.get_provider().sociallogin_from_response(request, extra_data)
+
+
 oauth2_login = OAuth2LoginView.adapter_view(MastoOAuth2Adapter)
 oauth2_callback = OAuth2CallbackView.adapter_view(MastoOAuth2Adapter)
