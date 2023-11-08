@@ -1,50 +1,73 @@
 {% extends "base.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block breadcrumb %}
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/">{% trans "Home" %}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{% trans "Status" %}</li>
-  </ol>
-</nav>
+    <div class="row">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/">{% trans "Home" %}</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{% trans "Status" %}</li>
+                </ol>
+            </nav>
+        </div>
+        <!-- col -->
+    </div>
+    <!-- row -->
 {% endblock %}
-
 {% block content %}
     {{ DEBUG }}
-
-<div class="row">
-  <div class="col">
-    Deployment
-  </div>
-  <div class="col">
-    <img src="https://build.pramari.de/badges/deploy.svg" width="133" height="20" alt="Deploy Status pramari.de">
-  </div>
-</div>
-<div class="row">
-  <div class="col">
-    Documentation
-  </div>
-  <div class="col">
-	  <img src="https://build.pramari.de/badges/documentation.svg" width="133" height="20" alt="Deploy Status pramari.de">
-  </div>
-</div>
-<div class="row">
-  <div class="col">
-    Quality
-  </div>
-  <div class="col">
-    <img src="https://build.pramari.de/badges/quality.svg" width="133" height="20" alt="Quality Status pramari.de">
-  </div>
-</div>
-<div class="row">
-  <div class="col">
-    Static files
-  </div>
-  <div class="col">
-    <img src="https://build.pramari.de/badges/staticfiles.svg" width="133" height="20" alt="Staticfiles Status pramari.de">
-  </div>
-</div>
-
+    <div class="row">
+        <div class="col">
+            <div class="content">
+                <div class="row">
+                    <div class="col">Deployment</div>
+                    <!-- col -->
+                    <div class="col">
+                        <img src="https://build.pramari.de/badges/deploy.svg"
+                             width="133"
+                             height="20"
+                             alt="Deploy Status pramari.de">
+                    </div>
+                    <!-- col -->
+                </div>
+                <!-- row -->
+                <div class="row">
+                    <div class="col">Documentation</div>
+                    <!-- col -->
+                    <div class="col">
+                        <img src="https://build.pramari.de/badges/documentation.svg"
+                             width="133"
+                             height="20"
+                             alt="Deploy Status pramari.de">
+                    </div>
+                    <!-- col -->
+                </div>
+                <!-- row -->
+                <div class="row">
+                    <div class="col">Quality</div>
+                    <div class="col">
+                        <img src="https://build.pramari.de/badges/quality.svg"
+                             width="133"
+                             height="20"
+                             alt="Quality Status pramari.de">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">Static files</div>
+                    <div class="col">
+                        <img src="https://build.pramari.de/badges/staticfiles.svg"
+                             width="133"
+                             height="20"
+                             alt="Staticfiles Status pramari.de">
+                    </div>
+                </div>
+            </div>
+            <!-- content -->
+        </div>
+        <!-- col -->
+    </div>
+    <!-- row -->
 {% endblock %}

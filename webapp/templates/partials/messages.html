@@ -1,11 +1,16 @@
 {% load i18n %}
-  {% for message in messages %}
-    {# <div class="alert alert-dismissible fade show alert-{{message.level_tag}}" role="alert"> #}
-    <div class="alert d-flex align-items-center alert-{{message.level_tag}} alert-dismissible fade show" role="alert">
-      <i class="bi bi-check-circle-fill"></i>
-      <div>
-        <strong>{{message.level_tag}}</strong> - {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
+{% for message in messages %}
+    {# <div class="alert alert-dismissible fade show alert-{{message.level_tag}}"
+      role="alert"> #}
+    <div class="alert d-flex align-items-center alert-{{ message.level_tag }} alert-dismissible fade show"
+         role="alert">
+        <i class="bi bi-check-circle-fill"></i>
+        <div>
+            <strong>{{ message.level_tag }}</strong> - {{ message }}
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
     </div>
-  {% endfor %}
+{% endfor %}

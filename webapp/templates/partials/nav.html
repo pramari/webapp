@@ -1,44 +1,70 @@
 {% load i18n %}
 {% load account %}
 {% load groups %}
-
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
-          <i class="bi bi-arrow-up-right-square-fill"></i>[pramari]
-        </a>
-
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="/" class="nav-link px-2 link-secondary"><i class="bi-house-door"></i>Home</a></li>
-          <!-- <li><a href="/news/" class="nav-link px-2 link-dark"><i
-            class="bi-newspaper"></i>News</a></li> -->
-          <li><a href="/pages/about/" class="nav-link px-2 link-dark"><i class="bi-info-square"></i>About</a></li>
-        </ul>
-
-        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'search_result' %}" method="get">
-          <input name="q" type="search" class="form-control" placeholder="Search..." aria-label="Search">
-        </form>
-
-        {% if user.is_authenticated %}
+<div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+    <a href="/"
+       class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+        <i class="bi bi-arrow-up-right-square-fill"></i>[pramari]
+    </a>
+    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+        <li>
+            <a href="/" class="nav-link px-2 link-secondary"><i class="bi-house-door"></i>Home</a>
+        </li>
+        <!-- <li><a href="/news/" class="nav-link px-2 link-dark"><i class="bi-newspaper"></i>News</a></li> -->
+        <li>
+            <a href="/pages/about/" class="nav-link px-2 link-dark"><i class="bi-info-square"></i>About</a>
+        </li>
+    </ul>
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3"
+          action="{% url 'search_result' %}"
+          method="get">
+        <input name="q"
+               type="search"
+               class="form-control"
+               placeholder="Search..."
+               aria-label="Search">
+    </form>
+    {% if user.is_authenticated %}
         <div class="dropdown text-end">
-          <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
-          </a>
-          <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-            <li><a class="dropdown-item" href="{% url "user_account" %}">Account</a></li>
-            <li><a class="dropdown-item" href="{% url "user_profile" %}">Profile</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url "account_email" %}"><i class="bi-envelope"></i> {% trans "EMail Connections" %}</a></li>
-            <li><a class="dropdown-item" href="{% url "socialaccount_connections" %}"><i class="bi-gear-wide-connected"></i> {% trans "Social Connections" %}</a></li>
-            <li><a class="dropdown-item" href="{% url "account_logout" %}"><i class="bi-door-open"></i> {% trans "logout" %} {% user_display user %}</a></li>
-
-          </ul>
-        </div> <!-- /dropdown -->
-        {% else %}
+            <a href="#"
+               class="d-block link-dark text-decoration-none dropdown-toggle"
+               id="dropdownUser1"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <img src="https://github.com/mdo.png"
+                     alt="mdo"
+                     width="32"
+                     height="32"
+                     class="rounded-circle">
+            </a>
+            <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
+                <li>
+                    <a class="dropdown-item" href="{% url "user_account" %}">Account</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url "user_profile" %}">Profile</a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url "account_email" %}"><i class="bi-envelope"></i> {% trans "EMail Connections" %}</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url "socialaccount_connections" %}"><i class="bi-gear-wide-connected"></i> {% trans "Social Connections" %}</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url "account_logout" %}"><i class="bi-door-open"></i> {% trans "logout" %} {% user_display user %}</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /dropdown -->
+    {% else %}
         <button type="button" class="btn btn-link btn-sm me-2">
-          <a href="{% url "account_login" %}"><i class="bi-file-person"></i> {% trans "login" %}</a>
+            <a href="{% url "account_login" %}"><i class="bi-file-person"></i> {% trans "login" %}</a>
         </button>
         <button type="button" class="btn btn-light btn-sm me-2">
-          <a href="{% url "account_signup" %}"><i class="bi-signpost"></i> {% trans "sign up" %}</a>
+            <a href="{% url "account_signup" %}"><i class="bi-signpost"></i> {% trans "sign up" %}</a>
         </button>
-        {% endif %}
-      </div>
+    {% endif %}
+</div>
