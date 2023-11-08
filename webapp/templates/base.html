@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# pramari: http://ogp.me/ns/fb/pramari#">
     <!-- Matomo Tag Manager -->
     <script>
@@ -27,6 +27,8 @@
 
     <title> {% block title %} Pramari {% endblock %} </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block metadescription %}Pramari Page{% endblock %}">
+    <meta name="keywords" content="{% block metakeywords %}Pramari, Product Management, Showcase, Educational{% endblock %}">
     <link type="text/plain" rel="author" href="https://pramari.de/humans.txt" />
     {% block og %}
     {% endblock %}
@@ -87,21 +89,16 @@
       </div>
       {% endblock %}
 
-
+      {% block content %}
       <div class="row">
         <div class="col">
-      {% block content %}
-      {% endblock %}
         </div>
       </div>
+      {% endblock %}
 
-      <footer class="py-3 border-top">
-        <div class="row">
-          <div class="col">
+      {% block footer %}
           {% include "partials/footer.html" %}
-          </div>
-        </div>
-      </footer>
+      {% endblock %}
 
     </div> <!-- container -->
 

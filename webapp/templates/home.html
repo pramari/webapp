@@ -1,73 +1,29 @@
 {% extends "base.html" %}
+
 {% load i18n %}
 {% load static %}
 
 {% block content %}
+<div class="row">
+  <div class="col">
   <div class="content">
     <div class="jumbotron">
       <h1 class="text-center">pramari</h1>
-      <p class="text-center">pramari is a tech demo.</p>
+      <p class="text-center">pramari is a tech demo. Product Management Showcase site designed specifically for those who are passionate about developing their skills and knowledge in the field of product management. At pramari.de, we're committed to providing an engaging platform where you can dive deep into the technological aspects of product management, gain hands-on experience, and learn from the best in the industry. 
+</p>
     </div>
     <div class="row">
       <div class="col">
-        <div class="card mb-4 rounded-3 shadow-sm">
-          <div class="card-header py-3">
-            <h4 class="my-0 fw-normal">Communication</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">matrix.pramari.de</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Federated communication</h6>
-            <p class="card-text">The fediverse and derived independence gained importance since Elon Musk bought Twitter. Pramari has a small playground in the matrix chat ecosysptem.</p>
-            <a href="https://matrix.pramari.de" class="card-link">matrix</a>
-          </div> <!-- card-body -->
-        </div> <!-- card -->
+        {% include "partials/card.html" %}
       </div> <!-- col -->
       <div class="col">
-        <div class="card mb-4 rounded-3 shadow-sm">
-          <div class="card-header py-3">
-            <h4 class="my-0 fw-normal">Analytics</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">track.pramari.de</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Web Analytics</h6>
-            <p class="card-text">Create transparency over how the project is being used.</p>
-            <a href="https://track.pramari.de" class="card-link">track</a>
-          </div> <!-- card-body -->
-        </div> <!-- card -->
       </div> <!-- col -->
       <div class="col">
-        <div class="card  mb-4 rounded-3 shadow-sm">
-          <div class="card-header py-3">
-            <h4 class="my-0 fw-normal">Automation</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">build.pramari.de</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Continuous Integration</h6>
-            <p class="card-text"><a href="https://www.buildbot.net">buildbot</a> automates tasks across all of the project. CI/CD is core to good digitalisation.</p>
-            <a href="https://build.pramari.de" class="card-link">Card link</a>
-          </div>
-        </div>
-      </div> <!-- col -->
-    </div> <!-- row -->
-    <div class="row">
-      <div class="col">
-        <div class="card  mb-4 rounded-3 shadow-sm border-primary">
-          <div class="card-header py-3">
-            <h4 class="my-0 fw-normal">Identification</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">pramari.self()</h5>
-            <h6 class="card-subtitle mb-2 text-muted">About the project.</h6>
-            <p class="card-text">Pramari is the technology leftover from two failed startups that refueses to die. For the project ecosystem, it serves as an identity provider.</p>
-            <a class="btn btn-primary btn-sm" href="/pages/about/" role="button">
-              about.
-            </a>
-          </div> <!-- card-body -->
-        </div> <!-- card -->
-
       </div> <!-- col -->
     </div> <!-- row -->
   </div> <!-- content-->
+  </div>
+</div>
 {% endblock %}
 {% block login %}
 {% endblock %}
