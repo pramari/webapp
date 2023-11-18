@@ -12,48 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class CronView(views.APIView):
-    """
-    CronView.
-
-    Receive a `GCP Cron` Event.
-    """
-
-    permission_classes = (permissions.AllowAny,)
-
-    def get(self, request):  # pylint: disable=R0201
-        """
-        /tasks/cron
-
-        Option to delete unverfied users.
-
-        from allauth.account.models import EmailAddress
-
-        for acct in EmailAddress.objects.filter(verified=False):
-            acct.user.delete()
-
-        Actually verify, what happens to accounts with multiple emails.
-
-        Emit a Task to run Cron for `gcpfeeds`
-        """
-        return response.Response("OK!", status=status.HTTP_200_OK)
-
-
-class TravisView(views.APIView):
-    """
-    TravisView.
-
-    Receive WebHooks from Travis-CI
-    """
-
-    permission_classes = (permissions.AllowAny,)
-
-    def get(self, request):  # pylint: disable=R0201
-        """GET /webhook/travis/"""
-        logger.debug("%s", request.data)
-        return response.Response("OK!", status=status.HTTP_200_OK)
-
-
 class BudgetView(views.APIView):
     """
     BudgetView.
