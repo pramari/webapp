@@ -117,7 +117,7 @@ cc.run({
                         ]
                     }, {
                         title: "Advertisement and Targeting cookies",
-                        description: "These cookies collect information about how you use the website, which pages you visited and which links you clicked on. All of the data is anonymized and cannot be used to identify you",
+                        description: "These cookies collect information about how you use the website, which pages you visited and which links you clicked on. All of the data is anonymized and cannot be used to identify you. At least that is what others claim. We don't do that shit here. That's why this section is empty and disabled.",
                         toggle: {
                             value: "targeting",
                             enabled: false,

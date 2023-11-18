@@ -14,7 +14,8 @@ requires-python = ">=3.11"
 dependencies = [
   "django>=4.2",
   "django-allauth",
-  "django-activity-stream",
+  # "django-activity-stream",
+  "django-oauth-toolkit"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

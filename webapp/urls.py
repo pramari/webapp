@@ -78,6 +78,14 @@ urlpatterns += [
     path(r'accounts/<slug:slug>/', ProfileDetailView.as_view(), name='profile-detail'),
 ]
 
+if "oauth2_provider" in settings.INSTALLED_APPS:
+    logger.debug("Including URLs for 'oauth2_provider'")
+    urlpatterns += [
+        path(r"o/", include(
+            "oauth2_provider.urls", namespace="oauth2_provider"
+        ))
+    ]
+
 urlpatterns += [
     # path('.well-known/webfinger', WebFingerView.as_view(), name='webfinger'),
     # path('activity/', include('actstream.urls')),
