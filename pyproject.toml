@@ -26,3 +26,9 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://www.pramari.de"
 "Bug Tracker" = "https://github.com/pramari/apc/issues"
+
+[tool.pytest.ini_options]
+addopts = "" #--cov --cov-report html --cov-report term-missing --cov-fail-under 95"
+
+[tool.coverage.run]
+source = ["src"]
