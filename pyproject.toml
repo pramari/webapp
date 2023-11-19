@@ -15,7 +15,8 @@ dependencies = [
   "django>=4.2",
   "django-allauth",
   # "django-activity-stream",
-  "django-oauth-toolkit"
+  "django-oauth-toolkit",
+  "djangorestframework"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
