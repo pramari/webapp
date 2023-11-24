@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Authentication and Userprofiles in  pramari.de"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
   "django>=4.2",
   "django-allauth",
@@ -28,8 +28,10 @@ classifiers = [
 "Homepage" = "https://www.pramari.de"
 "Bug Tracker" = "https://github.com/pramari/apc/issues"
 
-[tool.pytest.ini_options]
-addopts = "" #--cov --cov-report html --cov-report term-missing --cov-fail-under 95"
+# [tool.pytest.ini_options]
+# addopts = "" #--cov --cov-report html --cov-report term-missing --cov-fail-under 95"
+
+[tools.tox]
 
 [tool.coverage.run]
 source = ["src"]
