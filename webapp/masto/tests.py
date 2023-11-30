@@ -6,7 +6,7 @@ from .provider import MastoProvider
 
 class MastoTests(OAuth2TestsMixin, TestCase):
 
-    provider_id = HSProvider.id
+    provider_id = MastoProvider.id
 
     def get_mocked_response(self):
         return MockedResponse(
