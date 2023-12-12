@@ -33,3 +33,7 @@ addopts = "" #--cov --cov-report html --cov-report term-missing --cov-fail-under
 
 [tool.coverage.run]
 source = ["src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["webapp/"]
+
