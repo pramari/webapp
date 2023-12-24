@@ -13,4 +13,4 @@ Feature: Register for a newsletter.
   Scenario: a partner page wants to embed a registration form.
     Given they use an iframe to embed a registration form.
     When the registration form shows embedded on the remote page
-    Then somebody can provide their email, consent and submit to register.
+    Then they can provide their email, consent and submit to register.
