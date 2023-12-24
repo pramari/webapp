@@ -14,7 +14,7 @@ import logging
 
 from django.urls import path
 
-from webapp.ActivityView import (
+from .ActivityView import (
     #    WebFingerView,
     #    ActorView,
     #    InboxView,

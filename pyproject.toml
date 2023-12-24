@@ -23,7 +23,10 @@ dependencies = [
   "django-allauth",
   # "django-activity-stream",
   "django-oauth-toolkit",
-  "djangorestframework"
+  "djangorestframework",
+  "Pillow",
+  "pyyaml",
+  "celery"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

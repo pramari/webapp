@@ -14,19 +14,57 @@
 {% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-md-12">
-            {% if contacts %}
-                <h1>Contacts</h1>
-                <ul>
-                    {% for contact in contacts %}
-                        <li>
-                            <p>
-                                <a href="/contacts/{{ contact.resourceName }}">{{ contact.names.displayName }}</a>
-                            </p>
-                            <p>{{ contact }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
+        <div class="col">
+            <h1>Contacts</h1>
+        </div>
+        <!-- col -->
+    </div>
+    <!-- row -->
+    {% if contacts %}
+        <div class="row">
+            <div class="col">
+                {% for contact in contacts %}
+                    <div class="card mb-4 rounded-3 shadow-sm">
+                        <div class="card-header py-3">
+				<h4 class="my-0 fw-normal">{{contact.names.displayName}}</h4>
+                        </div>
+                        <div class="card-body">
+			    {% for name in contact.names %}
+				<h5 class="card-title">{{contact.names.displayNameLastFirst}}</h5>
+			    {% endfor %}
+                            <h6 class="card-subtitle mb-2 text-muted">Metadata:</h6>
+			    	{% for data in contact.metadata %}
+				<p class="card-text">{{data}}</p><!-- card-text: (meta)data -->
+				{% endfor %}
+                            <h6 class="card-subtitle mb-2 text-muted">Email Addresses:</h6>
+			    	{% for address in contact.emailAddresses %}
+				<p class="card-text">{{ address }}</p> <!-- card-text: addresses -->
+				{% endfor %}
+                            <h6 class="card-subtitle mb-2 text-muted">PhoneNumbers:</h6>
+			    	{% for number in contact.phoneNumbers %}
+				<p class="card-text">{{ number }}</p> <!-- card-text: number -->
+				{% endfor %}
+			    <p class="card-text">memberships
+			    	{{ contact.memberships }}
+			    </p> <!-- card-text: memberships -->
+			    <p class="card-text">Photos:
+			    	{% for photo in contact.photos %}
+			    	<img src="{{ photo.url }}">
+			    	{% endfor %}
+			    </p> <!-- card-text: Photos -->
+			    <p class="card-text">Keys:
+			    {% for key in contact.keys %}
+			    {{ key }}
+			    {% endfor %}
+			    </p> <!-- card-text: Keys -->
+			    {% for name in contact.names %}
+                            	<a href="/contacts/{{ contact.resourceName }}">{{ name.displayName }}</a>
+			    {% endfor %}
+                        </div>
+                        <!-- card-body -->
+                    </div>
+                    <!-- card -->
+                {% endfor %}
             {% endif %}
             {% if jsoncontacts %}
                 <h1>Contacts</h1>
