@@ -4,13 +4,38 @@
 {% block content %}
     <div class="row">
         <div class="col">
-            <div class="content">
-                <div class="jumbotron">
-                    <h1 class="text-center">pramari</h1>
-                    <p class="text-center">
-                        pramari is a tech demo. Product Management Showcase site designed specifically for those who are passionate about developing their skills and knowledge in the field of product management. At pramari.de, we're committed to providing an engaging platform where you can dive deep into the technological aspects of product management, gain hands-on experience, and learn from the best in the industry.
-                    </p>
+            <div class="container col-xl-10 col-xxl-8 px-4 py-5">
+                <div class="row align-items-center g-lg-5 py-5">
+                    <div class="col-lg-7 text-center text-lg-start">
+                        <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">pramari.de</h1>
+                        <p class="col-lg-10 fs-4">
+                        	pramari is a tech product demo. This Product Management Showcase site is designed specifically for those passionate about developing their skills and knowledge in the field of product management. At pramari.de, we're committed to providing an engaging platform where you can dive deep into the technological aspects of product management, gain hands-on experience, and learn from the best in the industry.
+                        </p>
+                    </div>
+                    <div class="col-md-10 mx-auto col-lg-5">
+                        <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+                            <div class="form-floating mb-3">
+                                <input type="email"
+                                       class="form-control"
+                                       id="floatingInput"
+                                       placeholder="name@example.com">
+                                <label for="floatingInput">Email address</label>
+                            </div>
+                            <div class="checkbox mb-3">
+                                <label>
+                                    <input type="checkbox" value="consent">
+                                    Accept our <a href="/poages/terms/" class="text-muted">terms of use</a>
+                                </label>
+                            </div>
+                            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign up</button>
+                            <hr class="my-4">
+			    <small class="text-body-secondary">Sign up to stay connected.</small>
+                        </form>
+			{{ form }}			
+                    </div>
                 </div>
+            </div>
+            <div class="content">
                 <div class="row">
                     <div class="col">{% include "partials/card.html" %}</div>
                     <!-- col -->
@@ -25,4 +50,5 @@
         </div>
     </div>
 {% endblock %}
-{% block login %}{% endblock %}
+{% block login %}<!-- unless overwritten, the login-block will render a login modal-->{% endblock %}
+

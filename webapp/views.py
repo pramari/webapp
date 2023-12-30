@@ -12,7 +12,7 @@ import logging
 from base64 import b64encode, b64decode
 import json
 from django.views.generic import View, TemplateView, ListView, DetailView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponse
@@ -34,7 +34,17 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class HomeView(TemplateView):
+from django import forms
+
+
+class ContactForm(forms.Form):
+    email = forms.EmailField()
+
+    def send_email(self):
+        # send email using the self.cleaned_data dictionary
+        pass
+
+class HomeView(FormView):
     """
     Display the `Project Homepage`.
 
@@ -44,6 +54,7 @@ class HomeView(TemplateView):
     """
 
     template_name = "home.html"
+    form_class = ContactForm
 
     def get_context(self, request):
         """
@@ -52,6 +63,10 @@ class HomeView(TemplateView):
         context = super().get_context(request)  # pylint: disable=E1101
         # context["blogpages"] = homepages  # add whatever you need here
         return context
+
+    def form_valid(self, form):
+        form.send_email()
+        return super().form_valid(form)
 
 
 # pylint: disable=R0201
@@ -164,7 +179,9 @@ class ProfileDetailView(UserPassesTestMixin, DetailView):
 
     def test_func(self):
         """This view requires a verfied profile."""
-        return self.request.user.is_verified
+        if self.request.user.is_authenticated:
+            return self.request.user.is_verified
+        return False
 
 
 

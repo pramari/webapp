@@ -20,6 +20,9 @@ from django.contrib.auth.forms import (
 from .models import Profile
 User = get_user_model()
 
+class SignUpForm(forms.Form):
+    class Meta:
+        pass
 
 class ProfileForm(forms.ModelForm):
     # pylint: disable=R0903
