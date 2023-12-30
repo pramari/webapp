@@ -22,7 +22,7 @@ class MastoOAuth2Adapter(OAuth2Adapter):
     def complete_login(self, request, app, access_token, **kwargs):
         headers = {"Content-Type": "application/json"}
         response = requests.get(self.profile_url, params={"access_token": access_token})
-        extra_data = resp.json()
+        extra_data = response.json()
         return self.get_provider().sociallogin_from_response(request, extra_data)
 
         response.raise_for_status()

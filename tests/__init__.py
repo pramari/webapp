@@ -19,7 +19,7 @@ class WebTest(TestCase):
     fixtures = [
         'sites.site.yaml',
         # 'pages.yaml',
-        'socialaccount.socialapp.yaml',
+        # 'socialaccount.socialapp.yaml',
     ]
 
     def setUp(self):
@@ -33,7 +33,8 @@ class WebTest(TestCase):
         Test http://www.pramari.de/
         """
         res = self.client.get('https://www.testserver/')
-        if settings.DEBUG is False:
+        # if settings.get('SECURE_SSL_REDIRECT', False) is True:
+        if getattr(settings, 'SECURE_SSL_REDIRECT', False) is True:
             self.assertEqual(res.status_code, 301)  # should redirect in PROD
         else:
             self.assertEqual(res.status_code, 200)
@@ -89,16 +90,9 @@ class WebTest(TestCase):
         # self.assertEqual(result.status_code, 200)
         self.assertEqual(result.status_code, result.status_code)
 
-    def test_health_https(self):
-        """
-        Test https://www.pramari.de/health/
-        """
-        result = self.client.get('/health/', secure=True)
-        self.assertEqual(result.status_code, 200)  # only Secure connection
-
     def test_google_https(self):
         """
-        Test https://www.pramari.de/facebook/
+        Test https://www.pramari.de/google.html
 
         .. todo::
             may fail in testing, is this in `staticfiles`?

@@ -22,7 +22,7 @@ from django.db import connections
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from pages.models import HomePage
+# from pages.models import HomePage
 
 from .models import Profile
 from .forms import ProfileForm
@@ -49,11 +49,8 @@ class HomeView(TemplateView):
         """
         get context for this request.
         """
-        homepages = HomePage.objects.filter()
-
-        # Update template context
         context = super().get_context(request)  # pylint: disable=E1101
-        context["blogpages"] = homepages
+        # context["blogpages"] = homepages  # add whatever you need here
         return context
 
 
@@ -125,7 +122,7 @@ class AccountView(LoginRequiredMixin, UpdateView):
 
 
 # pylint: disable=R0901
-class ProfileView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class ProfileView(LoginRequiredMixin, UpdateView):
     """
     View and update Profile.
 
@@ -137,10 +134,6 @@ class ProfileView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = "account/profile.html"
     form_class = ProfileForm
     success_url = "/accounts/profile/"
-
-    def test_func(self):
-        """This view requires a verfied profile."""
-        return self.request.user.is_verified
 
     def get_object(self, *args, **kwargs):
         """
@@ -167,10 +160,12 @@ class ProfileDetailView(UserPassesTestMixin, DetailView):
     """
 
     model = Profile
-    template_name = "account/profile.html"
+    template_name = "account/profile_detail.html"
 
     def test_func(self):
-        return True
+        """This view requires a verfied profile."""
+        return self.request.user.is_verified
+
 
 
 class GithubView(LoginRequiredMixin, TemplateView):

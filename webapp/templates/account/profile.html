@@ -1,20 +1,19 @@
 {% extends "account/base.html" %}
 {% load i18n %}
 {% load static %}
-{% load crispy_forms_tags %}
+
 {% block content %}
     <div class="row">
         <div class="col-md-12">
             <h2>{{ object }}</h2>
             <div class="row">
                 <div class="col">
-                    Following: <a href="{% url "profile-following" object.slug %}">{{ object.follows.count }}</a>
-                </div>
-                <div class="col">
-                    Followers: <a href="{% url "profile-followers" object.slug %}">{{ object.followed_by.count }}</a>
+			<form method="post">{% csrf_token %}
+    			{{ form.as_p }}
+    			<input type="submit" value="Update">
+			</form>
                 </div>
             </div>
-            <a href="{{ object.mastodon }}" rel="me">mastodon</a>
         </div>
     </div>
 {% endblock %}

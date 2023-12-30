@@ -71,8 +71,5 @@ router.register(r"user", UserViewSet, basename="user")
 urlpatterns = [
     path(r"api/userinfo/", UserDetails.as_view()),
     path(r"api/", include(router.urls)),
-]
-
-urlpatterns += [
     path("pubsub/push/", BudgetView.as_view()),
 ]
