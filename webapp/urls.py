@@ -21,7 +21,6 @@ from webapp.views import AddonView, AddonMsginfoView
 
 from webapp.views import (
     StatusView,
-    HealthCheckView,
     HomeView,
     GithubView,
     AccountView,

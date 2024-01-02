@@ -1,5 +1,0 @@
-/* TEAM */
-	Chef:Andreas Neumeier
-	Contact: andreas [at] neumeier.org
-	Twitter: @andreasofthings
-	From:Munich, Germany
