@@ -10,7 +10,6 @@ These are generic to UserProfiles and all other Applications.
 
 import logging
 from base64 import b64encode, b64decode
-import json
 from django.views.generic import View, TemplateView, ListView, DetailView
 from django.views.generic.edit import UpdateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -341,12 +340,10 @@ class GmailView(LoginRequiredMixin, TemplateView):
         """
 
 
-"""
-Search:
-"""
-
-
 class SearchView(ListView):
+    """
+    Search:
+    """
     # model = Website
     template_name = "search_results.html"
 
@@ -365,49 +362,3 @@ class SearchView(ListView):
         )
         return object_list
     """
-
-
-class AddonView(TemplateView):
-    template_name = "addon.json"
-    http_method_names = [
-        "get",
-        "post",
-    ]
-
-    def post(self, request, *args, **kwargs):
-        return self.get(request, *args, **kwargs)
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-
-class AddonMsginfoView(View):
-    http_method_names = [
-        "get",
-        "post",
-    ]
-
-    def post(self, request, *args, **kwargs):  # pylint: disable=W0613
-        print(request.POST)
-        response = {
-            "action": {
-                "navigations": [
-                    {
-                        "pushCard": {
-                            "header": {"title": "AddonMsginfoView!"},
-                            "sections": [
-                                {"widgets": [{"textParagraph": {"text": ""}}]}
-                            ],
-                        }
-                    }
-                ]
-            }
-        }
-
-        return HttpResponse(json.dumps(response))
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-    
