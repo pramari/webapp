@@ -17,8 +17,6 @@ from django.conf.urls import include
 from django.views.decorators.cache import cache_page  # , never_cache
 from django.views.generic import TemplateView
 
-from webapp.views import AddonView, AddonMsginfoView
-
 from webapp.views import (
     StatusView,
     HomeView,
@@ -38,16 +36,7 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path(r"", HomeView.as_view(), name="home"),
-    path(r"ads.txt", TemplateView.as_view(template_name="ads.txt"), name="ads"),
-    path(
-        r"humans.txt", TemplateView.as_view(template_name="humans.txt"), name="humans"
-    ),
-    path(
-        r"googlee7105c7cdfda4e14.html",
-        TemplateView.as_view(template_name="googlee7105c7cdfda4e14.html"),
-        name="google",
-    ),
-    path(r"calendar", CalendarView.as_view(), name="calendar"),
+    path(r"calendar/", CalendarView.as_view(), name="calendar"),
     path(r"contacts/", ContactView.as_view(), name="contacts"),
     path(
         r"contacts/people/<str:resourceName>/",
@@ -55,7 +44,7 @@ urlpatterns = [
         {"resourceName": None},
         name="contact-detail",
     ),
-    path(r"status/", cache_page(60)(StatusView.as_view()), name="status"),
+    path(r"status/", cache_page(60)(StatusView.as_view()), name="status"), # Project Status, Could be a template view
     path(r"github/", GithubView.as_view(), name="github"),
     path(
         r"github/<str:username>/<str:repository>",
@@ -74,9 +63,4 @@ urlpatterns += [
 
 urlpatterns += [
     path(r"o/", include("oauth2_provider.urls", namespace="oauth2_provider"))
-]
-
-urlpatterns += [
-    path(r"addon/", AddonView.as_view(), name="addon"),
-    path(r"addon/msginfo/", AddonMsginfoView.as_view(), name="addon-msginfo"),
 ]
