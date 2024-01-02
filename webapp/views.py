@@ -39,6 +39,7 @@ from django import forms
 
 class ContactForm(forms.Form):
     email = forms.EmailField()
+    consent = forms.BooleanField()
 
     def send_email(self):
         # send email using the self.cleaned_data dictionary
@@ -69,33 +70,34 @@ class HomeView(FormView):
         return super().form_valid(form)
 
 
+
 # pylint: disable=R0201
-class HealthCheckView(View):
-    """
-    Checks to see if the site is healthy.
-    """
-    def _check(self, cursor):
-        cursor.execute("select 1")
-        one = cursor.fetchone()[0]
-        if one != 1:
-            raise DatabaseError("Site did not pass health check")
-
-    def get(self, *args, **kwargs):  # pylint: disable=W0613
-        """
-        Return OK if Site is OK.
-        """
-
-        with connection.cursor() as cursor:
-            self._check(cursor)
-
-        if False:  # Don't actually test the 'new' DB from here.
-            with connections["new"].cursor() as cursor:
-                self._check(cursor)
-
-        return HttpResponse("ok")
-
-    def post(self, *args, **kwargs):  # pylint: disable=W0613
-        return HttpResponse("ok")
+#class HealthCheckView(View):
+#    """
+#    Checks to see if the site is healthy.
+#    """
+#    def _check(self, cursor):
+#        cursor.execute("select 1")
+#        one = cursor.fetchone()[0]
+#        if one != 1:
+#            raise DatabaseError("Site did not pass health check")
+#
+#    def get(self, *args, **kwargs):  # pylint: disable=W0613
+#        """
+#        Return OK if Site is OK.
+#        """
+#
+#        with connection.cursor() as cursor:
+#            self._check(cursor)
+#
+#        if False:  # Don't actually test the 'new' DB from here.
+#            with connections["new"].cursor() as cursor:
+#                self._check(cursor)
+#
+#        return HttpResponse("ok")
+#
+#    def post(self, *args, **kwargs):  # pylint: disable=W0613
+#        return HttpResponse("ok")
 
 
 class StatusView(LoginRequiredMixin, TemplateView):
