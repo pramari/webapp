@@ -26,6 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
             # "dob",
             "public",
             "consent",
+            "services",
         )
 
 
@@ -63,35 +64,21 @@ class UserDetails(views.APIView):
 
 
 class EventView(views.APIView):
-    """
-    POST <QueryDict: {'
-    {
-        "messageMetadata":{
-            "accessToken":"ADMQFHJwiPCZc-vc2mdDUDEprZmQfkaWRnwYNfHhp9BJNqL3pIoMLEXFO8xS-xq-nTtHuuK6ETqmfSIqR7pJ_EESCAwQvQ4179OpAbCiDZSvXmxRXzMDo2ldkpadrF2sAysVfxzqDPV-RkxLJHW5CnDduvYXgbbA1A",
-            "threadId":"thread-f:1785020815841123550",
-            "messageId":"msg-f:1785020815841123550"
-        },
-        "hostApp":"gmail",
-        "gmail":{
-            "messageId":"msg-f:1785020815841123550",
-            "accessToken":"ADMQFHKfopKsGpiYPekskSnIWNg2CnNkSQk_czJmESmff_ARw0b2g_WTcS74q-0FembMWPXVQ2OqNZtL5KFmZBwaDqEZSCnMraibGusW9rnLhCcMk2hquxOfv1M9ykJKOxhAvVD7sQVCqeoOT19fkDTMR80-v4b0rg",
-            "threadId":"thread-f:1785020815841123550"
-        },
-        "commonEventObject":{
-            "hostApp":"GMAIL",
-            "platform":"WEB"
-        },
-        "clientPlatform":"web"
-        }': ['']
-    }>
-    """
+    """ """
+
     queryset = get_user_model().objects.all()
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, bundle=None, format=None):  # pylint: disable=R0201
         from rest_framework import status
+
         """POST method."""
-        logger.error("POST %s", ", \n".join(request.data.items()))
+        try:
+            logger.error("POST")
+            logger.error("Type: %s", request.data)
+            [logger.error(item) for item in request.data.items()]
+        except TypeError as e:
+            raise e
         return response.Response("OK!", status=status.HTTP_200_OK)
 
 
