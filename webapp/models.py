@@ -10,8 +10,6 @@ may be the right home for an `Usermodel` in the future.
 """
 
 from django.contrib.auth.models import AbstractUser  # type: ignore
-from django.db.models.signals import pre_save, post_save  # type: ignore
-from django.dispatch import receiver  # type: ignore
 from django.db import models  # type: ignore
 from django.urls import reverse
 
@@ -47,7 +45,9 @@ class User(AbstractUser):
         addresses have been verified. Filter all `EmailAddress`es
         for this user `self`.
         """
-        queryset = EmailAddress.objects.filter(user=self, verified=True, primary=True)
+        queryset = EmailAddress.objects.filter(  # noqa: E501
+            user=self, verified=True, primary=True
+        )
         return queryset.count() > 0
 
     public = models.BooleanField(default=False)
@@ -67,26 +67,52 @@ class User(AbstractUser):
             from allauth.socialaccount.models import SocialAccount
         except ImportError:
             logger.error("Cannot import SocialToken")
+
+        accounts = []
         try:
             accounts = SocialAccount.objects.filter(user=self.request.user)
-            """
-            accessToken = SocialToken.objects.filter(  # pylint: disable=no-member
-                account__user=self  # provider
-            )
-            """
         except SocialAccount.DoesNotExist:
             accounts = [
                 "none",
             ]
         logger.error(type(accounts))
         logger.error(accounts)
-        return accounts
+        return ["A"]  # accounts
 
     @property
     def get_absolute_url(self):
         return reverse(
             "user-detail",
         )
+
+
+def get_profile_types() -> dict:
+    """
+    This is just a random thought at this point.
+    Not discarded, thats why it is still here.
+    Profiles can become profiles of different types.
+    To serve a different purpose, namely to become, e.g.:
+        - contacts
+        - regular users
+        - activity pub users
+        - etc.
+
+    The idea was to allow storing contacts in the same table.
+    The 2nd next idea was to make all activity pub related methods optional.
+    However, at this point I feel like this is not reducing complexity but
+    building up more complexity.
+    A contact will most likely not require the same methods a user or a
+    activitypub user will require, while making all fields and methods
+    conditional is really complex.
+    """
+    from django.utils.translation import gettext as _
+
+    profile_types = {
+        "001": _("Regular User"),
+        "002": _("Regular User with ActivityPub Profile"),
+        "003": _("Contact"),
+    }
+    return profile_types
 
 
 class Profile(models.Model):
@@ -96,6 +122,7 @@ class Profile(models.Model):
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # profile_type = models.CharField(max_length=3, choices=get_profile_types)
     slug = models.SlugField(null=True)
     follows = models.ManyToManyField(
         "self", related_name="followed_by", symmetrical=False, blank=True
@@ -178,8 +205,16 @@ class Profile(models.Model):
             "followers": f"https://pramari.de{self.get_followers_url()}",
             "following": f"https://pramari.de{self.get_following_url()}",
             "publicKey": self.get_public_key(),
-            "image": {"type": "Image", "mediaType": "image/jpeg", "url": self.imgurl},
-            "icon": {"type": "Image", "mediaType": "image/png", "url": self.icon},
+            "image": {
+                "type": "Image",
+                "mediaType": "image/jpeg",
+                "url": self.imgurl,
+            },  # noqa: E501
+            "icon": {
+                "type": "Image",
+                "mediaType": "image/png",
+                "url": self.icon,
+            },  # noqa: E501
         }
 
     @property

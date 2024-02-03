@@ -6,8 +6,8 @@ import django.db.models.deletion
 
 
 def move_profile(apps, schema_editor):
-    User = apps.get_model('webapp', 'User')
-    Profile = apps.get_model('webapp', 'Profile')
+    User = apps.get_model("webapp", "User")
+    Profile = apps.get_model("webapp", "Profile")
     for user in User.objects.all():
         profile = Profile()
         profile.user = user
@@ -18,21 +18,41 @@ def move_profile(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('webapp', '0003_alter_user_id'),
+        ("webapp", "0003_alter_user_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Profile',
+            name="Profile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('public', models.BooleanField(default=False)),
-                ('consent', models.BooleanField(default=False)),
-                ('dob', models.DateField(blank=True, null=True)),
-                ('follows', models.ManyToManyField(blank=True, related_name='followed_by', to='webapp.Profile')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("public", models.BooleanField(default=False)),
+                ("consent", models.BooleanField(default=False)),
+                ("dob", models.DateField(blank=True, null=True)),
+                (
+                    "follows",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="followed_by",
+                        to="webapp.Profile",  # noqa: E501
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.RunPython(move_profile),

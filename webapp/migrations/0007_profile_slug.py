@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('webapp', '0006_profile_mastodon_alter_profile_img'),
+        ("webapp", "0006_profile_mastodon_alter_profile_img"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='slug',
+            model_name="profile",
+            name="slug",
             field=models.SlugField(null=True),
         ),
     ]

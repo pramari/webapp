@@ -4,34 +4,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('webapp', '0004_profile'),
+        ("webapp", "0004_profile"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='dob',
+            model_name="user",
+            name="dob",
         ),
         migrations.AddField(
-            model_name='profile',
-            name='gravatar',
+            model_name="profile",
+            name="gravatar",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='img',
-            field=models.ImageField(default='https://storage.cloud.google.com/media.pramari.de/user/default.png', upload_to='user/'),
+            model_name="profile",
+            name="img",
+            field=models.ImageField(
+                default="https://storage.cloud.google.com/media.pramari.de/user/default.png",
+                upload_to="user/",
+            ),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='id',
-            field=models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="profile",
+            name="id",
+            field=models.AutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='id',
-            field=models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="user",
+            name="id",
+            field=models.AutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
     ]

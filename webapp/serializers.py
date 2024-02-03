@@ -17,6 +17,7 @@ class AttributeSerializer(serializers.Serializer):
         'schemaVersion': '1.0'
     },
     """
+
     billingAccountId = serializers.CharField(max_length=200)
     budgetId = serializers.CharField(max_length=200)
     schemaVersion = serializers.CharField(max_length=200)
@@ -37,6 +38,7 @@ class MessageSerializer(serializers.Serializer):
         'publish_time': '2019-07-02T11:33:08.697Z'
     },
     """
+
     attributes = AttributeSerializer()
     data = serializers.CharField(max_length=1024)
     messageId = serializers.CharField(max_length=128)

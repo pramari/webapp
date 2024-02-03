@@ -10,16 +10,12 @@ These are generic to UserProfiles and all other Applications.
 
 import logging
 from base64 import b64encode, b64decode
-from django.views.generic import View, TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.views.generic.edit import UpdateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse
 from django.contrib.auth import get_user_model
-from django.db import DatabaseError, connection
-from django.db import connections
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from django import forms
 
 # from pages.models import HomePage
 
@@ -33,9 +29,6 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-from django import forms
-
-
 class ContactForm(forms.Form):
     email = forms.EmailField()
     consent = forms.BooleanField()
@@ -43,6 +36,7 @@ class ContactForm(forms.Form):
     def send_email(self):
         # send email using the self.cleaned_data dictionary
         pass
+
 
 class HomeView(FormView):
     """
@@ -69,9 +63,8 @@ class HomeView(FormView):
         return super().form_valid(form)
 
 
-
 # pylint: disable=R0201
-#class HealthCheckView(View):
+# class HealthCheckView(View):
 #    """
 #    Checks to see if the site is healthy.
 #    """
@@ -185,11 +178,11 @@ class ProfileDetailView(UserPassesTestMixin, DetailView):
         return False
 
 
-
 class GithubView(LoginRequiredMixin, TemplateView):
     """
     Experiment with GitHub Tokens.
     """
+
     template_name = "github.html"
 
     def get_context_data(self, **kwargs):
@@ -291,15 +284,21 @@ class CalendarView(LoginRequiredMixin, TemplateView):
 
         star = BytesIO(
             b64decode(
-                "iVBORw0KGgoAAAANSUhEUgAAABAAAAAwCAMAAAAvgQplAAAAyVBMVEX////8+sz8/vT8jiz8Zhz89vT8ejT86tT8zrz87kT8ukz88nT8/vzs6uz88lz81mz8liT09vT8egz8poT86rz8vpz8+tz87uT89qTc3tz87jT8rjT88mT8+sT8niT8/uz8/tz8jhT89tT8+qzk4uT8Ygz8phz89uz8eiT85sz8zrT87jz8vhz88mz8+vzk5uT87lT89sT8yiT8mhT08vT8bgz8+uz8nlT85sT84lz8spT8+tT8ghT88tT89pzc2tz87iz8shz8VgQWXPWyAAAAAXRSTlMAQObYZgAAATBJREFUKJGVkn1vgjAQh3HzZWhVOidSlJiZwnRoGY6p6JTO7/+hVo6WUaJ/7Gdy5nl63KUEw7gTjGuCUp1ZluktESFR9RwTkhHMAFBEiQglNBM1EhJTReLXgo1goMjBDEA4pob2C9P/W0oh5WKUQy6RukcUYYTyKkWSwBFKkntXv5mGVxOzmc4nl5800eO8V0Hb4y7nng3wMDB5Hjcv5mAu5rtuQeLPbcDAEECocCFHyIdMWw3dFB2bcovsCBXPBXykQu2k8LjpMOSYPJbCucARujj/eh9xXBNpqvNiuz1rYrheDyt4PvyIvBQ9u+40KDPtvhnGKvgsExzynpX1KmOtihGdx2+I1VFD98+Qfbll+QVZKp74vt9uizKR4v3aHDM2bl6fpDiO4GtsjY63rv0LjCMywYpy0lMAAAAASUVORK5CYII="
+                "iVBORw0KGgoAAAANSUhEUgAAABAAAAAwCAMAAAAvgQplAAAAyVBMVEX////8+sz8/vT8jiz8Zhz89vT8ejT86tT8zrz87kT8ukz88nT8/vzs6uz88lz81mz8liT09vT8egz8poT86rz8vpz8+tz87uT89qTc3tz87jT8rjT88mT8+sT8niT8/uz8/tz8jhT89tT8+qzk4uT8Ygz8phz89uz8eiT85sz8zrT87jz8vhz88mz8+vzk5uT87lT89sT8yiT8mhT08vT8bgz8+uz8nlT85sT84lz8spT8+tT8ghT88tT89pzc2tz87iz8shz8VgQWXPWyAAAAAXRSTlMAQObYZgAAATBJREFUKJGVkn1vgjAQh3HzZWhVOidSlJiZwnRoGY6p6JTO7/+hVo6WUaJ/7Gdy5nl63KUEw7gTjGuCUp1ZluktESFR9RwTkhHMAFBEiQglNBM1EhJTReLXgo1goMjBDEA4pob2C9P/W0oh5WKUQy6RukcUYYTyKkWSwBFKkntXv5mGVxOzmc4nl5800eO8V0Hb4y7nng3wMDB5Hjcv5mAu5rtuQeLPbcDAEECocCFHyIdMWw3dFB2bcovsCBXPBXykQu2k8LjpMOSYPJbCucARujj/eh9xXBNpqvNiuz1rYrheDyt4PvyIvBQ9u+40KDPtvhnGKvgsExzynpX1KmOtihGdx2+I1VFD98+Qfbll+QVZKp74vt9uizKR4v3aHDM2bl6fpDiO4GtsjY63rv0LjCMywYpy0lMAAAAASUVORK5CYII="  # noqa: E501
             )
         )
-        context["chart"] = f"<img src='data:image/png;base64,{b64encode(star.read()).decode('utf-8')}'/>"
+        context[
+            "chart"
+        ] = f"<img src='data:image/png;base64,{b64encode(star.read()).decode('utf-8')}'/>"  # noqa: E501
 
         return context
 
 
 class ContactView(LoginRequiredMixin, TemplateView):
+    """
+    View Google Contacts.
+    """
+
     template_name = "contact.html"
 
     def get_context_data(self, **kwargs):
@@ -344,6 +343,7 @@ class SearchView(ListView):
     """
     Search:
     """
+
     # model = Website
     template_name = "search_results.html"
 

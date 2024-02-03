@@ -11,8 +11,8 @@ class CacheMixin(object):
 
     @method_decorator(vary_on_cookie)
     def dispatch(self, *args, **kwargs):
-        return cache_page(
-                self._get_cache_timeout()
-            )(
-                super(CacheMixin, self).dispatch
-            )(*args, **kwargs)
+        return cache_page(self._get_cache_timeout())(
+            super(CacheMixin, self).dispatch
+        )(  # noqa: E501
+            *args, **kwargs
+        )

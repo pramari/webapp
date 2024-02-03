@@ -1,4 +1,5 @@
 import json
+
 # from django.views import View
 # from django.http import JsonResponse
 # from django.utils.decorators import method_decorator
@@ -31,10 +32,10 @@ class BudgetView(views.APIView):
 
             budget = base64.b64decode(
                 serializer.validated_data["message"]["data"]
-            )
+            )  # noqa: E501
             logger.info(
                 "Subscription: %s", serializer.validated_data["subscription"]
-            )
+            )  # noqa: E501
             jsonBudget = json.loads(budget)
             """
             # logger.info("Keys: %s" % .keys())
@@ -46,9 +47,9 @@ class BudgetView(views.APIView):
             """
             logger.info(
                 "Budget %s: %s (%s)",
-                jsonBudget['budgetDisplayName'],
+                jsonBudget["budgetDisplayName"],
                 jsonBudget["costAmount"],
-                jsonBudget["budgetAmount"]
+                jsonBudget["budgetAmount"],
             )
             # serializer.save()
         else:

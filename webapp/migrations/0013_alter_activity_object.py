@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('webapp', '0012_alter_activity_actor'),
+        ("webapp", "0012_alter_activity_actor"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='activity',
-            name='object',
+            model_name="activity",
+            name="object",
             field=models.JSONField(),
         ),
     ]

@@ -36,37 +36,38 @@ def getAppAndAccessToken(
 
 @shared_task
 def generateProfileKeyPair(
-    modeladmin: str,
-    request,
-    queryset,
-    verbose=True
-) -> bool:
-    """
-    """
+    modeladmin: str, request, queryset, verbose=True
+) -> bool:  # noqa: E501
+    """ """
     from cryptography.hazmat.primitives import (
-        serialization as crypto_serialization
-    )
+        serialization as crypto_serialization,
+    )  # noqa: E501
     from cryptography.hazmat.primitives.asymmetric import rsa
     from cryptography.hazmat.backends import (
-        default_backend as crypto_default_backend
-    )
+        default_backend as crypto_default_backend,
+    )  # noqa: E501
+
     for user in queryset.all():
         key = rsa.generate_private_key(
             backend=crypto_default_backend(),
             public_exponent=65537,
-            key_size=2048
+            key_size=2048,  # noqa: E501
         )
 
         user.profile.private_key = key.private_bytes(
             crypto_serialization.Encoding.PEM,
             crypto_serialization.PrivateFormat.PKCS8,
-            crypto_serialization.NoEncryption()
-        ).decode('utf-8')
+            crypto_serialization.NoEncryption(),
+        ).decode("utf-8")
 
-        user.profile.public_key = key.public_key().public_bytes(
-            crypto_serialization.Encoding.PEM,
-            crypto_serialization.PublicFormat.SubjectPublicKeyInfo
-        ).decode('utf-8')
+        user.profile.public_key = (
+            key.public_key()
+            .public_bytes(
+                crypto_serialization.Encoding.PEM,
+                crypto_serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+            .decode("utf-8")
+        )
         print(type(user.profile.private_key))
         print(user.profile.private_key)
         print(type(user.profile.public_key))
@@ -110,12 +111,44 @@ def getGoogleContact(
         client_secret=googleApp.secret,
     )
 
+    personFields = [
+        "addresses",
+        "ageRanges",
+        "biographies",
+        "birthdays",
+        "calendarUrls",
+        "clientData",
+        "coverPhotos",
+        "emailAddresses",
+        "events",
+        "externalIds",
+        "genders",
+        "imClients",
+        "interests",
+        "locales",
+        "locations",
+        "memberships",
+        "metadata",
+        "miscKeywords",
+        "names",
+        "nicknames",
+        "occupations",
+        "organizations",
+        "phoneNumbers",
+        "photos",
+        "relations",
+        "sipAddresses",
+        "skills",
+        "urls",
+        "userDefined",
+    ]
+
     service = build("people", version="v1", credentials=creds)
     people = service.people()  # pylint: disable=no-member  # E1101
     connections = people.connections()
     contacts = connections.list(
         resourceName=resourceName,
-        personFields="addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined",
+        personFields=",".join(personFields),
     )
     result = contacts.execute()
 
@@ -124,5 +157,4 @@ def getGoogleContact(
 
 @shared_task
 def updateGoogleContact(contact: dict):
-    """
-    """
+    """ """

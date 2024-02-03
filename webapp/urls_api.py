@@ -1,19 +1,33 @@
-from webapp.api_views import BudgetView
+"""
+webapp urls.py that define possible API invocation options.
+"""
 
-from rest_framework import views, routers, serializers, viewsets, permissions, response
+import logging
+from rest_framework import views
+from rest_framework import routers
+from rest_framework import serializers
+from rest_framework import viewsets
+from rest_framework import permissions
+from rest_framework import response
+
 from django.urls import path, include
 from django.contrib.auth import get_user_model
 
 from oauth2_provider.contrib.rest_framework import TokenHasScope
 
-import logging
+from webapp.api_views import BudgetView
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Define how User Objects are serialized.
     # pylint: disable=R0903
+    """
+
     class Meta:
         model = User
         fields = (

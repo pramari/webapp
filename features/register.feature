@@ -1,3 +1,6 @@
+# -- FILE: features/example_with_rules.feature
+# USING: Gherkin v6
+
 Feature: Register for a newsletter.
 
   Scenario: somebody anonymously surfs to the pramari homepage and chose to register for the newsletter.

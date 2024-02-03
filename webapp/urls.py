@@ -15,7 +15,6 @@ import logging
 from django.urls import path
 from django.conf.urls import include
 from django.views.decorators.cache import cache_page  # , never_cache
-from django.views.generic import TemplateView
 
 from webapp.views import (
     StatusView,
@@ -28,7 +27,6 @@ from webapp.views import (
     ContactView,
     SearchView,
 )
-
 
 
 logger = logging.getLogger(__name__)
@@ -44,7 +42,9 @@ urlpatterns = [
         {"resourceName": None},
         name="contact-detail",
     ),
-    path(r"status/", cache_page(60)(StatusView.as_view()), name="status"), # Project Status, Could be a template view
+    path(
+        r"status/", cache_page(60)(StatusView.as_view()), name="status"
+    ),  # Project Status, Could be a template view
     path(r"github/", GithubView.as_view(), name="github"),
     path(
         r"github/<str:username>/<str:repository>",
@@ -58,7 +58,11 @@ urlpatterns += [
     path(r"accounts/", include("allauth.urls")),
     path(r"accounts/profile/", ProfileView.as_view(), name="user-profile"),
     path(r"accounts/account/", AccountView.as_view(), name="user-detail"),
-    path(r"accounts/<slug:slug>/", ProfileDetailView.as_view(), name="profile-detail"),
+    path(
+        r"accounts/<slug:slug>/",
+        ProfileDetailView.as_view(),
+        name="profile-detail",  # noqa: E501
+    ),
 ]
 
 urlpatterns += [

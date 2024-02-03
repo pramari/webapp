@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
+
 # from allauth.account.models import EmailAddress # unused? since 2023-08-07
 import logging
 
 from django.contrib.auth.signals import user_logged_in  # type: ignore
-from django.db.models.signals import post_save          # type: ignore
-from django.dispatch import receiver                    # type: ignore
+from django.dispatch import receiver  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ def create_user_profile(sender, instance, created, **kwargs):
     """
     if created:  # not user.profile:
         from .models import Profile
+
         Profile.objects.create(user=instance)
 
 

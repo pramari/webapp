@@ -4,20 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('webapp', '0005_remove_user_dob_profile_gravatar_profile_img_and_more'),
+        ("webapp", "0005_remove_user_dob_profile_gravatar_profile_img_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='mastodon',
+            model_name="profile",
+            name="mastodon",
             field=models.URLField(blank=True),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='img',
-            field=models.ImageField(default='https://storage.cloud.google.com/media.pramari.de/user/default.png', upload_to='mediafiles/user/'),
+            model_name="profile",
+            name="img",
+            field=models.ImageField(
+                default="https://storage.cloud.google.com/media.pramari.de/user/default.png",
+                upload_to="mediafiles/user/",
+            ),
         ),
     ]
