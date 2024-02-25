@@ -28,14 +28,20 @@ class Migration(migrations.Migration):
             model_name="profile",
             name="id",
             field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                auto_created=True,
+                primary_key=True,
+                serialize=False,
+                verbose_name="ID",  # noqa: E501
             ),
         ),
         migrations.AlterField(
             model_name="user",
             name="id",
             field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                auto_created=True,
+                primary_key=True,
+                serialize=False,
+                verbose_name="ID",  # noqa: E501
             ),
         ),
         migrations.DeleteModel(

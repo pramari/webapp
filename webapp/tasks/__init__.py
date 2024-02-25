@@ -1,14 +1,11 @@
-from celery import shared_task
-
-from django.contrib.auth import get_user_model
-
-
 import logging
-
-from allauth.socialaccount.models import SocialToken, SocialApp
 
 from typing import List
 from typing import Tuple
+
+from celery import shared_task
+from django.contrib.auth import get_user_model
+from allauth.socialaccount.models import SocialToken, SocialApp
 
 logger = logging.getLogger(__name__)
 

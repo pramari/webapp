@@ -2,6 +2,13 @@
 # -*- coding: utf-8 -*-
 # vim: ts=4 et sw=4 sts=4
 
+"""
+ActivityPub views to drive social interactions in pramari.de.
+
+See::
+    https://paul.kinlan.me/adding-activity-pub-to-your-static-site/
+"""
+
 import json
 import uuid
 import logging
@@ -12,22 +19,87 @@ from django.views.generic import View, ListView
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
+
 from webapp.models import Profile
+from .. import __version__
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
-###
-"""
-Below is Activitypub
+
+class NodeInfoView(View):
+    """
+    Node Info.
+
+    EndPoint::
+        /.well-known/nodeinfo
+    """
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+        """
+        Response to GET Requests.
+        """
+        r = {
+            "links": [
+                {
+                    "rel": "http://nodeinfo.diaspora.software/ns/schema/2.0",
+                    "href": reverse("version"),
+                }
+            ]
+        }
+        return JsonResponse(r)
 
 
-"""
+class VersionView(View):
+    """
+    VersionView
+
+    endpoint::
+        /api/v1/version
+    """
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+        """
+        Response to GET Requests.
+        """
+        nodename = Site.objects.get_current().name
+        total = len(Profile.objects.all())
+        r = {
+            "version": __version__,
+            "software": {
+                "name": __name__,
+                "version": __version__,
+            },
+            "protocols": ["activitypub"],
+            "services": {"outbound": [], "inbound": []},
+            "usage": {
+                "users": {
+                    "total": total,
+                    "activeMonth": 0,  # 251585,
+                    "activeHalfyear": 0,  # 660001,
+                },
+                "localPosts": 0,  # 83554772,
+            },
+            "openRegistrations": False,
+            "metadata": {
+                "nodeName": nodename,
+                "nodeDescription": "Private ActivityPub Server",
+            },
+        }
+        return JsonResponse(r)
 
 
 class WebFingerView(View):
-    def get(self, r, *args, **kwargs):  # pylint: disable=W0613
-        resource = r.GET.get("resource")
+    """
+    WebFingerView
+    """
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+        """
+        Response to GET Requests.
+        """
+        resource = request.GET.get("resource")
 
         if not resource:
             return JsonResponse(
@@ -42,7 +114,14 @@ class WebFingerView(View):
                 {"error": "Invalid resource format"}, status=400
             )  # noqa: E501
 
-        username, domain = resource[5:].split("@")
+        try:
+            username, domain = resource[5:].split("@")
+        except ValueError:
+            logger.debug(
+                "WebFingerView: ValueError. Assuming domain for actor is pramari.de"  # noqa: E501
+            )
+            username = resource[5:]
+            domain = "pramari.de"
 
         if not username:
             return JsonResponse({"error": "User not found"}, status=404)
@@ -50,39 +129,41 @@ class WebFingerView(View):
         if domain != "pramari.de":
             return JsonResponse({"error": "Invalid domain."}, status=400)
 
-        user = Profile.objects.filter(
-            user__username=username
-        ).first()  # pylint: disable=E1101
-
-        if not user:
+        try:
+            profile = Profile.objects.filter(  # pylint: disable=E1101
+                user__username=username
+            ).get()  # pylint: disable=E1101
+        except Profile.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
 
         webfinger_data = {
-            "subject": f"acct:{user.user.username}@{r.get_host()}",
+            # The user's profile URL
+            # subject is the user's profile identified
+            "subject": f"acct:{profile.user.username}@{request.get_host()}",
             "aliases": [
-                f"https://{r.get_host()}{user.get_absolute_url}",
+                f"https://{request.get_host()}{profile.get_absolute_url}",
+                f"https://{request.get_host()}{profile.get_actor_url}",
             ],
             "links": [
-                {
-                    "rel": "http://webfinger.net/rel/profile-page",
-                    "type": "text/html",
-                    "href": f"https://{r.get_host()}{user.get_absolute_url}",
-                },
-                {
-                    "rel": "http://webfinger.net/rel/avatar",
-                    "type": "image/jpeg",
-                    "href": user.imgurl,
-                },
+                # {
+                #     "rel": "http://webfinger.net/rel/profile-page",
+                #     "type": "text/html",
+                #     "href": f"https://{request.get_host()}{profile.get_actor_url}",  # noqa: E501
+                # },
+                # {
+                #     "rel": "http://webfinger.net/rel/avatar",
+                #     "type": "image/jpeg",
+                #     "href": profile.imgurl,
+                # },
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": f"https://{r.get_host()}{user.get_absolute_url}actor",  # noqa: E501
+                    "href": f"https://{request.get_host()}{profile.get_actor_url}",  # noqa: E501
                 },
-                {
-                    "rel": "http://ostatus.org/schema/1.0/subscribe",
-                    "template": "https://pramari.de/authorize_interaction?uri={uri}",  # noqa: E501
-                }
-                # Add more link relations as needed
+                # {
+                #    "rel": "http://ostatus.org/schema/1.0/subscribe",
+                #    "template": "https://pramari.de/authorize_interaction?uri={uri}",  # noqa: E501
+                # },
             ],
         }
 
@@ -91,6 +172,10 @@ class WebFingerView(View):
 
 class ActorView(View):
     """
+    Return the actor object for a given user.
+    User is identified by the slug.
+
+    Example urlconf:
         path(
         r'accounts/<slug:slug>/activity',
         ActivityView.as_view(),
@@ -99,6 +184,12 @@ class ActorView(View):
     """
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+        """
+        Return the actor object for a given user.
+        Type:: GET
+        Request: /accounts/<slug:slug>/activity
+
+        """
         slug = kwargs.get("slug")
 
         profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
@@ -107,11 +198,15 @@ class ActorView(View):
 
 
 class InboxView(View):
+    """
+    InboxView
+    """
+
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
-    def follow(self, request, activity, *args, **kwargs):
+    def follow(self, request, activity):
         """
         {
         '@context': 'https://www.w3.org/ns/activitystreams',
@@ -126,7 +221,7 @@ class InboxView(View):
 
         # Store the follower in the database
         try:
-            follower_profile = Profile.objects.get(ap_id=activity["actor"])
+            follower_profile = Profile.objects.get(ap_id=activity["actor"])  # noqa
         except Profile.DoesNotExist:
             """ """
             user = User.objects.get(username="AnonymousUser")

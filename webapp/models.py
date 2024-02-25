@@ -9,16 +9,26 @@ At the time, this file exists for `Django` only, however, this
 may be the right home for an `Usermodel` in the future.
 """
 
+import hashlib
+import urllib.parse
+import logging
 from django.contrib.auth.models import AbstractUser  # type: ignore
 from django.db import models  # type: ignore
 from django.urls import reverse
+from django.template.defaultfilters import slugify
+from django.contrib.sites.models import Site
+from django.utils.translation import gettext as _
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 from allauth.account.models import EmailAddress  # type: ignore
 
-import logging
-
-
 logger = logging.getLogger(__name__)
+
+try:
+    # from allauth.socialaccount.models import SocialToken, SocialApp,
+    from allauth.socialaccount.models import SocialAccount  # type
+except ImportError:
+    logger.error("Cannot import SocialToken")
 
 
 class User(AbstractUser):
@@ -62,15 +72,11 @@ class User(AbstractUser):
         returns:
             List of strings.
         """
-        try:
-            # from allauth.socialaccount.models import SocialToken, SocialApp,
-            from allauth.socialaccount.models import SocialAccount
-        except ImportError:
-            logger.error("Cannot import SocialToken")
-
         accounts = []
         try:
-            accounts = SocialAccount.objects.filter(user=self.request.user)
+            accounts = SocialAccount.objects.filter(
+                user=self.request.user
+            )  # pylint: disable=E1101,E501
         except SocialAccount.DoesNotExist:
             accounts = [
                 "none",
@@ -81,6 +87,9 @@ class User(AbstractUser):
 
     @property
     def get_absolute_url(self):
+        """
+        Default Django Method/Best Practice
+        """
         return reverse(
             "user-detail",
         )
@@ -123,17 +132,25 @@ class Profile(models.Model):
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     # profile_type = models.CharField(max_length=3, choices=get_profile_types)
-    slug = models.SlugField(null=True)
+    slug = models.SlugField(null=True, help_text=_("Slug"))
     follows = models.ManyToManyField(
         "self", related_name="followed_by", symmetrical=False, blank=True
     )
 
-    public = models.BooleanField(default=False)
-    consent = models.BooleanField(default=False)
-    dob = models.DateField(blank=True, null=True)
-    gravatar = models.BooleanField(default=True)
-    bio = models.TextField(blank=True)
-    public_key_pem = models.TextField(blank=True)
+    public = models.BooleanField(
+        default=False, help_text=_("Make Profile Profile public?")
+    )
+    consent = models.BooleanField(
+        default=False, help_text=_("Consent to store and use data.")
+    )
+    dob = models.DateField(
+        blank=True, null=True, help_text=_("Date of Birth (DOB)")
+    )  # noqa: E501
+    gravatar = models.BooleanField(
+        default=True, help_text=_("Use Gravatar profile image.")
+    )
+    bio = models.TextField(blank=True, help_text=_("Short Bio"))
+    public_key_pem = models.TextField(blank=True, help_text=_("Public Key"))
     private_key_pem = models.TextField(blank=True)
 
     ap_id = models.CharField(max_length=255, blank=True)
@@ -159,99 +176,139 @@ class Profile(models.Model):
         .. todo::
             make this work
         """
-        import hashlib
-        import urllib.parse
+        size = 80
 
         # Set your variables here
-        if self.user.is_verified:
+        if self.user.is_verified:  # noqa
             email = EmailAddress.objects.get(
                 user=self.user, verified=True, primary=True
             )
 
-        default = "https://www.example.com/default.jpg"
-        size = 40
-
         # construct the url
-        gravatar_url = (
-            "https://www.gravatar.com/avatar/"
-            + hashlib.md5(str(email).lower().encode("utf-8")).hexdigest()
-            + "?"
-        )
-        gravatar_url += urllib.parse.urlencode({"d": default, "s": str(size)})
-        return gravatar_url
+        if self.gravatar is False:
+            return staticfiles_storage.url(self.img)
+
+        hashvalue = hashlib.md5(str(email).lower().encode("utf-8")).hexdigest()
+        size = urllib.parse.urlencode({"d": email, "s": str(size)})
+        return f"https://www.gravatar.com/avatar/{hashvalue}?{size}"
 
     def __str__(self):
+        """
+        Default Python Method/Best Practice for String Representation
+        """
         return self.user.username  # pylint: disable=E1101
 
     def save(self, *args, **kwargs):
-        from django.template.defaultfilters import slugify
-
-        self.slug = slugify(self.user.username)
+        self.slug = slugify(self.user.username)  # pylint: disable=E1101
         super().save(*args, **kwargs)  # Call the "real" save() method.
 
     def generate_jsonld(self):
+        """
+        Activity Streams 2.0 JSON-LD
+        """
+
+        base = f"https://{Site.objects.get_current().domain}"
+        username = f"{self.user.username}"  # pylint: disable=E1101
+        actorid = f"{base}{self.get_actor_url}"
+        inbox = f"{base}{self.get_inbox_url}"
+        outbox = f"{base}{self.get_outbox_url}"  # noqa: F841
+        followers = f"{base}{self.get_followers_url}"  # noqa: F841
+        following = f"{base}{self.get_following_url}"  # noqa: F841
+        public_key = self.get_public_key()
+
         return {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
                 "https://w3id.org/security/v1",
             ],
-            "id": f"https://pramari.de{self.get_absolute_url}",
+            "id": actorid,
             "type": "Person",
-            "name": self.user.username,
-            "preferredUsername": self.user.username,
+            "name": username,
+            "preferredUsername": username,
             "summary": self.bio,
-            "inbox": f"https://pramari.de{self.get_inbox_url()}",
-            "outbox": f"https://pramari.de{self.get_outbox_url()}",
-            "followers": f"https://pramari.de{self.get_followers_url()}",
-            "following": f"https://pramari.de{self.get_following_url()}",
-            "publicKey": self.get_public_key(),
-            "image": {
-                "type": "Image",
-                "mediaType": "image/jpeg",
-                "url": self.imgurl,
-            },  # noqa: E501
-            "icon": {
-                "type": "Image",
-                "mediaType": "image/png",
-                "url": self.icon,
-            },  # noqa: E501
+            "inbox": inbox,
+            # "outbox": outbox,
+            # "followers": followers,
+            # "following": following,
+            "publicKey": public_key,
+            # "image": {
+            #     "type": "Image",
+            #     "mediaType": "image/jpeg",
+            #     "url": self.imgurl,
+            # },  # noqa: E501
+            # "icon": {
+            #     "type": "Image",
+            #     "mediaType": "image/png",
+            #     "url": self.icon,
+            # },  # noqa: E501
         }
 
     @property
     def get_absolute_url(self):
+        """
+        Default Django Method/Best Practice
+        Returns the URL of the object-detail view.
+        """
         return reverse("profile-detail", args=[str(self.slug)])
 
-    def get_profile_url(self):
-        return self.get_absolute_url
+    @property
+    def get_actor_url(self):
+        """
+        Return the URL of the actor.
+        Activity Streams 2.0
+        """
+        return reverse("actor-view", args=[str(self.slug)])
 
+    @property
     def get_inbox_url(self):
+        """
+        Return the URL of the inbox.
+
+        """
         return reverse(
             "profile-inbox",
             args=[self.slug],
         )
 
+    @property
     def get_outbox_url(self):
+        """
+        Return the URL of the outbox.
+        """
         return reverse(
             "profile-outbox",
             args=[self.slug],
         )
 
+    @property
     def get_followers_url(self):
+        """
+        Return the URL of the followers.
+        """
         return reverse(
             "profile-followers",
             args=[self.slug],
         )
 
+    @property
     def get_following_url(self):
+        """
+        Return the URL of the following.
+        """
         return reverse(
             "profile-following",
             args=[self.slug],
         )
 
     def get_public_key(self):
+        """
+        Return the public key as JSON-LD.
+        """
+        base = f"https://{Site.objects.get_current().domain}"
+        actorid = f"{base}{self.get_actor_url}"
         public_key_data = {
-            "id": f"{self.get_profile_url()}#main-key",
-            "owner": self.get_absolute_url,
+            "id": f"{actorid}#main-key",
+            "owner": actorid,
             "publicKeyPem": self.public_key_pem,
         }
         return public_key_data

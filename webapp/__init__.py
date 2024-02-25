@@ -14,5 +14,6 @@ from __future__ import absolute_import, unicode_literals
 
 __version__ = "1.1.23"
 __date__ = "2023-08-21"
+__author__ = "Andreas Neumeier"
 
 default_app_config = "webapp.apps.WebAppConfig"

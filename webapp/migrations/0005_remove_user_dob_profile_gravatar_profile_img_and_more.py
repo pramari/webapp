@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             model_name="profile",
             name="img",
             field=models.ImageField(
-                default="https://storage.cloud.google.com/media.pramari.de/user/default.png",
+                default="https://storage.cloud.google.com/media.pramari.de/user/default.png",  # noqa: E501
                 upload_to="user/",
             ),
         ),
@@ -30,14 +30,20 @@ class Migration(migrations.Migration):
             model_name="profile",
             name="id",
             field=models.AutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                auto_created=True,
+                primary_key=True,
+                serialize=False,
+                verbose_name="ID",  # noqa: E501
             ),
         ),
         migrations.AlterField(
             model_name="user",
             name="id",
             field=models.AutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                auto_created=True,
+                primary_key=True,
+                serialize=False,
+                verbose_name="ID",  # noqa: E501
             ),
         ),
     ]

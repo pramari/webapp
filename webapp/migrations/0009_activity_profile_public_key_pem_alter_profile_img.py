@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
             model_name="profile",
             name="img",
             field=models.ImageField(
-                default="//storage.cloud.google.com/media.pramari.de/user/default.png",
+                default="//storage.cloud.google.com/media.pramari.de/user/default.png",  # noqa: E501
                 upload_to="mediafiles/user/",
             ),
         ),

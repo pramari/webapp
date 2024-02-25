@@ -37,27 +37,10 @@ class ProfileForm(forms.ModelForm):
             "public",
             "consent",
             "dob",
+            "img",
+            "gravatar",
             "follows",
         ]
-
-    # def __init__(self, *args, **kwargs):
-    #    super().__init__(*args, **kwargs)
-    #    self.helper = FormHelper(self)
-    #    self.helper.layout = Layout(
-    #        Fieldset(
-    #            'User Profile',
-    #            # 'username',
-    #            # 'first_name',
-    #            # 'last_name',
-    #            'public',
-    #            'consent',
-    #            'dob',
-    #            'follows',
-    #        ),
-    #        ButtonHolder(
-    #            Submit('submit', 'Submit', css_class='button white')
-    #        )
-    #    )
 
 
 class UserCreationForm(forms.ModelForm):

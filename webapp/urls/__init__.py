@@ -19,14 +19,14 @@ from django.views.decorators.cache import cache_page  # , never_cache
 from webapp.views import (
     StatusView,
     HomeView,
-    GithubView,
     AccountView,
     ProfileView,
     ProfileDetailView,
-    CalendarView,
-    ContactView,
     SearchView,
 )
+
+from webapp.urls.activitypub import urlpatterns as activitypub_urlpatterns
+from webapp.urls.api import urlpatterns as api_urlpatterns
 
 
 logger = logging.getLogger(__name__)
@@ -34,23 +34,9 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path(r"", HomeView.as_view(), name="home"),
-    path(r"calendar/", CalendarView.as_view(), name="calendar"),
-    path(r"contacts/", ContactView.as_view(), name="contacts"),
-    path(
-        r"contacts/people/<str:resourceName>/",
-        ContactView.as_view(),
-        {"resourceName": None},
-        name="contact-detail",
-    ),
     path(
         r"status/", cache_page(60)(StatusView.as_view()), name="status"
     ),  # Project Status, Could be a template view
-    path(r"github/", GithubView.as_view(), name="github"),
-    path(
-        r"github/<str:username>/<str:repository>",
-        GithubView.as_view(),
-        name="github-detail",
-    ),
     path(r"search/", SearchView.as_view(), name="search_result"),
 ]
 
@@ -68,3 +54,6 @@ urlpatterns += [
 urlpatterns += [
     path(r"o/", include("oauth2_provider.urls", namespace="oauth2_provider"))
 ]
+
+urlpatterns += activitypub_urlpatterns
+urlpatterns += api_urlpatterns
