@@ -167,7 +167,7 @@ class WebFingerView(View):
             ],
         }
 
-        return JsonResponse(webfinger_data)
+        return JsonResponse(webfinger_data, content_type="application/jrd+json")
 
 
 class ActorView(View):
