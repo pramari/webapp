@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 
 from oauth2_provider.contrib.rest_framework import TokenHasScope
 
-from webapp.api_views import BudgetView
+from webapp.views.api import BudgetView
 
 
 logger = logging.getLogger(__name__)

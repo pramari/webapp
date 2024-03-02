@@ -145,16 +145,16 @@ class WebFingerView(View):
                 f"https://{request.get_host()}{profile.get_actor_url}",
             ],
             "links": [
-                # {
-                #     "rel": "http://webfinger.net/rel/profile-page",
-                #     "type": "text/html",
-                #     "href": f"https://{request.get_host()}{profile.get_actor_url}",  # noqa: E501
-                # },
-                # {
-                #     "rel": "http://webfinger.net/rel/avatar",
-                #     "type": "image/jpeg",
-                #     "href": profile.imgurl,
-                # },
+                {
+                    "rel": "http://webfinger.net/rel/profile-page",
+                    "type": "text/html",
+                    "href": f"https://{request.get_host()}{profile.get_absolute_url}",  # noqa: E501
+                },
+                {
+                    "rel": "http://webfinger.net/rel/avatar",
+                    "type": "image/jpeg",
+                    "href": profile.imgurl,
+                },
                 {
                     "rel": "self",
                     "type": "application/activity+json",
@@ -167,7 +167,10 @@ class WebFingerView(View):
             ],
         }
 
-        return JsonResponse(webfinger_data)
+        return JsonResponse(
+            webfinger_data,
+            content_type="application/jrd+json",
+        )
 
 
 class ActorView(View):
@@ -194,7 +197,10 @@ class ActorView(View):
 
         profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
 
-        return JsonResponse(profile.generate_jsonld())
+        return JsonResponse(
+            profile.generate_jsonld(),
+            content_type="application/Activity+json",
+        )
 
 
 class InboxView(View):

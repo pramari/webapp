@@ -6,7 +6,7 @@ import json
 # from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 from rest_framework import views, status, response, permissions
-from .serializers import BudgetSerializer
+from webapp.serializers import BudgetSerializer
 
 import logging
 
@@ -37,14 +37,6 @@ class BudgetView(views.APIView):
                 "Subscription: %s", serializer.validated_data["subscription"]
             )  # noqa: E501
             jsonBudget = json.loads(budget)
-            """
-            # logger.info("Keys: %s" % .keys())
-            # Keys: dict_keys([
-                'budgetDisplayName', 'costAmount',
-                'costIntervalStart', 'budgetAmount',
-                'budgetAmountType', 'currencyCode']
-                )
-            """
             logger.info(
                 "Budget %s: %s (%s)",
                 jsonBudget["budgetDisplayName"],

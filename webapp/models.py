@@ -231,11 +231,11 @@ class Profile(models.Model):
             # "followers": followers,
             # "following": following,
             "publicKey": public_key,
-            # "image": {
-            #     "type": "Image",
-            #     "mediaType": "image/jpeg",
-            #     "url": self.imgurl,
-            # },  # noqa: E501
+            "image": {
+                "type": "Image",
+                "mediaType": "image/jpeg",
+                "url": self.imgurl,
+            },  # noqa: E501
             # "icon": {
             #     "type": "Image",
             #     "mediaType": "image/png",
