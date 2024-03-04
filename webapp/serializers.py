@@ -22,8 +22,12 @@ class AttributeSerializer(serializers.Serializer):
     budgetId = serializers.CharField(max_length=200)
     schemaVersion = serializers.CharField(max_length=200)
 
-    def create(self, **kwargs):
-        pass
+    def create(self, *args, **kwargs):
+        """
+        Create Attribute object.
+
+        """
+        return super.create(*args, **kwargs)
 
 
 class MessageSerializer(serializers.Serializer):
@@ -31,7 +35,7 @@ class MessageSerializer(serializers.Serializer):
     {
         'attributes': 'see AttributeSerializer'
         'data':
-        'ewogICJidWRnZXREaXNwbGF5TmFtZSI6ICJEZWZhdWx0IiwKICAiY29zdEFtb3VudCI6IDAuMDcsCiAgImNvc3RJbnRlcnZhbFN0YXJ0IjogIjIwMTktMDctMDFUMDc6MDA6MDBaIiwKICAiYnVkZ2V0QW1vdW50IjogMTIuMCwKICAiYnVkZ2V0QW1vdW50VHlwZSI6ICJTUEVDSUZJRURfQU1PVU5UIiwKICAiY3VycmVuY3lDb2RlIjogIkVVUiIKfQ==',
+        'ewogICJidWRnZXREaXNwbGF5TmFtZSI6ICJEZWZhdWx0IiwKICAiY29zdEFtb3VudCI6IDAuMDcsCiAgImNvc3RJbnRlcnZhbFN0YXJ0IjogIjIwMTktMDctMDFUMDc6MDA6MDBaIiwKICAiYnVkZ2V0QW1vdW50IjogMTIuMCwKICAiYnVkZ2V0QW1vdW50VHlwZSI6ICJTUEVDSUZJRURfQU1PVU5UIiwKICAiY3VycmVuY3lDb2RlIjogIkVVUiIKfQ==',  # noqa: E501
         'messageId': '603388362718701',
         'message_id': '603388362718701',
         'publishTime': '2019-07-02T11:33:08.697Z',
@@ -57,3 +61,16 @@ class BudgetSerializer(serializers.Serializer):
 
     message = MessageSerializer()
     subscription = serializers.CharField(max_length=128)
+
+
+class ActivitySerializer(serializers.Serializer):
+    """
+    Deserializes the activity message.
+    """
+
+    context = serializers.CharField(max_length=128, required=False)
+    id = serializers.CharField(max_length=128)
+    type = serializers.CharField(max_length=128)
+    actor = serializers.CharField(max_length=128)
+    to = serializers.CharField(max_length=128)
+    object = serializers.CharField(max_length=128)

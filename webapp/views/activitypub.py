@@ -206,42 +206,31 @@ class ActorView(View):
 class InboxView(View):
     """
     InboxView
+
+    Leveraging the Django Rest Framework to process incoming ActivityPub
+    Messages, rely on `serializers:ActivitySerializer` to validate the
+    incoming data.
     """
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
-
     def create(self, request, activity):
         """
         Save the message.
         """
+        actor = activity.get("actor")
+        type = activity.get("type", {})
+        object = activity.get("object", {})
 
-        follow_activity = Activity(
-            actor=activity_actor, verb="Follow", object=activity_object
-        )
-        follow_activity.save()
-        return JsonResponse({"status": "success"})
+        return JsonResponse({"status": f"success: {actor} {type} {object}"})
 
     def delete(self, request, activity):
-        """
-        {
-            '@context': 'https://www.w3.org/ns/activitystreams', 
-            'id': 'https://mastodon.social/users/OfficialLondonRP_#delete', 
-            'type': 'Delete', 'actor': 'https://mastodon.social/users/OfficialLondonRP_', 
-            'to': [
-                'https://www.w3.org/ns/activitystreams#Public'
-            ], 
-            'object': 'https://mastodon.social/users/OfficialLondonRP_', 
-            'signature': {
-                'type': 'RsaSignature2017', 
-                'creator': 'https://mastodon.social/users/OfficialLondonRP_#main-key', 
-                'created': '2024-03-02T21:48:00Z', 
-                'signatureValue': 'YNR3WNfmU47Y+85cLNexTLy/gUz3iyBqkNWtfyrcJNKRUu258Sn0uBve/bfC4cTGGaZEx6CHmxM8qd4QjRNWR7HmwPVgHCZeFxrFD1aWUxT9XAth80Q8I38CegDgK61EVh9+8ZFigaTYinAW4UisjSnC//vWhQJJazq+Dw1TVNmHU/YMyAbyyQ8FShWB3LMJ9Fq6HCs5lGy20hx36G3ieaA+e/YN/65jklMT1ZwJ5sihP00iZjjXMnkZI8nK83hcunCEufmDdxBOCILq/hEOC5YWJHJWp5pzyozc5QgVYeV2G4w3cEgEhKbgCW4IJuToTpD0KBoZo9zy1MqER5VYUg=='
-            }
-        }
-        """
+        """ """
+        object = activity.get("object")
+
+        return JsonResponse({"status": f"success: deleted {object}"})
 
     def follow(self, request, activity):
         """
@@ -254,8 +243,6 @@ class InboxView(View):
         }
         """
 
-        from actstream.actions import follow
-
         # Store the follower in the database
         try:
             follower_profile = Profile.objects.get(ap_id=activity["actor"])  # noqa
@@ -266,9 +253,6 @@ class InboxView(View):
             follower_profile.save()
 
         profile_to_follow = Profile.objects.get(ap_id=activity["object"])
-        # follower_profile.follows.add(profile_to_follow)
-
-        follow(follower_profile, profile_to_follow, actor_only=False)
 
         # Optionally, you can send a response indicating
         # the success of the follow request
@@ -287,6 +271,9 @@ class InboxView(View):
 
         return JsonResponse(response)
 
+    def parse(self, activity):
+        return activity
+
     def post(self, request, *args, **kwargs):
         """
         process incoming activity.
@@ -295,8 +282,6 @@ class InboxView(View):
         # Process the incoming activity
         # Save the activity to the database, perform necessary actions, etc.
         # from .models import Activity
-        from actstream import action as Activity
-
         try:
             # Assuming the request payload is a valid JSON activity
             body = request.body.decode("utf-8")
@@ -319,15 +304,11 @@ class InboxView(View):
                 raise NotImplementedError
             case "Create":
                 return self.create(request=request, activity=activity)
+            case "Delete":
+                return self.delete(request=request, activity=activity)
             case _:
                 logger.error("Activity Actor: {}".format(activity_actor))
                 logger.error("Activity Object: {}".format(activity_object))
-                follow_activity = Activity(
-                    actor=activity_actor,
-                    verb=f"Unkown: {activity_type}",
-                    object=activity_object,
-                )
-                follow_activity.save()
                 return JsonResponse(
                     {"error": "Invalid activity type"}, status=400
                 )  # noqa: E501
@@ -366,8 +347,6 @@ class FollowView(View):
 
     def post(self, request, *args, **kwargs):
         # from .models import Activity
-        from actstream import action as Activity
-
         try:
             # Assuming the request payload is a valid JSON activity
             activity = request.json
@@ -375,21 +354,11 @@ class FollowView(View):
             return JsonResponse({"error": "Invalid JSON"}, status=400)
 
         # Extract the relevant information from the Follow activity
-        activity_actor = activity.get("actor")
-        activity_object = activity.get("object")
-
-        # Save the Follow activity to the database
-        follow_activity = Activity(
-            actor=activity_actor, verb="Follow", object=activity_object
-        )
-        follow_activity.save()
-
-        # Perform additional actions, such as
-        # establishing the follower relationship
-        # ...
+        actor = activity.get("actor")
+        object = activity.get("object")
 
         # Return a success response
-        return JsonResponse({"status": "success"})
+        return JsonResponse({"status": f"success: {actor} followed {object}"})
 
 
 class FollowersView(ListView):

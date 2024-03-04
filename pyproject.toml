@@ -24,6 +24,7 @@ dependencies = [
   "django-activity-stream",
   "django-oauth-toolkit",
   "djangorestframework",
+  "django-guardian",
   "Pillow",
   "pyyaml",
   "celery"

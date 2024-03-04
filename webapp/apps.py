@@ -31,4 +31,18 @@ class WebAppConfig(AppConfig):
         email_added.connect(signal_logger)  # , sender=EmailAddress)
         email_confirmed.connect(signal_logger)  # , sender=EmailAddress)
         email_removed.connect(signal_logger)  # , sender=EmailAddress)
+
+        # Activity signals
+
+        try:
+            from actstream import registry
+            from pages.models import ActivityPubNote
+        except ImportError as e:
+            logger.error("Actstream and/or Pages not installed. %s", e)
+
+        try:
+            registry.register(ActivityPubNote)
+        except Exception as e:
+            logger.error("Cannot register `Notes` for Activities. %s", e)
+
         logger.info("WebApp ready.")

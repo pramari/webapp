@@ -18,6 +18,9 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth import get_user_model
 from django import forms
 
+from django.views.generic.edit import ModelFormMixin, ProcessFormView
+from django.views.generic.detail import SingleObjectTemplateResponseMixin
+
 # from pages.models import HomePage
 
 from ..models import Profile
@@ -103,7 +106,13 @@ class AccountView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 
 
 # pylint: disable=R0901
-class ProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class ProfileView(
+    LoginRequiredMixin,
+    SuccessMessageMixin,
+    SingleObjectTemplateResponseMixin,
+    ModelFormMixin,
+    ProcessFormView,
+):
     """
     View and update Profile.
 
@@ -123,11 +132,20 @@ class ProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 
         Overriding super() implementation.
         """
+        pk = self.request.user.pk  # noqa: F841
         try:
             return super().get_object(*args, **kwargs)
         except AttributeError as error:
             logger.error(error)
             return self.model.objects.get(pk=self.request.user.pk)  # noqa
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
 
 
 # pylint: disable=R0901

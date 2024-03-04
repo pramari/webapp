@@ -12,13 +12,18 @@ may be the right home for an `Usermodel` in the future.
 import hashlib
 import urllib.parse
 import logging
+import uuid
+
 from django.contrib.auth.models import AbstractUser  # type: ignore
 from django.db import models  # type: ignore
 from django.urls import reverse
 from django.template.defaultfilters import slugify
 from django.contrib.sites.models import Site
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 from allauth.account.models import EmailAddress  # type: ignore
 
@@ -165,7 +170,7 @@ class Profile(models.Model):
 
     img = models.ImageField(
         upload_to="mediafiles/user/",
-        default="//storage.cloud.google.com/media.pramari.de/user/default.png",
+        default="https://storage.cloud.google.com/media.pramari.de/user/default.png",  # noqa: E501
     )
 
     @property
@@ -312,3 +317,44 @@ class Profile(models.Model):
             "publicKeyPem": self.public_key_pem,
         }
         return public_key_data
+
+
+class Action(models.Model):
+    """
+    Activity Streams 2.0
+
+    Inp
+    https://github.com/justquick/django-activity-stream/blob/main/actstream/models.get_profile_types
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    timestamp = models.DateTimeField(default=now, db_index=True)
+    public = models.BooleanField(default=True, db_index=True)
+
+    actor_content_type = models.ForeignKey(
+        ContentType,
+        related_name="actor",
+        on_delete=models.CASCADE,
+        db_index=True,  # noqa: E501
+    )
+    actor_object_id = models.CharField(max_length=255, db_index=True)
+    actor = GenericForeignKey("actor_content_type", "actor_object_id")
+
+    verb = models.CharField(max_length=255, db_index=True)
+
+    def since(self, now=None):
+        """
+        Shortcut for the ``django.utils.timesince.timesince`` function of the
+        current timestamp.
+        """
+        from django.utils.timesince import timesince
+
+        return (
+            timesince(self.timestamp, now)
+            .encode("utf8")
+            .replace(b"\xc2\xa0", b" ")
+            .decode("utf8")
+        )
+
+    def get_absolute_url(self):
+        return reverse("action_detail", args=[self.pk])
