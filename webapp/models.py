@@ -204,8 +204,9 @@ class Profile(models.Model):
         return self.user.username  # pylint: disable=E1101
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.user.username)  # pylint: disable=E1101
-        super().save(*args, **kwargs)  # Call the "real" save() method.
+        if not self.slug:
+            self.slug = slugify(self.user.username)  # pylint: disable=E1101
+        return super().save(*args, **kwargs)  # Call the "real" save() method.
 
     def generate_jsonld(self):
         """
