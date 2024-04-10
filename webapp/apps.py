@@ -35,13 +35,16 @@ class WebAppConfig(AppConfig):
         # Activity signals
 
         try:
-            from actstream import registry
-            from pages.models import ActivityPubNote
+            from webapp import registry
         except ImportError as e:
-            logger.error("Actstream and/or Pages not installed. %s", e)
+            logger.error("webapp.registry not installed. %s", e)
 
         try:
+            from pages.models import ActivityPubNote
+
             registry.register(ActivityPubNote)
+        except ImportError as e:
+            logger.error(f"Model for 'Note' not installed {e}")
         except Exception as e:
             logger.error("Cannot register `Notes` for Activities. %s", e)
 

@@ -61,16 +61,3 @@ class BudgetSerializer(serializers.Serializer):
 
     message = MessageSerializer()
     subscription = serializers.CharField(max_length=128)
-
-
-class ActivitySerializer(serializers.Serializer):
-    """
-    Deserializes the activity message.
-    """
-
-    context = serializers.CharField(max_length=128, required=False)
-    id = serializers.CharField(max_length=128)
-    type = serializers.CharField(max_length=128)
-    actor = serializers.CharField(max_length=128)
-    to = serializers.CharField(max_length=128)
-    object = serializers.CharField(max_length=128)

@@ -27,7 +27,7 @@ dependencies = [
   "django-guardian",
   "Pillow",
   "pyyaml",
-  "celery"
+  "celery",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

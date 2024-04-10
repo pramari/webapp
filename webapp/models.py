@@ -18,7 +18,6 @@ from django.contrib.auth.models import AbstractUser  # type: ignore
 from django.db import models  # type: ignore
 from django.urls import reverse
 from django.template.defaultfilters import slugify
-from django.contrib.sites.models import Site
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -207,47 +206,6 @@ class Profile(models.Model):
         self.slug = slugify(self.user.username)  # pylint: disable=E1101
         super().save(*args, **kwargs)  # Call the "real" save() method.
 
-    def generate_jsonld(self):
-        """
-        Activity Streams 2.0 JSON-LD
-        """
-
-        base = f"https://{Site.objects.get_current().domain}"
-        username = f"{self.user.username}"  # pylint: disable=E1101
-        actorid = f"{base}{self.get_actor_url}"
-        inbox = f"{base}{self.get_inbox_url}"
-        outbox = f"{base}{self.get_outbox_url}"  # noqa: F841
-        followers = f"{base}{self.get_followers_url}"  # noqa: F841
-        following = f"{base}{self.get_following_url}"  # noqa: F841
-        public_key = self.get_public_key()
-
-        return {
-            "@context": [
-                "https://www.w3.org/ns/activitystreams",
-                "https://w3id.org/security/v1",
-            ],
-            "id": actorid,
-            "type": "Person",
-            "name": username,
-            "preferredUsername": username,
-            "summary": self.bio,
-            "inbox": inbox,
-            # "outbox": outbox,
-            # "followers": followers,
-            # "following": following,
-            "publicKey": public_key,
-            "image": {
-                "type": "Image",
-                "mediaType": "image/jpeg",
-                "url": self.imgurl,
-            },  # noqa: E501
-            # "icon": {
-            #     "type": "Image",
-            #     "mediaType": "image/png",
-            #     "url": self.icon,
-            # },  # noqa: E501
-        }
-
     @property
     def get_absolute_url(self):
         """
@@ -305,11 +263,10 @@ class Profile(models.Model):
             args=[self.slug],
         )
 
-    def get_public_key(self):
+    def get_public_key(self, base: str) -> dict[str, str]:
         """
         Return the public key as JSON-LD.
         """
-        base = f"https://{Site.objects.get_current().domain}"
         actorid = f"{base}{self.get_actor_url}"
         public_key_data = {
             "id": f"{actorid}#main-key",
@@ -317,6 +274,16 @@ class Profile(models.Model):
             "publicKeyPem": self.public_key_pem,
         }
         return public_key_data
+
+    @property
+    def activities(self) -> list:
+        """
+        Return all activities of this profile.
+
+        .. todo::
+            Implement this.
+        """
+        return []  # Action.objects.filter(actor=self)
 
 
 class Action(models.Model):

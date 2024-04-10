@@ -1,3 +1,4 @@
+import json
 import logging
 from django.test import TestCase
 from django.test import Client
@@ -30,26 +31,55 @@ class SerializerTest(TestCase):
     def setUp(self):
         pass
 
-    def test_delete_message_with_activityserializer(self):
-        from .serializers import ActivitySerializer
 
-        message = {
-            "@context": "https://www.w3.org/ns/activitystreams",
-            "id": "https://mastodon.social/users/OfficialLondonRP_#delete",
-            "type": "Delete",
-            "actor": "https://mastodon.social/users/OfficialLondonRP_",  # noqa: E501
-            "to": ["https://www.w3.org/ns/activitystreams#Public"],
-            "object": "https://mastodon.social/users/OfficialLondonRP_",
-            "signature": {
-                "type": "RsaSignature2017",
-                "creator": "https://mastodon.social/users/OfficialLondonRP_#main-key",  # noqa: E501
-                "created": "2024-03-02T21:48:00Z",
-                "signatureValue": "YNR3WNfmU47Y+85cLNexTLy/gUz3iyBqkNWtfyrcJNKRUu258Sn0uBve/bfC4cTGGaZEx6CHmxM8qd4QjRNWR7HmwPVgHCZeFxrFD1aWUxT9XAth80Q8I38CegDgK61EVh9+8ZFigaTYinAW4UisjSnC//vWhQJJazq+Dw1TVNmHU/YMyAbyyQ8FShWB3LMJ9Fq6HCs5lGy20hx36G3ieaA+e/YN/65jklMT1ZwJ5sihP00iZjjXMnkZI8nK83hcunCEufmDdxBOCILq/hEOC5YWJHJWp5pzyozc5QgVYeV2G4w3cEgEhKbgCW4IJuToTpD0KBoZo9zy1MqER5VYUg==",  # noqa: E501
-            },
-        }
+class TactivityTest(TestCase):
+    def setUp(self):
+        """
+        Setup test.
+        """
+        self.client = Client()
 
-        serializer = ActivitySerializer(data=message)
-        result = serializer.is_valid()
-        if result is False:
-            print(f"result: {serializer.errors}")
-        self.assertFalse(result)
+    def test_actor_remote(self):
+        """
+        test getRemoteActor helper function
+        """
+        from .activity import getRemoteActor
+
+        result = getRemoteActor("https://pramari.de/accounts/andreas/actor/")
+
+        self.assertEqual(
+            result.id, "https://pramari.de/accounts/andreas/actor/"
+        )  # noqa: E501
+
+
+class ActivityTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_random(self):
+        """
+        Post some data. Unrelated to ActivityPub.
+
+        .. todo::
+            Randomize the dict with keywords from ActivityPub and others.
+        """
+        from .exceptions import ParseActivityError
+
+        data = json.dumps({"bar": "baz"})
+        self.client.post(
+            "/accounts/andreas/inbox",
+            data,
+            content_type="application/json",
+        )
+        self.assertRaises(ParseActivityError)
+
+    def test_follow(self):
+        with open(
+            "submodules/taktivitypub/tests/data/follow-mastodon.json"
+        ) as f:  # noqa: E501
+            data = f.read()
+            self.client.post(
+                "/accounts/andreas/inbox",
+                data,
+                content_type="application/json",
+            )

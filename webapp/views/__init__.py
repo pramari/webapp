@@ -14,13 +14,14 @@ from .web import (
     SearchView,
 )
 
+from .webfinger import WebFingerView
+from .actor import ActorView
+from .inbox import InboxView
+from .outbox import OutboxView
+
 from .activitypub import (
     NodeInfoView,
     VersionView,
-    WebFingerView,
-    ActorView,
-    InboxView,
-    OutboxView,
     FollowView,
     FollowersView,
     FollowingView,
