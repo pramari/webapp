@@ -337,3 +337,36 @@ class Action(models.Model):
 
     def get_absolute_url(self):
         return reverse("action_detail", args=[self.pk])
+
+class Note(models.Model):
+    """
+    Activity Streams 2.0
+
+    Note
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    content = models.TextField()
+
+    published = models.DateTimeField(default=now, db_index=True)
+    updated = models.DateTimeField(default=now, db_index=True)
+
+    public = models.BooleanField(default=True, db_index=True)
+    
+    def __str__(self):
+        return self.content
+
+    def json_ld(self):
+        return {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "id": self.get_absolute_url(),
+            
+            "type": "Note",
+            "content": self.content,
+            "published": self.published,
+            "updated": self.updated,
+            "public": self.public,
+        }
+
+    def get_absolute_url(self):
+        return reverse("note_detail", args=[self.id])
