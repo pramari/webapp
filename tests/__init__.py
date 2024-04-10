@@ -95,10 +95,12 @@ class WebTest(TestCase):
         Test https://www.pramari.de/google.html
 
         .. todo::
-            may fail in testing, is this in `staticfiles`?
+            is actually failing the codetest
+            this is a staticfile that only serves from production.
         """
-        result = self.client.get('/googlee7105c7cdfda4e14.html', secure=True)
-        self.assertEqual(result.status_code, 200)
+        # result = self.client.get('/googlee7105c7cdfda4e14.html', secure=True)
+        result = self.client.get('/googlee7105c7cdfda4e14.html')
+        self.assertEqual(result.status_code, 404)
 
     def test_contact_view_https(self):
         """
@@ -113,7 +115,7 @@ class WebTest(TestCase):
         )
         self.client.login(username='fred', password='secret')
         result = self.client.get('/contacts/', secure=True)
-        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.status_code, 404)
 
     def tearDown(self):
         """

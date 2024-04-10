@@ -175,7 +175,14 @@ class Profile(models.Model):
     @property
     def imgurl(self):
         """
-        # import code for encoding urls and generating md5 hashes
+        Return the URL of the profile image.
+
+        First, if the user is not verified, the user will not be allowed
+        to have a custom gravatar. Instead, a default image will be used.
+
+        Second, if the user is verified, the user will be allowed to have
+        a custom avatar. The user can choose to use a gravatar or a custom
+        image.
 
         .. todo::
             make this work
@@ -187,14 +194,18 @@ class Profile(models.Model):
             email = EmailAddress.objects.get(
                 user=self.user, verified=True, primary=True
             )
+        else:
+            return "https://storage.cloud.google.com/media.pramari.de/user/default.png"  # noqa: E501
 
         # construct the url
         if self.gravatar is False:
             return staticfiles_storage.url(self.img)
-
-        hashvalue = hashlib.md5(str(email).lower().encode("utf-8")).hexdigest()
-        size = urllib.parse.urlencode({"d": email, "s": str(size)})
-        return f"https://www.gravatar.com/avatar/{hashvalue}?{size}"
+        else:
+            hashvalue = hashlib.md5(
+                str(email).lower().encode("utf-8")
+            ).hexdigest()  # noqa: E501
+            size = urllib.parse.urlencode({"d": email, "s": str(size)})
+            return f"https://www.gravatar.com/avatar/{hashvalue}?{size}"
 
     def __str__(self):
         """

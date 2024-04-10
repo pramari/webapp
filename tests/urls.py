@@ -12,6 +12,6 @@ from django.conf.urls import include
 
 urlpatterns = [
     path(r"", include("webapp.urls")),
-    path(r"", include("webapp.urls_api")),
-    path(r"", include("webapp.urls_activity")),
+    path(r"", include("webapp.urls.api")),
+    path(r"", include("webapp.urls.activitypub")),
 ]
