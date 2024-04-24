@@ -16,4 +16,11 @@ __version__ = "1.1.23"
 __date__ = "2023-08-21"
 __author__ = "Andreas Neumeier"
 
+contenttype = (
+    "application/json+ld",
+    "activity/json",
+    "application/activity+json",
+    "application/ld+json",
+)
+
 default_app_config = "webapp.apps.WebAppConfig"

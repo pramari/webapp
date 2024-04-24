@@ -25,6 +25,7 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.account.models import EmailAddress
 
 from .models import User, Profile
+from .models import Note, Action  # todo:: refactor into own package
 from .forms import UserCreationForm, UserChangeForm
 from .tasks import generateProfileKeyPair
 
@@ -41,6 +42,28 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Profile, ProfileAdmin)
+
+
+class NoteAdmin(admin.ModelAdmin):
+    model = Note
+
+
+admin.site.register(Note, NoteAdmin)
+
+
+class ActionAdmin(admin.ModelAdmin):
+    date_hierarchy = "timestamp"
+    list_display = ("__str__", "actor", "verb", "target", "public")
+    list_editable = ("verb",)
+    list_filter = ("timestamp",)
+    # raw_id_fields = (
+    #     "actor_content_type",
+    #     "target_content_type",
+    #     "action_object_content_type",
+    # )
+
+
+admin.site.register(Action, ActionAdmin)
 
 
 csrf_protect_m = method_decorator(csrf_protect)

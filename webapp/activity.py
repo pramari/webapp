@@ -5,6 +5,8 @@ https://docs.python.org/3/library/typing.html
 import logging
 import ipaddress
 import functools
+
+from typing import Any
 from socket import getaddrinfo
 
 from urllib.parse import urlparse
@@ -14,9 +16,13 @@ import requests
 from django.conf import settings
 
 from taktivitypub.actor import Actor
+from taktivitypub.activity import Activity
 
 from webapp.exceptions import (
     InvalidURLError,
+    ObjectIsGoneError,
+    ObjectUnavailableError,
+    ObjectNotFoundError,
 )
 
 logger = logging.getLogger(__name__)
@@ -113,6 +119,7 @@ def is_hostname_blocked(hostname: str) -> bool:
     return False
 
 
+@functools.lru_cache(maxsize=512)
 def is_url_valid(url: str) -> bool:
     """Implements basic SSRF protection."""
     parsed = urlparse(url)
@@ -146,42 +153,52 @@ def is_url_valid(url: str) -> bool:
     return True
 
 
-@functools.lru_cache(maxsize=512)
-def check_url(url: str) -> None:
-    logger.debug(f"check_url {url=}")
-    if not is_url_valid(url):
-        raise InvalidURLError(f'"{url}" is invalid')
-
-    return None
-
-
-"""
 def fetch(
     url: str,
     params: dict[str, Any] | None = None,
     disable_httpsig: bool = False,
-) -> APObject:
-"""
-"""
+) -> Actor | Activity:
+    """
     .. todo::
         really, this shouldn't be httpx at all.
         that shouldn't be from microblog.pub at all.
     """
-"""
+
     logger.info(f"Fetching {url} ({params=})")
-    check_url(url)
+    if not is_url_valid(url):
+        raise InvalidURLError(f"'{url} is invalid")
 
-    auth = httpx.BasicAuth(
+    auth = requests.auth.HTTPBasicAuth(
         settings.AP_USER, settings.AP_PASS, settings.AP_CONTENT_TYPE
-    )  # noqa: E501
+    )
 
+    headers = {
+        "User-Agent": settings.USER_AGENT,
+        "Accept": settings.AP_CONTENT_TYPE,
+    }
+
+    with requests.Session() as session:
+        resp = session.get(
+            url,
+            headers=headers,
+            params=params,
+            auth=None if disable_httpsig else auth,
+        )
+
+        # Special handling for deleted object
+        if resp.status_code == 410:
+            raise ObjectIsGoneError(url, resp)
+        elif resp.status_code in [401, 403]:
+            raise ObjectUnavailableError(url, resp)
+        elif resp.status_code == 404:
+            raise ObjectNotFoundError(url, resp)
+
+
+"""
     async with httpx.AsyncClient() as client:
         resp = client.get(
             url,
-            headers={
-                "User-Agent": settings.USER_AGENT,
-                "Accept": settings.AP_CONTENT_TYPE,
-            },
+            headers=headers,
             params=params,
             follow_redirects=True,
             auth=None if disable_httpsig else auth,

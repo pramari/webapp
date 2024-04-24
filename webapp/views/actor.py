@@ -63,12 +63,12 @@ class ActorView(View):
             "image": {
                 "type": "Image",
                 "mediaType": "image/jpeg",
-                "url": self.imgurl,
+                "url": profile.imgurl,
             },  # noqa: E501
             "icon": {
                 "type": "Image",
                 "mediaType": "image/png",
-                "url": self.icon,
+                "url": profile.icon,
             },  # noqa: E501
         }
 

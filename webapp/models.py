@@ -26,6 +26,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 from allauth.account.models import EmailAddress  # type: ignore
 
+from .managers import ActionManager
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -287,15 +289,16 @@ class Profile(models.Model):
         }
         return public_key_data
 
-    @property
-    def activities(self) -> list:
+        #   @property
+        #   def activities(self) -> list:
         """
         Return all activities of this profile.
 
         .. todo::
             Implement this.
         """
-        return []  # Action.objects.filter(actor=self)
+
+    #    return Action.objects.filter(actor=self)
 
 
 class Action(models.Model):
@@ -305,6 +308,8 @@ class Action(models.Model):
     Inp
     https://github.com/justquick/django-activity-stream/blob/main/actstream/models.get_profile_types
     """
+
+    objects = ActionManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     timestamp = models.DateTimeField(default=now, db_index=True)
@@ -320,6 +325,59 @@ class Action(models.Model):
     actor = GenericForeignKey("actor_content_type", "actor_object_id")
 
     verb = models.CharField(max_length=255, db_index=True)
+    description = models.TextField(blank=True, null=True)
+
+    target_content_type = models.ForeignKey(
+        ContentType,
+        blank=True,
+        null=True,
+        related_name="target",
+        on_delete=models.CASCADE,
+        db_index=True,
+    )
+    target_object_id = models.CharField(
+        max_length=255, blank=True, null=True, db_index=True
+    )
+    target = GenericForeignKey("target_content_type", "target_object_id")
+
+    action_object_content_type = models.ForeignKey(
+        ContentType,
+        blank=True,
+        null=True,
+        related_name="action_object",
+        on_delete=models.CASCADE,
+        db_index=True,
+    )
+    action_object_object_id = models.CharField(
+        max_length=255, blank=True, null=True, db_index=True
+    )
+    action_object = GenericForeignKey(
+        "action_object_content_type", "action_object_object_id"
+    )
+
+    timestamp = models.DateTimeField(default=now, db_index=True)
+
+    public = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ("-timestamp",)
+
+    def __str__(self):
+        if self.target:
+            if self.action_object:
+                return _(
+                    f"{self.actor} {self.verb} {self.action_object} on {self.target} {self.since}s ago"  # noqa: E501
+                )
+            return _(
+                "{self.actor} {self.verb} {self.target} {self.since}s ago"
+            )  # noqa: E501
+        if self.action_object:
+            return _(
+                f"{self.actor} {self.verb} {self.action_object} {self.since}s ago"  # noqa: E501
+            )  # noqa: E501
+        return _(
+            f"{self.actor} {self.verb}"
+        )  # _(f"{self.actor} {self.verb} {self.since} ago")
 
     def since(self, now=None):
         """
@@ -338,12 +396,18 @@ class Action(models.Model):
     def get_absolute_url(self):
         return reverse("action_detail", args=[self.pk])
 
+
 class Note(models.Model):
     """
     Activity Streams 2.0
 
     Note
     """
+
+    class Meta:
+        verbose_name = _("Note (Activity Streams 2.0)")
+        verbose_name_plural = _("Notes (Activity Streams 2.0)")
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     content = models.TextField()
@@ -352,21 +416,10 @@ class Note(models.Model):
     updated = models.DateTimeField(default=now, db_index=True)
 
     public = models.BooleanField(default=True, db_index=True)
-    
+    sensitive = models.BooleanField(default=False, db_index=True)
+
     def __str__(self):
         return self.content
 
-    def json_ld(self):
-        return {
-            "@context": "https://www.w3.org/ns/activitystreams",
-            "id": self.get_absolute_url(),
-            
-            "type": "Note",
-            "content": self.content,
-            "published": self.published,
-            "updated": self.updated,
-            "public": self.public,
-        }
-
     def get_absolute_url(self):
-        return reverse("note_detail", args=[self.id])
+        return reverse("note-detail", args=[self.id])

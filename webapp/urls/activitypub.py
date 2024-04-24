@@ -24,6 +24,8 @@ from webapp.views import (
     FollowView,
     FollowersView,
     FollowingView,
+    NoteView,
+    ActionView,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,4 +69,9 @@ urlpatterns = [
         FollowingView.as_view(),
         name="profile-following",
     ),
+]
+
+urlpatterns += [
+    path(r"note/<uuid:pk>", NoteView.as_view(), name="note-detail"),
+    path(r"action/<uuid:pk>", ActionView.as_view(), name="action-detail"),
 ]

@@ -18,13 +18,18 @@ from .webfinger import WebFingerView
 from .actor import ActorView
 from .inbox import InboxView
 from .outbox import OutboxView
+from .followers import FollowersView
+from .following import FollowingView
 
 from .activitypub import (
     NodeInfoView,
     VersionView,
     FollowView,
-    FollowersView,
-    FollowingView,
+)
+
+from .activity import (
+    NoteView,
+    ActionView,
 )
 
 __all__ = [
@@ -46,4 +51,9 @@ __all__ += [
     "FollowView",
     "FollowersView",
     "FollowingView",
+]
+
+__all__ += [
+    "NoteView",
+    "ActionView",
 ]

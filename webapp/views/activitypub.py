@@ -13,7 +13,7 @@ import logging
 
 from django.urls import reverse
 from django.http import JsonResponse
-from django.views.generic import View, ListView
+from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth import get_user_model
@@ -91,6 +91,12 @@ class VersionView(View):
 
 
 class FollowView(View):
+    """
+    .. todo::
+        This is actually unused, is it?
+        Most likely this is not from the standard.
+    """
+
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
@@ -109,25 +115,3 @@ class FollowView(View):
 
         # Return a success response
         return JsonResponse({"status": f"success: {actor} followed {object}"})
-
-
-class FollowersView(ListView):
-    template_name = "activitypub/followers.html"
-
-    def get_queryset(self):
-        from django.shortcuts import get_object_or_404
-
-        profile = get_object_or_404(Profile, slug=self.kwargs["slug"])
-        return profile.followed_by.filter(consent=True)
-        # .filter(user__is_verified=True)
-
-
-class FollowingView(ListView):
-    template_name = "activitypub/following.html"
-
-    def get_queryset(self):
-        from django.shortcuts import get_object_or_404
-
-        profile = get_object_or_404(Profile, slug=self.kwargs["slug"])
-        return profile.follows.filter(consent=True)
-        # .filter(user__is_verified=True)
