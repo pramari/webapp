@@ -13,6 +13,7 @@ See::
 import json
 import logging
 
+from django.conf import settings
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -27,7 +28,8 @@ from ..exceptions import (
     ParseUTF8Error,
 )
 from ..models import Profile
-from ..activity import verifySignature
+
+# from ..activity import verifySignature
 
 logger = logging.getLogger(__name__)
 
@@ -110,95 +112,42 @@ class InboxView(View):
         return JsonResponse({"status": "undone"})
 
     def follow(self, message: APObject, signature: dict = None):
-        """
-        {
-        '@context': 'https://www.w3.org/ns/activitystreams',
-        'id': 'https://neumeier.org/o/ca357ba56dc24554bfb7646a1db2c67f',
-        'type': 'Follow',
-        'actor': 'https://neumeier.org',
-        'object': 'https://pramari.de/accounts/andreas/'
-        }
-        """
-
-        """
-        Find account to be followed.
-
-        Ruby Code from Paul Kinlan:
-
-              const signature = parseSignature(req);
-              const actorInformation = await fetchActorInformation(signature.keyId);
-              const signatureValid = verifySignature(signature, actorInformation.publicKey);
-
-              if (signatureValid == null || signatureValid == false) {
-                res.end('invalid signature');
-                return;
-              }
-
-              // We should check the digest.
-              if (message.type == "Follow") {
-                // We are following.
-                const followMessage: AP.Follow = <AP.Follow>message;
-                if (followMessage.id == null) return;
-
-                const collection = db.collection('followers');
-
-                const actorID = (<URL>followMessage.actor).toString();
-                const followDocRef = collection.doc(actorID.replace(/\//g, "_"));  # noqa: W605, E501
-                const followDoc = await followDocRef.get();
-
-                if (followDoc.exists) {
-                  console.log("Already Following")
-                  return res.end('already following');
-                }
-
-                // Create the follow;
-                await followDocRef.set(followMessage);
-
-                const guid = uuid();
-                const domain = 'paul.kinlan.me';
-
-                const acceptRequest: AP.Accept = <AP.Accept>{
-                  "@context": "https://www.w3.org/ns/activitystreams",
-                  'id': new URL(`https://${domain}/${guid}`),
-                  'type': 'Accept',
-                  'actor': "https://paul.kinlan.me/paul",
-                  'object': followMessage
-                };
-
-                const actorInbox = new URL(actorInformation.inbox);
-
-                const response = await sendSignedRequest(actorInbox, acceptRequest);  # noqa: E501
-
-                console.log("Following result", response.status, response.statusText, await response.text());  # noqa: E501
-
-                return res.end("ok")
-              }
-        """
+        """{
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            'id': 'https://neumeier.org/o/ca357ba56dc24554bfb7646a1db2c67f',
+            'type': 'Follow',
+            'actor': 'https://neumeier.org',
+            'object': 'https://pramari.de/accounts/andreas/'
+        }"""
 
         # Store the follower in the database
-        logger.error(f"Activity: {message.actor} followed {message.object}")
+        logger.debug(
+            f"Activity: {message.actor} wants to follow {message.object}"
+        )  # noqa: E501
 
-        # message.object is the profile to be followed
-        # it should be checked if local or remote
+        assert message.actor is not None
+
+        from webapp.tasks.activitypub import getRemoteActor
+
+        actor = getRemoteActor(message.actor)  # noqa: F841
 
         # Step 2:
-        # Confirm the follow reuqst to message.actor
-        if not signature:
-            """Not having a signature seems default?"""
-            actor = {}  # getRemoteActor(message.actor)
+        # Confirm the follow request to message.actor
+        from webapp.tasks.activitypub import accept_follow
+
+        """
+        .. todo::
+            - Check if the signature is valid
+            - Store the follow request in the database
+            - Defer the task to the background
+        """
+        if settings.DEBUG:
+            accept_follow(message.actor, message.object)
         else:
-            """
-            .. todo:: Check the signature
-            """
-            actor = {}  # getRemoteActor(signature["keyId"])
-            signatureValid = verifySignature(
-                signature, actor.publicKey
-            )  # noqa: F841, E501
+            accept_follow.delay(message.actor, message.object)
 
         return JsonResponse(
-            {
-                "status": f"OK: {message.actor} followed {message.object} ({signatureValid})"  # noqa: E501
-            }
+            {"status": f"OK: {message.actor} followed {message.object}"}  # noqa: E501
         )
 
     def parse(self, request) -> tuple[APObject, dict]:
@@ -229,15 +178,6 @@ class InboxView(View):
 
         return activity, signature
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        """
-        Process the incoming message.
-
-        No CSRF token required for incoming activities.
-        """
-        return super().dispatch(*args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         """
         Process the incoming activity.
@@ -246,7 +186,7 @@ class InboxView(View):
         try:
             message, signature = self.parse(request)
         except ParseError as e:
-            logger.error(f"InboxView raised error: {e}")
+            logger.debug(f"InboxView raised error: {e}")
             return JsonResponse({"error": str(e.message)}, status=400)
 
         # Process the activity based on its type
@@ -273,3 +213,18 @@ class InboxView(View):
 
         # Return a success response. Unclear, why.
         return JsonResponse({"status": f"success: {result}"})
+
+    def get(self, request, *args, **kwargs):
+        """
+        Return a 404 for GET requests.
+        """
+        return JsonResponse({"error": "Not found"}, status=404)
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        """
+        Process the incoming message.
+
+        No CSRF token required for incoming activities.
+        """
+        return super().dispatch(*args, **kwargs)

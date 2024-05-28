@@ -4,6 +4,12 @@ admin.py for apc.
 Define Admin-Views for `User`-Objects.
 """
 
+import json
+from functools import update_wrapper
+
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
+from django import VERSION
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.options import IS_POPUP_VAR
@@ -15,19 +21,219 @@ from django.db import router, transaction
 from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
-from django.utils.html import escape
-from django.utils.translation import gettext, gettext_lazy as _
 from django.utils.decorators import method_decorator
+from django.utils.html import escape
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 
-from allauth.socialaccount.models import SocialAccount
-from allauth.account.models import EmailAddress
-
-from .models import User, Profile
-from .models import Note, Action  # todo:: refactor into own package
-from .forms import UserCreationForm, UserChangeForm
+from .forms import UserChangeForm, UserCreationForm
+from .models import Action, Note, Profile, User  # todo:: refactor own package
 from .tasks import generateProfileKeyPair
+
+try:
+    from django.conf.urls import url
+except ImportError:
+    from django.urls import re_path as url  # Django >= 4.0
+
+try:
+    from django.contrib.contenttypes.generic import (
+        GenericForeignKey,
+        GenericStackedInline,
+        GenericTabularInline,
+    )
+except ImportError:
+    from django.contrib.contenttypes.admin import (
+        GenericStackedInline,
+        GenericTabularInline,
+    )
+    from django.contrib.contenttypes.fields import GenericForeignKey
+
+from django.contrib.contenttypes.models import ContentType
+
+from django.utils.encoding import force_str as force_text  # Django >= 4.0
+
+from django.contrib.admin.widgets import url_params_from_lookup_dict
+from django.http import HttpResponse, HttpResponseNotAllowed
+from django.utils.text import capfirst
+
+from django.core.exceptions import ObjectDoesNotExist
+
+JS_PATH = getattr(settings, "GENERICADMIN_JS", "genericadmin/js/")
+
+
+class BaseGenericModelAdmin(object):
+    class Media:
+        js = ()
+
+    content_type_lookups = {}
+    generic_fk_fields = []
+    content_type_blacklist = []
+    content_type_whitelist = []
+
+    def __init__(self, model, admin_site):
+        try:
+            media = list(self.Media.js)
+        except AttributeError:
+            media = []
+        if VERSION >= (2, 2):
+            media.append("admin/js/jquery.init.js")  # Django >= 2.2
+        media.append(JS_PATH + "genericadmin.js")
+        self.Media.js = tuple(media)
+
+        self.content_type_whitelist = [
+            s.lower() for s in self.content_type_whitelist
+        ]  # noqa: E501
+        self.content_type_blacklist = [
+            s.lower() for s in self.content_type_blacklist
+        ]  # noqa: E501
+
+        super(BaseGenericModelAdmin, self).__init__(model, admin_site)
+
+    def get_generic_field_list(self, request, prefix=""):
+        if hasattr(self, "ct_field") and hasattr(self, "ct_fk_field"):
+            exclude = [self.ct_field, self.ct_fk_field]
+        else:
+            exclude = []
+
+        field_list = []
+        if hasattr(self, "generic_fk_fields") and self.generic_fk_fields:
+            for fields in self.generic_fk_fields:
+                if (
+                    fields["ct_field"] not in exclude
+                    and fields["fk_field"] not in exclude
+                ):
+                    fields["inline"] = prefix != ""
+                    fields["prefix"] = prefix
+                    field_list.append(fields)
+        else:
+            try:
+                virtual_fields = self.model._meta.virtual_fields
+            except AttributeError:
+                virtual_fields = (
+                    self.model._meta.private_fields
+                )  # Django >= 2.0  # noqa: E501
+
+            for field in virtual_fields:
+                if (
+                    isinstance(field, GenericForeignKey)
+                    and field.ct_field not in exclude
+                    and field.fk_field not in exclude
+                ):
+                    field_list.append(
+                        {
+                            "ct_field": field.ct_field,
+                            "fk_field": field.fk_field,
+                            "inline": prefix != "",
+                            "prefix": prefix,
+                        }
+                    )
+
+        if hasattr(self, "inlines") and len(self.inlines) > 0:
+            for FormSet, inline in zip(
+                self.get_formsets_with_inlines(request),
+                self.get_inline_instances(request),
+            ):
+                if hasattr(inline, "get_generic_field_list"):
+                    prefix = FormSet.get_default_prefix()
+                    field_list = field_list + inline.get_generic_field_list(
+                        request, prefix
+                    )
+
+        return field_list
+
+    def get_urls(self):
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+
+            return update_wrapper(wrapper, view)
+
+        custom_urls = [
+            url(
+                r"^obj-data/$",
+                wrap(self.generic_lookup),
+                name="admin_genericadmin_obj_lookup",
+            ),
+            url(
+                r"^genericadmin-init/$",
+                wrap(self.genericadmin_js_init),
+                name="admin_genericadmin_init",
+            ),
+        ]
+        return custom_urls + super(BaseGenericModelAdmin, self).get_urls()
+
+    def genericadmin_js_init(self, request):
+        if request.method == "GET":
+            obj_dict = {}
+            for c in ContentType.objects.all():
+                val = force_text("%s/%s" % (c.app_label, c.model))
+                params = self.content_type_lookups.get(
+                    "%s.%s" % (c.app_label, c.model), {}
+                )
+                params = url_params_from_lookup_dict(params)
+                if self.content_type_whitelist:
+                    if val in self.content_type_whitelist:
+                        obj_dict[c.id] = (val, params)
+                elif val not in self.content_type_blacklist:
+                    obj_dict[c.id] = (val, params)
+
+            data = {
+                "url_array": obj_dict,
+                "fields": self.get_generic_field_list(request),
+                "popup_var": IS_POPUP_VAR,
+            }
+            resp = json.dumps(data, ensure_ascii=False)
+            return HttpResponse(resp, content_type="application/json")
+        return HttpResponseNotAllowed(["GET"])
+
+    def generic_lookup(self, request):
+        if request.method != "GET":
+            return HttpResponseNotAllowed(["GET"])
+
+        if "content_type" in request.GET and "object_id" in request.GET:
+            content_type_id = request.GET["content_type"]
+            object_id = request.GET["object_id"]
+
+            obj_dict = {
+                "content_type_id": content_type_id,
+                "object_id": object_id,
+            }
+
+            content_type = ContentType.objects.get(pk=content_type_id)
+            obj_dict["content_type_text"] = capfirst(force_text(content_type))
+
+            try:
+                obj = content_type.get_object_for_this_type(pk=object_id)
+                obj_dict["object_text"] = capfirst(force_text(obj))
+            except ObjectDoesNotExist:
+                raise Http404
+
+            resp = json.dumps(obj_dict, ensure_ascii=False)
+        else:
+            resp = ""
+        return HttpResponse(resp, content_type="application/json")
+
+
+class GenericAdminModelAdmin(BaseGenericModelAdmin, admin.ModelAdmin):
+    """Model admin for generic relations."""
+
+
+class GenericTabularInline(BaseGenericModelAdmin, GenericTabularInline):
+    """Model admin for generic tabular inlines."""
+
+
+class GenericStackedInline(BaseGenericModelAdmin, GenericStackedInline):
+    """Model admin for generic stacked inlines."""
+
+
+class TabularInlineWithGeneric(BaseGenericModelAdmin, admin.TabularInline):
+    """ "Normal tabular inline with a generic relation"""
+
+
+class StackedInlineWithGeneric(BaseGenericModelAdmin, admin.StackedInline):
+    """ "Normal stacked inline with a generic relation"""
 
 
 class ProfileAdmin(admin.ModelAdmin):
@@ -51,7 +257,7 @@ class NoteAdmin(admin.ModelAdmin):
 admin.site.register(Note, NoteAdmin)
 
 
-class ActionAdmin(admin.ModelAdmin):
+class ActionAdmin(GenericAdminModelAdmin):
     date_hierarchy = "timestamp"
     list_display = ("__str__", "actor", "verb", "target", "public")
     list_editable = ("verb",)

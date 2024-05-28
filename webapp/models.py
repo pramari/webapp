@@ -101,35 +101,6 @@ class User(AbstractUser):
         )
 
 
-def get_profile_types() -> dict:
-    """
-    This is just a random thought at this point.
-    Not discarded, thats why it is still here.
-    Profiles can become profiles of different types.
-    To serve a different purpose, namely to become, e.g.:
-        - contacts
-        - regular users
-        - activity pub users
-        - etc.
-
-    The idea was to allow storing contacts in the same table.
-    The 2nd next idea was to make all activity pub related methods optional.
-    However, at this point I feel like this is not reducing complexity but
-    building up more complexity.
-    A contact will most likely not require the same methods a user or a
-    activitypub user will require, while making all fields and methods
-    conditional is really complex.
-    """
-    from django.utils.translation import gettext as _
-
-    profile_types = {
-        "001": _("Regular User"),
-        "002": _("Regular User with ActivityPub Profile"),
-        "003": _("Contact"),
-    }
-    return profile_types
-
-
 class Profile(models.Model):
     """
     Also: ActivityPub Profile
@@ -137,7 +108,6 @@ class Profile(models.Model):
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # profile_type = models.CharField(max_length=3, choices=get_profile_types)
     slug = models.SlugField(null=True, help_text=_("Slug"))
     follows = models.ManyToManyField(
         "self", related_name="followed_by", symmetrical=False, blank=True
@@ -156,10 +126,12 @@ class Profile(models.Model):
         default=True, help_text=_("Use Gravatar profile image.")
     )
     bio = models.TextField(blank=True, help_text=_("Short Bio"))
-    public_key_pem = models.TextField(blank=True, help_text=_("Public Key"))
-    private_key_pem = models.TextField(blank=True)
 
-    ap_id = models.CharField(max_length=255, blank=True)
+    ap_id = models.CharField(
+        max_length=255, blank=True, help_text=_("ActivityPub ID")
+    )  # noqa: E501
+    public_key_pem = models.TextField(blank=True, help_text=_("Public Key"))
+    private_key_pem = models.TextField(blank=True, help_text=_("Private Key"))
 
     USER_ICONS = [
         ("0s", "0-square"),
@@ -192,7 +164,7 @@ class Profile(models.Model):
         size = 80
 
         # Set your variables here
-        if self.user.is_verified:  # noqa
+        if self.user.is_verified:  # noqa: no-member
             email = EmailAddress.objects.get(
                 user=self.user, verified=True, primary=True
             )
@@ -233,6 +205,11 @@ class Profile(models.Model):
         """
         Return the URL of the actor.
         Activity Streams 2.0
+
+        .. todo::
+            re-architect this. This could be the same as `get_absolute_url`,
+            provided either of these views considers the `Accept` header; which
+            currently only the `actor-view` does.
         """
         return reverse("actor-view", args=[str(self.slug)])
 
@@ -363,13 +340,15 @@ class Action(models.Model):
         ordering = ("-timestamp",)
 
     def __str__(self):
+        act = self.actor
         if self.target:
             if self.action_object:
                 return _(
                     f"{self.actor} {self.verb} {self.action_object} on {self.target} {self.since}s ago"  # noqa: E501
                 )
             return _(
-                "{self.actor} {self.verb} {self.target} {self.since}s ago"
+                # f"{self.actor} {self.verb} {self.target} {self.since}s ago"
+                f"{act} {self.verb} {self.target} {self.since}s ago"
             )  # noqa: E501
         if self.action_object:
             return _(

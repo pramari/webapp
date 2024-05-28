@@ -27,7 +27,9 @@ class WebFingerView(View):
 
         if not resource:
             return JsonResponse(
-                {"error": "Missing resource parameter"}, status=400
+                {"error": "Missing resource parameter"},
+                status=400,
+                content_type="application/jrd+json",
             )  # noqa: E501
 
         # Perform the necessary logic to retrieve user data
@@ -35,7 +37,9 @@ class WebFingerView(View):
 
         if not resource.startswith("acct:"):
             return JsonResponse(
-                {"error": "Invalid resource format"}, status=400
+                {"error": "Invalid resource format"},
+                status=400,
+                content_type="application/jrd+json",
             )  # noqa: E501
 
         try:

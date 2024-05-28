@@ -18,24 +18,7 @@ class ActorView(View):
     ),
     """
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
-        """
-        Return the actor object for a given user
-        represented in Activity Streams 2.0 JSON-LD.
-
-        .. Type::
-            GET
-
-        .. Request::
-            /accounts/<slug:slug>/actor
-
-        .. Response::
-            Activity Streams 2.0 JSON-LD
-        """
-        slug = kwargs.get("slug")
-
-        profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
-
+    def to_jsonld(self, profile):
         base = f"https://{Site.objects.get_current().domain}"
         username = f"{profile.user.username}"  # pylint: disable=E1101
         actorid = f"{base}{profile.get_actor_url}"
@@ -72,7 +55,32 @@ class ActorView(View):
             },  # noqa: E501
         }
 
-        return JsonResponse(
-            jsonld,
-            content_type="application/Activity+json",
-        )
+        return jsonld
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+        """
+        Return the actor object for a given user
+        represented in Activity Streams 2.0 JSON-LD.
+
+        .. Type::
+            GET
+
+        .. Request::
+            /accounts/<slug:slug>/actor
+
+        .. Response::
+            Activity Streams 2.0 JSON-LD
+        """
+        slug = kwargs.get("slug")
+
+        profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
+
+        if kwargs["Accept"] == "application/json":
+            return JsonResponse(
+                self.to_jsonld(profile),
+                content_type="application/activity+json",
+            )
+        else:
+            from webapp.views.web import ProfileView
+
+            return ProfileView.as_view()(request, slug=slug)

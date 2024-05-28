@@ -39,27 +39,10 @@ def parseSignature(message: dict) -> dict:
     }
 
 
+"""
 def verifySignature(signature, publicKey) -> bool:
-    """ """
-
     return True
-
-
-def getRemoteActor(id: str) -> Actor:
-    """ """
-
-    headers = {
-        "Content-type": "application/activity+json",
-        "Accept": "application/activity+json",
-    }
-    actor = requests.get(id, headers=headers).json()
-    return Actor(
-        id=actor.get("id"),
-        inbox=actor.get("inbox"),
-        outbox=actor.get("outbox"),  # noqa: E501
-        publicKey=actor.get("publicKey", ""),
-    )  # noqa: E501
-
+"""
 
 """
 class ActivityBase(dict):

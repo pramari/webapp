@@ -5,47 +5,55 @@ from typing import Tuple
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
+from webapp.models import Action
+from taktivitypub.actor import Actor
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-"""
-# Ruby:
-require 'http'
-require 'openssl'
+@shared_task
+def getRemoteActor(id: str) -> Actor:
+    """
+    Task to get details for a remote actor
+    """
+    import requests
 
-document      = File.read('create-hello-world.json')
-date          = Time.now.utc.httpdate
-keypair       = OpenSSL::PKey::RSA.new(File.read('private.pem'))
-signed_string = "(request-target): post /inbox\nhost: mastodon.social\ndate: #{date}"  # noqa: E501
-signature     = Base64.strict_encode64(keypair.sign(OpenSSL::Digest::SHA256.new, signed_string))  # noqa: E501
-header        = 'keyId="https://my-example.com/actor",headers="(request-target) host date",signature="' + signature + '"'  # noqa: E501
+    headers = {
+        "Content-type": "application/activity+json",
+        "Accept": "application/activity+json",
+    }
 
-HTTP.headers({ 'Host': 'mastodon.social', 'Date': date, 'Signature': header })
-    .post('https://mastodon.social/inbox', body: document)
-"""
+    actor = requests.get(id, headers=headers).json()
 
-
-message = {
-    "@context": "https://www.w3.org/ns/activitystreams",
-    "id": "https://my-example.com/create-hello-world",
-    "type": "Create",
-    "actor": "https://my-example.com/actor",
-    "object": {
-        "id": "https://my-example.com/hello-world",
-        "type": "Note",
-        "published": "2018-06-23T17:17:11Z",
-        "attributedTo": "https://my-example.com/actor",
-        "inReplyTo": "https://mastodon.social/@Gargron/100254678717223630",
-        "content": "<p>Hello world</p>",
-        "to": "https://www.w3.org/ns/activitystreams#Public",
-    },
-}
+    return Actor(
+        id=actor.get("id"),
+        inbox=actor.get("inbox"),
+        outbox=actor.get("outbox"),  # noqa: E501
+        publicKey=actor.get("publicKey", ""),
+    )  # noqa: E501
 
 
 @shared_task
-def activitypub_send_task(user: User, message: message) -> Tuple[bool]:
+def accept_follow(user: User, actor: Actor, activity: Action) -> bool:
+    import requests  # noqa: F401
+    from requests_http_signature import (
+        HTTPSignatureAuth,  # noqa: F401
+        algorithms,  # noqa: F401
+    )  # noqa: F401, E501
+
+    auth = HTTPSignatureAuth(
+        key=user.key,
+        key_id=user.key,
+        signature_algorithm=algorithms.HMAC_SHA256,  # noqa: E501
+    )
+    requests.post(actor.inbox, auth=auth)
+
+    return True
+
+
+@shared_task
+def activitypub_send_task(user: User, message: str) -> Tuple[bool]:
     from Crypto.Hash import SHA256
     from Crypto.Signature import PKCS1_v1_5
     from Crypto.PublicKey import RSA

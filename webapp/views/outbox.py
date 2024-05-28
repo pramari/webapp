@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views import View
+from django.core.paginator import Paginator
 
 from webapp.models import Profile, Action
 
@@ -19,7 +20,6 @@ class OutboxView(View):
     def get(self, request, *args, **kwargs):
         # Retrieve the activity stream of the authenticated user's actor
         # ...
-        from django.core.paginator import Paginator
 
         slug = kwargs.get("slug")
         page = request.GET.get("page", None)
@@ -49,6 +49,7 @@ class OutboxView(View):
             # paginator.page(int(page)),
             # fields=["id", "content", "published"],  # pylint: disable=E501
             # )
+            activity_stream["type"] = "OrderedCollectionPage"
             activity_stream[
                 "current"
             ] = f"{profile.get_outbox_url}?page={page}"  # pylint: disable=E501

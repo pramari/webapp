@@ -25,9 +25,11 @@ dependencies = [
   "django-oauth-toolkit",
   "djangorestframework",
   "django-guardian",
+  "django-anymail[mailgun]",
   "Pillow",
   "pyyaml",
   "celery",
+  "requests-http-signature",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

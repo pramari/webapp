@@ -152,6 +152,8 @@ def getGoogleContact(
     return result.get("connections", [])
 
 
+"""
 @shared_task
 def updateGoogleContact(contact: dict):
-    """ """
+"""
+""" """
