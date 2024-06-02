@@ -33,11 +33,15 @@ logger = logging.getLogger(__name__)
 urlpatterns = [
     # /.well-known/nodeinfo
     path(".well-known/nodeinfo", NodeInfoView.as_view(), name="nodeinfo"),
-    path("api/v1/version", VersionView.as_view(), name="version"),
     path(".well-known/webfinger", WebFingerView.as_view(), name="webfinger"),
-    # path('activity/', include('actstream.urls')),
-    # path('inbox/', InboxView.as_view(), name='profile-inbox'),
-    # path('outbox/', OutboxView.as_view(), name='profile-outbox'),
+
+    path("api/v1/version", VersionView.as_view(), name="version"),
+    
+    path(
+        r"@<slug:slug>",
+        ActorView.as_view(),
+        name="actor-view",  # noqa: E501
+    ),
     path(
         r"accounts/<slug:slug>/inbox",
         InboxView.as_view(),
@@ -54,11 +58,6 @@ urlpatterns = [
     #    ActivityView.as_view(),
     #    name='activity-detail'
     # ),
-    path(
-        r"accounts/<slug:slug>/actor/",
-        ActorView.as_view(),
-        name="actor-view",  # noqa: E501
-    ),
     path(
         r"accounts/<slug:slug>/followers",
         FollowersView.as_view(),
