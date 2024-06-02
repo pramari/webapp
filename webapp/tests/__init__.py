@@ -5,11 +5,12 @@ from django.contrib.sites.models import Site
 
 from webapp.tests.inbox import InboxTest
 from webapp.tests.outbox import OutboxTest
+from webapp.tests.following import FollowingTest
 from webapp.tests.webfinger import WebfingerTests
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["InboxTest", "OutboxTest", "WebfingerTests"]
+__all__ = ["InboxTest", "OutboxTest", "FollowingTest", "WebfingerTests"]
 
 
 class ToolTest(TestCase):
@@ -49,7 +50,7 @@ class TactivityTest(TestCase):
         """
         from webapp.tasks.activitypub import getRemoteActor
 
-        result = getRemoteActor("https://pramari.de/accounts/andreas/actor/")
+        result = getRemoteActor("https://pramari.de/@andreas")
 
         self.assertEqual(
             result.id, "https://pramari.de/accounts/andreas/actor/"

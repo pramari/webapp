@@ -30,6 +30,7 @@ dependencies = [
   "pyyaml",
   "celery",
   "requests-http-signature",
+  "PyJWT",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

@@ -340,15 +340,19 @@ class Action(models.Model):
         ordering = ("-timestamp",)
 
     def __str__(self):
-        act = self.actor
+        details = {
+            "actor": str(self.actor),
+            "verb": self.verb,
+            "target": str(self.target),
+            "since": self.since(),
+        }
         if self.target:
             if self.action_object:
                 return _(
-                    f"{self.actor} {self.verb} {self.action_object} on {self.target} {self.since}s ago"  # noqa: E501
+                    f"{details['actor']} {details['verb']} {details['action_object']} on {details['target']} {details['since']}s ago"  # noqa: E501
                 )
             return _(
-                # f"{self.actor} {self.verb} {self.target} {self.since}s ago"
-                f"{act} {self.verb} {self.target} {self.since}s ago"
+                f"{details['actor']} {details['verb']} {details['target']} {details['since']}s ago"  # noqa: E501
             )  # noqa: E501
         if self.action_object:
             return _(
