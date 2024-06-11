@@ -8,9 +8,9 @@ import base64
 import hashlib
 import logging
 import traceback
-from urllib.parse import urlparse
+
+# from urllib.parse import urlparse
 from datetime import datetime, timedelta, timezone
-from dateutil.parser import parse
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -21,6 +21,8 @@ from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
     load_pem_public_key,
 )
+
+from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,8 @@ def did_key_to_public_key(did):
 
 
 def parse_gmt(date_string: str) -> datetime:
+    from dateutil.parser import parse
+
     return parse(date_string)
 
 
@@ -139,6 +143,9 @@ class HttpSignature:
     def __init__(self):
         self.fields = []
 
+    def build_message(self):
+        return "\n".join(f"{name}: {value}" for name, value in self.fields)
+
     def build_signature(self, key_id, private_key):
         message = self.build_message()
 
@@ -153,9 +160,6 @@ class HttpSignature:
         ]
 
         return ",".join(signature_parts)
-
-    def build_message(self):
-        return "\n".join(f"{name}: {value}" for name, value in self.fields)
 
     def verify(self, public_key, signature):
         message = self.build_message()
@@ -192,10 +196,21 @@ class HttpSignature:
 
 
 class SignatureChecker:
-    def __init__(self, key_retriever):
-        self.key_retriever = key_retriever
 
-    async def validate(self, request, digest=None):
+    """
+    Class to check the signature of a Django HttpRequest.
+
+    The class is initialized with a key retriever function that is used to
+    retrieve the public key of the actor that signed the request.
+
+    """
+
+    def __init__(self):
+        from webapp.tasks.activitypub import getRemoteActor
+
+        self.key_retriever = getRemoteActor
+
+    def validate(self, request: HttpRequest, digest=None):
         if "signature" not in request.headers:
             logger.warning("Signature not present")
             return None
@@ -228,20 +243,23 @@ class SignatureChecker:
             http_date = parse_gmt(request.headers["date"])
             if not check_max_offset_now(http_date):
                 logger.warning(
-                    f"Encountered invalid http date {request.headers['date']}"
+                    f"Encountered too old http date {request.headers['date']}"
                 )
                 return None
 
             for field in signature_fields:
                 if field == "(request-target)":
                     method = request.method.lower()
-                    parsed_url = urlparse(request.url)
-                    path = parsed_url.path
+                    # parsed_url = urlparse(request.url)
+                    # path = parsed_url.path
+                    path = request.path
                     http_signature.with_field(field, f"{method} {path}")
                 else:
                     http_signature.with_field(field, request.headers[field])
 
-            public_key = await self.key_retriever(parsed_signature.key_id)
+            public_key = self.key_retriever(parsed_signature.key_id).publicKey[
+                "publicKeyPem"
+            ]  # noqa: E501
 
             if public_key is None:
                 logger.warning(

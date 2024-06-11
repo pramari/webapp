@@ -160,7 +160,7 @@ class InboxView(View):
 
     def parse(self, request) -> tuple[APObject, bool]:
         logger.error(f"Request: {request.headers}")
-        signature_valid = False
+        signature = False
         try:
             # Assuming the request payload is a valid JSON activity
             body = request.body.decode("utf-8")
@@ -188,9 +188,9 @@ class InboxView(View):
         """
         from webapp.signature import SignatureChecker
 
-        signature_valid = SignatureChecker(activity).validate(request)
-
-        return activity, signature_valid
+        signature = SignatureChecker().validate(request)
+        logger.error(f"Signature: {signature}")
+        return activity, signature
 
     def post(self, request, *args, **kwargs):
         """
