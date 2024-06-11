@@ -52,9 +52,7 @@ class TactivityTest(TestCase):
 
         result = getRemoteActor("https://pramari.de/@andreas")
 
-        self.assertEqual(
-            result.id, "https://pramari.de/accounts/andreas/actor/"
-        )  # noqa: E501
+        self.assertEqual(result.id, "https://pramari.de/@andreas")  # noqa: E501
 
 
 class ActionTest(TestCase):

@@ -1,0 +1,260 @@
+"""
+https://github.com/HelgeKrueger/bovine/blob/4ba2a83d1b4104ebffaaca357fbc9c225ffb06bf/bovine/bovine/utils/signature_checker.py
+and
+https://github.com/HelgeKrueger/bovine/blob/4ba2a83d1b4104ebffaaca357fbc9c225ffb06bf/bovine/bovine/utils/signature_parser.py
+"""
+
+import base64
+import hashlib
+import logging
+import traceback
+from urllib.parse import urlparse
+from datetime import datetime, timedelta, timezone
+from dateutil.parser import parse
+
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric import ed25519
+
+from cryptography.hazmat.primitives.serialization import (
+    load_pem_private_key,
+    load_pem_public_key,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def did_key_to_public_key(did):
+    """
+    .. todo::
+        this is the only place in which multiformats are being used.
+        Can we remove this dependency?
+    """
+    from multiformats import multibase, multicodec
+
+    assert did.startswith("did:key:")
+    decoded = multibase.decode(did[8:])
+    codec, key_bytes = multicodec.unwrap(decoded)
+    assert codec.name == "ed25519-pub"
+
+    return ed25519.Ed25519PublicKey.from_public_bytes(key_bytes)
+
+
+def parse_gmt(date_string: str) -> datetime:
+    return parse(date_string)
+
+
+def check_max_offset_now(dt: datetime, minutes: int = 5) -> bool:
+    now = datetime.now(tz=timezone.utc)
+
+    if dt > now + timedelta(minutes=minutes):
+        return False
+
+    if dt < now - timedelta(minutes=minutes):
+        return False
+
+    return True
+
+
+def sign_message(private_key, message):
+    key = load_pem_private_key(private_key.encode("utf-8"), password=None)
+
+    return base64.standard_b64encode(
+        key.sign(
+            message.encode("utf-8"),
+            padding.PKCS1v15(),
+            hashes.SHA256(),
+        )
+    ).decode("utf-8")
+
+
+def verify_signature(public_key, message, signature):
+    public_key_loaded = load_pem_public_key(public_key.encode("utf-8"))
+
+    try:
+        public_key_loaded.verify(
+            base64.standard_b64decode(signature),
+            message.encode("utf-8"),
+            padding.PKCS1v15(),
+            hashes.SHA256(),
+        )
+    except InvalidSignature:
+        logger.warning("invalid signature")
+        return False
+
+    return True
+
+
+def content_digest_sha256(content):
+    if isinstance(content, str):
+        content = content.encode("utf-8")
+
+    digest = base64.standard_b64encode(
+        hashlib.sha256(content).digest()
+    ).decode(  # noqa: E501
+        "utf-8"
+    )  # noqa: E501
+    return "sha-256=" + digest
+
+
+class Signature(object):
+    def __init__(
+        self, key_id: str, algorithm: str, headers: str, signature: str
+    ):  # noqa: E501
+        self.key_id = key_id
+        self.algorithm = algorithm
+        self.headers = headers
+        self.signature = signature
+
+        if self.algorithm not in ["rsa-sha256", "hs2019"]:
+            logger.error(f"Unsupported algorithm {self.algorithm}")
+            logger.error(self.signature)
+            logger.error(self.headers)
+            logger.error(self.key_id)
+
+            raise Exception(f"Unsupported algorithm {self.algorithm}")
+
+    def fields(self):
+        return self.headers.split(" ")
+
+    @staticmethod
+    def from_signature_header(header):
+        try:
+            headers = header.split(",")
+            headers = [x.split('="', 1) for x in headers]
+            parsed = {x[0]: x[1].replace('"', "") for x in headers}
+
+            return Signature(
+                parsed["keyId"],
+                parsed.get("algorithm", "rsa-sha256"),
+                parsed["headers"],
+                parsed["signature"],
+            )
+        except Exception:
+            logger.error(f"failed to parse signature {header}")
+
+
+class HttpSignature:
+    def __init__(self):
+        self.fields = []
+
+    def build_signature(self, key_id, private_key):
+        message = self.build_message()
+
+        signature_string = sign_message(private_key, message)
+        headers = " ".join(name for name, _ in self.fields)
+
+        signature_parts = [
+            f'keyId="{key_id}"',
+            'algorithm="rsa-sha256"',  # todo: other algorithm support
+            f'headers="{headers}"',
+            f'signature="{signature_string}"',
+        ]
+
+        return ",".join(signature_parts)
+
+    def build_message(self):
+        return "\n".join(f"{name}: {value}" for name, value in self.fields)
+
+    def verify(self, public_key, signature):
+        message = self.build_message()
+        return verify_signature(public_key, message, signature)
+
+    def with_field(self, field_name, field_value):
+        self.fields.append((field_name, field_value))
+        return self
+
+    """
+    def ed25519_sign(self, private_encoded):
+        private_bytes = multicodec.unwrap(multibase.decode(private_encoded))[1]
+        private_key = (  # noqa: BLK100
+            ed25519.Ed25519PrivateKey.from_private_bytes(  # noqa: E501
+                private_bytes
+            )
+        )
+
+        message = self.build_message()
+
+        return multibase.encode(
+            private_key.sign(message.encode("utf-8")), "base58btc"
+        )
+
+    def ed25519_verify(self, didkey, signature):
+        public_key = did_key_to_public_key(didkey)
+
+        signature = multibase.decode(signature)
+
+        message = self.build_message().encode("utf-8")
+
+        return public_key.verify(signature, message)
+    """
+
+
+class SignatureChecker:
+    def __init__(self, key_retriever):
+        self.key_retriever = key_retriever
+
+    async def validate(self, request, digest=None):
+        if "signature" not in request.headers:
+            logger.warning("Signature not present")
+            return None
+
+        if digest is not None:
+            request_digest = request.headers["digest"]
+            request_digest = request_digest[:4].lower() + request_digest[4:]
+            if request_digest != digest:
+                logger.warning("Different digest")
+                return None
+
+        try:
+            http_signature = HttpSignature()
+            parsed_signature = Signature.from_signature_header(
+                request.headers["signature"]
+            )
+            signature_fields = parsed_signature.fields()
+
+            if (
+                "(request-target)" not in signature_fields
+                or "date" not in signature_fields
+            ):
+                logger.warning("Required field not present in signature")
+                return None
+
+            if digest is not None and "digest" not in signature_fields:
+                logger.warning("Digest not present, but computable")
+                return None
+
+            http_date = parse_gmt(request.headers["date"])
+            if not check_max_offset_now(http_date):
+                logger.warning(
+                    f"Encountered invalid http date {request.headers['date']}"
+                )
+                return None
+
+            for field in signature_fields:
+                if field == "(request-target)":
+                    method = request.method.lower()
+                    parsed_url = urlparse(request.url)
+                    path = parsed_url.path
+                    http_signature.with_field(field, f"{method} {path}")
+                else:
+                    http_signature.with_field(field, request.headers[field])
+
+            public_key = await self.key_retriever(parsed_signature.key_id)
+
+            if public_key is None:
+                logger.warning(
+                    f"Could'nt retrieve key for {parsed_signature.key_id}"  # noqa: E501
+                )
+                return None
+
+            if http_signature.verify(public_key, parsed_signature.signature):
+                return parsed_signature.key_id
+
+        except Exception as e:
+            logger.error(str(e))
+            logger.error(request.headers)
+            for log_line in traceback.format_exc().splitlines():
+                logger.error(log_line)
+            return None

@@ -188,8 +188,15 @@ class Profile(models.Model):
         return self.user.username  # pylint: disable=E1101
 
     def save(self, *args, **kwargs):
+        """
+        Profile.save()
+
+        Create a slug from the username if none is provided.
+        """
         if not self.slug:
             self.slug = slugify(self.user.username)  # pylint: disable=E1101
+        if not self.ap_id and self.user.is_verified:
+            self.ap_id = f"https://pramari.de/@{self.slug}"
         return super().save(*args, **kwargs)  # Call the "real" save() method.
 
     @property
@@ -207,11 +214,12 @@ class Profile(models.Model):
         Activity Streams 2.0
 
         .. todo::
-            re-architect this. This could be the same as `get_absolute_url`,
-            provided either of these views considers the `Accept` header; which
-            currently only the `actor-view` does.
+            This is not the same as `get_absolute_url`, but the actor ID,
+            that is stored in self.ap_id
+            Currently only the `actor-view` does use this.
         """
-        return reverse("actor-view", args=[str(self.slug)])
+        return self.ap_id
+        # return reverse("actor-view", args=[str(self.slug)])
 
     @property
     def get_inbox_url(self):
@@ -258,7 +266,7 @@ class Profile(models.Model):
         """
         Return the public key as JSON-LD.
         """
-        actorid = f"{base}{self.get_actor_url}"
+        actorid = f"{self.get_actor_url}"
         public_key_data = {
             "id": f"{actorid}#main-key",
             "owner": actorid,

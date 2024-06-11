@@ -29,7 +29,8 @@ dependencies = [
   "Pillow",
   "pyyaml",
   "celery",
-  "requests-http-signature",
+  "http-message-signatures",
+  #"requests-http-signature",
   "PyJWT",
 ]
 classifiers = [

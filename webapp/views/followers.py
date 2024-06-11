@@ -1,10 +1,13 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from django.http import JsonResponse
+
 from webapp.models import Profile
+from webapp.mixins import JsonLDMixin
+from django.contrib.sites.models import Site
 
 
-class FollowersView(ListView):
+class FollowersView(JsonLDMixin, ListView):
     """
     Provide a list of followers for a given profile.
 
@@ -13,20 +16,20 @@ class FollowersView(ListView):
 
     template_name = "activitypub/followers.html"
 
-    def to_jsonld(self, actor, followers):
+    def to_jsonld(self, *args, **kwargs):
+        slug = kwargs.get("slug")
+        profile = get_object_or_404(Profile, slug=slug)
+        followers = profile.followed_by.filter(consent=True)
+        # .filter(user__is_verified=True)
+
+        base = f"https://{Site.objects.get_current().domain}"
         wrap = {
             "@context": "https://www.w3.org/ns/activitystreams",
-            "summary": f"{actor}'s followers",
-            "type": "Collection",
+            "id": f"{base}{profile.get_followers_url}",
+            "summary": f"{profile}'s followers",
+            "type": "OrderedCollection",
             "totalItems": len(followers),
-            "items": [
-                {
-                    "type": "Person",
-                    "id": item.get_actor_url,
-                    "name": item.user.username,
-                }  # noqa: E501
-                for item in followers
-            ],
+            "items": [f"{item.get_actor_url}" for item in followers],
         }
         return wrap
 
@@ -37,7 +40,7 @@ class FollowersView(ListView):
         return profile.followed_by.filter(consent=True)
         # .filter(user__is_verified=True)
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+    def oldget(self, request, *args, **kwargs):  # pylint: disable=W0613
         if request.accepts("application/json") or request.accepts(
             "application/activity+json"
         ):

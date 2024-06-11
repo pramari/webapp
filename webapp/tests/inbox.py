@@ -42,6 +42,7 @@ class InboxTest(TestCase):
                 data,
                 content_type="application/json",
             )
+        self.assertRaises(Exception)
 
     def test_random(self):
         """

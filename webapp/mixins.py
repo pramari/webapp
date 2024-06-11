@@ -46,10 +46,13 @@ class JsonLDMixin(object):
             and "application/activity+json" in request.headers.get("Accept")
         ):
             return JsonResponse(
-                self.to_jsonld(request),
+                self.to_jsonld(request, *args, **kwargs),
                 content_type="application/activity+json",
             )
         else:
-            return HttpResponseRedirect(
-                self.get_redirect_url(request, *args, **kwargs)
-            )  # noqa: E501
+            if self.redirect_to:
+                return HttpResponseRedirect(
+                    self.get_redirect_url(request, *args, **kwargs)
+                )  # noqa: E501
+            else:
+                return super().get(request, *args, **kwargs)

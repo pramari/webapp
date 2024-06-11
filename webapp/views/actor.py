@@ -26,7 +26,7 @@ class ActorView(JsonLDMixin, View):
     Otherwise, the response will redirect the client to the `profile-page`.
     """
 
-    redirect_to = "user-detail"
+    redirect_to = "profile-detail"
 
     def to_jsonld(self, *args, **kwargs):
         slug = kwargs.get("slug")
@@ -34,7 +34,7 @@ class ActorView(JsonLDMixin, View):
 
         base = f"https://{Site.objects.get_current().domain}"
         username = f"{profile.user.username}"  # pylint: disable=E1101
-        actorid = f"{base}{profile.get_actor_url}"
+        actorid = f"{profile.ap_id}"
         inbox = f"{base}{profile.get_inbox_url}"
         outbox = f"{base}{profile.get_outbox_url}"  # noqa: F841
         followers = f"{base}{profile.get_followers_url}"  # noqa: F841

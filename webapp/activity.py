@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 import requests
 
 from django.conf import settings
+from django.http import HttpRequest
 
 from taktivitypub.actor import Actor
 from taktivitypub.activity import Activity
@@ -25,24 +26,33 @@ from webapp.exceptions import (
     ObjectNotFoundError,
 )
 
+from http_message_signatures import HTTPSignatureKeyResolver
+
 logger = logging.getLogger(__name__)
 
 
-def parseSignature(message: dict) -> dict:
-    """ """
+class ActorKeyResolver(HTTPSignatureKeyResolver):
+    def resolve_public_key(self, key_id):
+        from webapp.tasks import getRemoteActor
 
-    return {
-        "type": message.get("type"),
-        "creator": message.get("creator"),
-        "created": message.get("created"),
-        "signatureValue": message.get("signatureValue"),
-    }
+        assert isinstance(key_id, str)
+        actor = getRemoteActor(key_id)
+        return actor["publicKey"]["publicKeyPem"]
 
 
-"""
-def verifySignature(signature, publicKey) -> bool:
-    return True
-"""
+def parseSignature(request: HttpRequest) -> bool:
+    """
+    Parse the signature from the message.
+
+    Request: {
+        'Signature': 'keyId="https://23.social/users/andreasofthings#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest content-type",signature="e5Vj4XBt9B/TJSI4iJPDW3NtAXtOM8Z6y0j72uglfSi/R1xVwUvGcgu/r0h5yaf8e5weBZcuQ7t4ztMJfQGhol2weRWqFiC5vN1SkJTnen669sX0z6JPR/9FV9piEeSLCGHdW1wscR0c1XIQNciciPB8RrgouEQxmOxPCvlXFxqQeAVRH82d5UObSU9XQOx9/j8et/lCPegQuDM00l6qmhAAwqX7UnVDrNUJgN3eYcJpOMGfGNeymdZwf3j8/CAdQGgQPfzuNmDHvy4Wo79BZV4ud9mkVquEAh7RagfwIQRUtM/mI2i2qGrXwnpjwhOgxJkjoG7Fc18qvzuT3nQfQg=="', # noqa: E501
+    """
+
+    from requests_http_signature import HTTPSignatureAuth
+
+    result = HTTPSignatureAuth.verify(request, key_resolver=ActorKeyResolver())
+    return result
+
 
 """
 class ActivityBase(dict):
