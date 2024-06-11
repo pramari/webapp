@@ -5,7 +5,6 @@ from typing import Tuple
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
-from webapp.models import Action
 from taktivitypub.actor import Actor
 
 logger = logging.getLogger(__name__)
@@ -16,6 +15,11 @@ User = get_user_model()
 def getRemoteActor(id: str) -> Actor:
     """
     Task to get details for a remote actor
+
+    .. todo::
+        - Add caching
+        - Add error handling
+        - Add tests
     """
     import requests
 
@@ -35,19 +39,15 @@ def getRemoteActor(id: str) -> Actor:
 
 
 @shared_task
-def accept_follow(user: User, actor: Actor, activity: Action) -> bool:
+def accept_follow(actor: Actor, Object: Actor) -> bool:
     import requests  # noqa: F401
-    from requests_http_signature import (
-        HTTPSignatureAuth,  # noqa: F401
-        algorithms,  # noqa: F401
-    )  # noqa: F401, E501
+    from webapp.signals import action
 
-    auth = HTTPSignatureAuth(
-        key=user.key,
-        key_id=user.key,
-        signature_algorithm=algorithms.HMAC_SHA256,  # noqa: E501
-    )
+    auth = {"Signature": "broken"}
+
     requests.post(actor.inbox, auth=auth)
+
+    action.send(sender=Actor, instance=Actor, verb="Accept")  # noqa: E501
 
     return True
 

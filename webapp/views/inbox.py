@@ -111,7 +111,7 @@ class InboxView(View):
 
         return JsonResponse({"status": "undone"})
 
-    def follow(self, message: APObject, signature: dict = None):
+    def follow(self, message: APObject):
         """{
             '@context': 'https://www.w3.org/ns/activitystreams',
             'id': 'https://neumeier.org/o/ca357ba56dc24554bfb7646a1db2c67f',
@@ -129,7 +129,11 @@ class InboxView(View):
 
         from webapp.tasks.activitypub import getRemoteActor
 
-        actor = getRemoteActor(message.actor)  # noqa: F841
+        try:
+            remoteActor = getRemoteActor(message.actor)  # noqa: F841
+        except Exception as e:
+            logger.error(f"Error getting remote actor: {e}")
+            return JsonResponse({"error": "Error getting remote actor"})
 
         # Step 2:
         # Confirm the follow request to message.actor
@@ -141,17 +145,22 @@ class InboxView(View):
             - Store the follow request in the database
             - Defer the task to the background
         """
-        if settings.DEBUG:
-            accept_follow(message.actor, message.object)
-        else:
-            accept_follow.delay(message.actor, message.object)
+        try:
+            if settings.DEBUG:
+                accept_follow(remoteActor, message.object)
+            else:
+                accept_follow.delay(remoteActor, message.object)
+        except Exception as e:
+            logger.error(f"Error accepting follow request: {e}")
+            return JsonResponse({"error": "Error accepting follow request"})
 
         return JsonResponse(
             {"status": f"OK: {message.actor} followed {message.object}"}  # noqa: E501
         )
 
-    def parse(self, request) -> tuple[APObject, dict]:
-        signature = None
+    def parse(self, request) -> tuple[APObject, bool]:
+        logger.error(f"Request: {request.headers}")
+        signature_valid = False
         try:
             # Assuming the request payload is a valid JSON activity
             body = request.body.decode("utf-8")
@@ -167,16 +176,21 @@ class InboxView(View):
             logger.error(message)
             raise ParseJSONError(message)
 
-        if "signature" in js.keys():
-            signature = message.pop("signature")
-
         try:
             activity = APObject.load(js)
         except ValueError as e:
             message = f"InboxView: Invalid activity message: {e}"
             raise ParseActivityError(message) from e
 
-        return activity, signature
+        """
+        .. todo::
+            - Verify the signature of the incoming activity
+        """
+        from webapp.signature import SignatureChecker
+
+        signature_valid = SignatureChecker(activity).validate(request)
+
+        return activity, signature_valid
 
     def post(self, request, *args, **kwargs):
         """
@@ -189,15 +203,23 @@ class InboxView(View):
             logger.debug(f"InboxView raised error: {e}")
             return JsonResponse({"error": str(e.message)}, status=400)
 
+        if not signature:
+            """
+            If the signature is not valid, return an error.
+            """
+            logger.error(
+                "InboxView: Invalid Actor Signature from %s", message.actor
+            )  # noqa: E501
+            return JsonResponse({"error": "Invalid Signature"}, status=400)
+
         # Process the activity based on its type
 
         logger.debug(f"Activity Object: {message}")
-        logger.debug(f"Activity Signature: {signature}")
 
         try:
             match message.type:
                 case ObjectType.Follow:
-                    result = self.follow(message=message, signature=signature)
+                    result = self.follow(message=message)
                 case ObjectType.Undo:
                     result = self.undo(request=request, message=message)
                 case ObjectType.Create:
@@ -209,6 +231,7 @@ class InboxView(View):
                     logger.error(f"Actvity error: {error}")
         except Exception as e:
             error = f"InboxView: Error processing activity: {e}"
+            logger.error(error)
             return JsonResponse({"error": error}, status=400)  # noqa: E501
 
         # Return a success response. Unclear, why.
