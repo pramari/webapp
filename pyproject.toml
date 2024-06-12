@@ -41,13 +41,44 @@ classifiers = [
 
 [project.urls]
 "Homepage" = "https://www.pramari.de"
-"Bug Tracker" = "https://github.com/pramari/apc/issues"
+"Bug Tracker" = "https://github.com/pramari/npc/issues"
 
 # [tool.pytest.ini_options]
 # addopts = "" #--cov --cov-report html --cov-report term-missing --cov-fail-under 95"
 
-[tools.tox]
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    min_version = 4.0
+    isolated_build = True
+    env_list =
+        py312
+        py311
+        py310
+        py39
+        type
 
+    [testenv]
+    setenv =
+        PYTHONPATH = "."
+        DJANGO_SETTINGS_MODULE = "tests.settings"
+    
+    deps =
+        behave
+        coverage
+
+    commands =
+        coverage run --source webapp tests/manage.py
+        coverage xml
+        behave
+        echo "success"
+     
+    # commands = python tests/manage.py test --settings=tests.settings
+
+    [testenv:lint]
+    deps = flake8
+    commands = flake8 webapp
+"""
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
 

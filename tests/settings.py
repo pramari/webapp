@@ -19,6 +19,7 @@ TEMPLATES = [
         },
     },
 ]
+LOGGING_CONFIG = []
 STATIC_URL = "/"
 MEDIA_URL = "/media/"
 INSTALLED_APPS = [
