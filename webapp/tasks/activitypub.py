@@ -1,42 +1,12 @@
-import datetime
 import logging
-
-from typing import Tuple
-from webapp.typing import url, method
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
+
 from taktivitypub.actor import Actor
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
-
-
-def signRequest(method: method, host: str, url: url, message: str, key: str) -> str:
-    """
-    Sign a request with a private key
-
-    Fields to sign:
-        host date digest content-type
-
-    :param method: The HTTP method
-    :param url: The URL to send the request to
-    :param message: The message to send in JSON LD
-    :param key: The private key to sign the message with
-
-    :return: The signed request
-
-    https://docs.python-requests.org/en/latest/user/advanced/
-    """
-    import requests
-    from webapp.signature import HttpSignature
-
-    req = requests.Request(method, url)
-    r = req.prepare()
-
-    auth = {"Signature": HttpSignature().with_field("Host", host)}
-    r.headers.update(auth)
-    return r
 
 
 @shared_task
@@ -68,7 +38,17 @@ def getRemoteActor(id: str) -> Actor:
 
 @shared_task
 def accept_follow(actor: Actor, Object: Actor) -> bool:
+    """
+    >>> from webapp.signature import signedRequest
+    >>> r = signedRequest(
+        "POST",
+        "https://pramari.de/accounts/andreas/inbox",
+        activitymessage,
+        "https://pramari.de/@andreas#main-key"
+    )
+    """
     from webapp.signals import action
+    from webapp.signature import signedRequest
 
     message = {
         "@context": "https://www.w3.org/ns/activitystreams",
@@ -77,7 +57,9 @@ def accept_follow(actor: Actor, Object: Actor) -> bool:
         "object": Object.get_actor_url(),
     }
 
-    signedRequest = signRequest("POST", actor.inbox, Object, actor.privateKey)
+    signed = signedRequest(  # noqa: F841,E501
+        "POST", actor.inbox, message, actor.privateKey
+    )  # noqa: F841,E501
 
     action.send(sender=Actor, instance=Actor, verb="Accept")  # noqa: E501
 

@@ -34,9 +34,7 @@ urlpatterns = [
     # /.well-known/nodeinfo
     path(".well-known/nodeinfo", NodeInfoView.as_view(), name="nodeinfo"),
     path(".well-known/webfinger", WebFingerView.as_view(), name="webfinger"),
-
     path("api/v1/version", VersionView.as_view(), name="version"),
-    
     path(
         r"@<slug:slug>",
         ActorView.as_view(),

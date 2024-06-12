@@ -44,9 +44,22 @@ class SignatureTest(TestCase):
             username="testuser", password="testpassword"
         )
 
+    def test_signed_request(self):
+        from webapp.tests.messages import follow
+        from webapp.signature import signedRequest
+
+        r = signedRequest(
+            "POST",
+            "https://pramari.de/accounts/andreas/inbox",
+            follow,
+            "https://pramari.de/@andreas#main-key",
+        )  # noqa: E501
+        self.assertIsNotNone(r)
+
     def test_signature_from_header(self):
         self.signature = Signature.from_signature_header(
-            testsignature["signature"]
+            # testsignature["signature"]
+            self.request["signature"]
         )  # noqa: E501
         self.assertEqual(isinstance(self.signature, Signature), True)
 

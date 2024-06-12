@@ -170,16 +170,18 @@ class InboxView(View):
             raise ParseUTF8Error(message)
 
         try:
+            logger.error(f"Body: {body}")
             js = json.loads(body)
         except ValueError as e:
             message = f"InboxView: Received invalid JSON {e}"
             logger.error(message)
-            raise ParseJSONError(message)
+            raise ParseJSONError(message) from e
 
         try:
             activity = APObject.load(js)
         except ValueError as e:
             message = f"InboxView: Invalid activity message: {e}"
+            logger.error(message)
             raise ParseActivityError(message) from e
 
         """

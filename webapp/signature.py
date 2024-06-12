@@ -4,6 +4,7 @@ and
 https://github.com/HelgeKrueger/bovine/blob/4ba2a83d1b4104ebffaaca357fbc9c225ffb06bf/bovine/bovine/utils/signature_parser.py
 """
 
+import json
 import base64
 import hashlib
 import logging
@@ -22,9 +23,66 @@ from cryptography.hazmat.primitives.serialization import (
     load_pem_public_key,
 )
 
+from webapp.typing import url, method
 from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
+
+
+def digest_sha256(content: str) -> str:
+    """
+    Create a sha-256 digest of the content string.
+    """
+    if isinstance(content, str):
+        content = content.encode("utf-8")
+
+    digest = base64.standard_b64encode(
+        hashlib.sha256(content).digest()
+    ).decode(  # noqa: E501
+        "utf-8"
+    )  # noqa: E501
+    return "sha-256=" + digest
+
+
+def signedRequest(
+    method: method, url: url, message: dict, key_id: str
+) -> str:  # noqa: E501
+    """
+    Sign a request with a private key
+
+    Fields to sign:
+        host date digest content-type
+
+    :param method: The HTTP method
+    :param url: The URL to send the request to
+    :param message: The message to send in JSON LD
+    :param key_id: The private key_id to sign the message with
+
+    :return: The signed request
+
+    https://docs.python-requests.org/en/latest/user/advanced/
+    """
+    import requests
+    from webapp.signature import HttpSignature
+    from webapp.models import Profile
+
+    private_key = Profile.objects.get(key_id=key_id).private_key_pem
+    digest = digest_sha256(json.dumps(message))
+    date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S GMT")
+    ses = requests.Session()
+    req = requests.Request(method, url, json=message).prepare()
+    signature = (
+        HttpSignature()
+        .with_field("host", req.headers.get("host"))
+        .with_field("date", date)
+        .with_field("digest", digest)
+        .with_field("content-Type", "application/ld+json")
+        .build_signature(key_id, private_key)
+    )
+    req.headers.update(
+        {"date": date, "digest": digest, "signature": signature}
+    )  # noqa: E501
+    return ses.send(req)
 
 
 def did_key_to_public_key(did):
@@ -90,18 +148,6 @@ def verify_signature(public_key, message, signature):
     return True
 
 
-def content_digest_sha256(content):
-    if isinstance(content, str):
-        content = content.encode("utf-8")
-
-    digest = base64.standard_b64encode(
-        hashlib.sha256(content).digest()
-    ).decode(  # noqa: E501
-        "utf-8"
-    )  # noqa: E501
-    return "sha-256=" + digest
-
-
 class Signature(object):
     def __init__(
         self, key_id: str, algorithm: str, headers: str, signature: str
@@ -150,7 +196,9 @@ class HttpSignature:
         message = self.build_message()
 
         signature_string = sign_message(private_key, message)
-        headers = " ".join(name for name, _ in self.fields)
+        headers = "(request-target) " + " ".join(
+            name for name, _ in self.fields
+        )  # noqa: E501
 
         signature_parts = [
             f'keyId="{key_id}"',
@@ -196,7 +244,6 @@ class HttpSignature:
 
 
 class SignatureChecker:
-
     """
     Class to check the signature of a Django HttpRequest.
 
@@ -212,14 +259,14 @@ class SignatureChecker:
 
     def validate(self, request: HttpRequest, digest=None):
         if "signature" not in request.headers:
-            logger.warning("Signature not present")
+            logger.error("Signature not present")
             return None
 
         if digest is not None:
             request_digest = request.headers["digest"]
             request_digest = request_digest[:4].lower() + request_digest[4:]
             if request_digest != digest:
-                logger.warning("Different digest")
+                logger.error("Different digest")
                 return None
 
         try:
@@ -233,18 +280,16 @@ class SignatureChecker:
                 "(request-target)" not in signature_fields
                 or "date" not in signature_fields
             ):
-                logger.warning("Required field not present in signature")
+                logger.error("Required field not present in signature")
                 return None
 
             if digest is not None and "digest" not in signature_fields:
-                logger.warning("Digest not present, but computable")
+                logger.error("Digest not present, but computable")
                 return None
 
             http_date = parse_gmt(request.headers["date"])
             if not check_max_offset_now(http_date):
-                logger.warning(
-                    f"Encountered too old http date {request.headers['date']}"
-                )
+                logger.error(f"Found too old date {request.headers['date']}")
                 return None
 
             for field in signature_fields:
@@ -262,7 +307,7 @@ class SignatureChecker:
             ]  # noqa: E501
 
             if public_key is None:
-                logger.warning(
+                logger.error(
                     f"Could'nt retrieve key for {parsed_signature.key_id}"  # noqa: E501
                 )
                 return None

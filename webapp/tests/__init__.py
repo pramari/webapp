@@ -7,10 +7,17 @@ from webapp.tests.inbox import InboxTest
 from webapp.tests.outbox import OutboxTest
 from webapp.tests.following import FollowingTest
 from webapp.tests.webfinger import WebfingerTests
+from webapp.tests.signature import SignatureTest
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["InboxTest", "OutboxTest", "FollowingTest", "WebfingerTests"]
+__all__ = [
+    "InboxTest",
+    "OutboxTest",
+    "FollowingTest",
+    "WebfingerTests",
+    "SignatureTest",
+]
 
 
 class ToolTest(TestCase):

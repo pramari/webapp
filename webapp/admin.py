@@ -244,6 +244,7 @@ class ProfileAdmin(admin.ModelAdmin):
         "consent",
         "public",
         "ap_id",
+        "key_id",
     )
 
 

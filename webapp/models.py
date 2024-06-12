@@ -130,6 +130,9 @@ class Profile(models.Model):
     ap_id = models.CharField(
         max_length=255, blank=True, help_text=_("ActivityPub ID")
     )  # noqa: E501
+    key_id = models.CharField(
+        max_length=255, blank=True, help_text=_("Key ID")
+    )  # noqa: E501
     public_key_pem = models.TextField(blank=True, help_text=_("Public Key"))
     private_key_pem = models.TextField(blank=True, help_text=_("Private Key"))
 
@@ -197,6 +200,8 @@ class Profile(models.Model):
             self.slug = slugify(self.user.username)  # pylint: disable=E1101
         if not self.ap_id and self.user.is_verified:
             self.ap_id = f"https://pramari.de/@{self.slug}"
+        if not self.key_id:
+            self.key_id = f"{self.ap_id}#main-key"
         return super().save(*args, **kwargs)  # Call the "real" save() method.
 
     @property
@@ -262,13 +267,20 @@ class Profile(models.Model):
             args=[self.slug],
         )
 
+    @property
+    def get_key_id(self) -> str:
+        """
+        Return the key id.
+        """
+        return f"{self.key_id}"
+
     def get_public_key(self, base: str) -> dict[str, str]:
         """
         Return the public key as JSON-LD.
         """
         actorid = f"{self.get_actor_url}"
         public_key_data = {
-            "id": f"{actorid}#main-key",
+            "id": f"{self.get_key_id}",
             "owner": actorid,
             "publicKeyPem": self.public_key_pem,
         }
