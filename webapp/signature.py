@@ -1,17 +1,23 @@
 """
+fedapp/signature.py
+
+This module contains two main functions, an signature checker for incoming
+requests, and a function to make signed requests to the fediverse.
+
 https://github.com/HelgeKrueger/bovine/blob/4ba2a83d1b4104ebffaaca357fbc9c225ffb06bf/bovine/bovine/utils/signature_checker.py
 and
 https://github.com/HelgeKrueger/bovine/blob/4ba2a83d1b4104ebffaaca357fbc9c225ffb06bf/bovine/bovine/utils/signature_parser.py
+
+https://github.com/christianp/django-activitypub-bot/blob/main/bot/send_signed_message.py
 """
 
-import json
 import base64
 import hashlib
 import logging
 import traceback
 
-# from urllib.parse import urlparse
 from datetime import datetime, timedelta, timezone
+import requests
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -41,14 +47,26 @@ def digest_sha256(content: str) -> str:
     ).decode(  # noqa: E501
         "utf-8"
     )  # noqa: E501
-    return "sha-256=" + digest
+    return "SHA-256=" + digest
+
+
+def getPrivateKey(key_id: str) -> str:
+    """
+    Get the private key for a given key_id
+    """
+    from webapp.models import Profile
+
+    actor_id, key = key_id.split("#")  # noqa: E841
+
+    return Profile.objects.get(ap_id=actor_id).private_key_pem
 
 
 def signedRequest(
-    method: method, url: url, message: dict, key_id: str
+    method: method, url: url, message: dict, key_id: str, headers: dict = None
 ) -> str:  # noqa: E501
     """
-    Sign a request with a private key
+    Wrapper around requests.method to sign a request with
+    a private key for the fediverse
 
     Fields to sign:
         host date digest content-type
@@ -61,28 +79,53 @@ def signedRequest(
     :return: The signed request
 
     https://docs.python-requests.org/en/latest/user/advanced/
-    """
-    import requests
-    from webapp.signature import HttpSignature
-    from webapp.models import Profile
 
-    private_key = Profile.objects.get(key_id=key_id).private_key_pem
-    digest = digest_sha256(json.dumps(message))
-    date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S GMT")
-    ses = requests.Session()
-    req = requests.Request(method, url, json=message).prepare()
+    Example:
+
+    """
+    from webapp.signature import HttpSignature
+    from urllib.parse import urlparse
+
+    private_key = getPrivateKey(key_id=key_id)
+    headers = {} if headers is None else headers
+
+    host = urlparse(url).hostname  # req.headers.get("host")
+    target = urlparse(url).path  # noqa F841
+    logger.debug(f"host: {host} of {url}")
+
+    digest = digest_sha256(message)
+    logger.debug(f"digest: {digest}")
+
+    date = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+    logger.debug(f"date: {date}")
+
+    content_type = "application/activity+json"
+    accept = "application/activity+json"  # noqa: F841
+
     signature = (
         HttpSignature()
-        .with_field("host", req.headers.get("host"))
+        .with_field("(request-target)", f"post {target}")
+        .with_field("host", host)
         .with_field("date", date)
         .with_field("digest", digest)
-        .with_field("content-Type", "application/ld+json")
+        .with_field("content-type", content_type)
         .build_signature(key_id, private_key)
     )
-    req.headers.update(
-        {"date": date, "digest": digest, "signature": signature}
+    headers.update(
+        {
+            "accept": accept,
+            "host": host,
+            "date": date,
+            "digest": digest,
+            "content-type": content_type,
+            "signature": signature,
+        }
     )  # noqa: E501
-    return ses.send(req)
+
+    response = requests.post(url, data=message, headers=headers)
+    logger.debug(f"message: {message}")
+    logger.debug(f"headers: {headers}")
+    return response
 
 
 def did_key_to_public_key(did):
@@ -131,23 +174,6 @@ def sign_message(private_key, message):
     ).decode("utf-8")
 
 
-def verify_signature(public_key, message, signature):
-    public_key_loaded = load_pem_public_key(public_key.encode("utf-8"))
-
-    try:
-        public_key_loaded.verify(
-            base64.standard_b64decode(signature),
-            message.encode("utf-8"),
-            padding.PKCS1v15(),
-            hashes.SHA256(),
-        )
-    except InvalidSignature:
-        logger.warning("invalid signature")
-        return False
-
-    return True
-
-
 class Signature(object):
     def __init__(
         self, key_id: str, algorithm: str, headers: str, signature: str
@@ -159,9 +185,9 @@ class Signature(object):
 
         if self.algorithm not in ["rsa-sha256", "hs2019"]:
             logger.error(f"Unsupported algorithm {self.algorithm}")
-            logger.error(self.signature)
-            logger.error(self.headers)
-            logger.error(self.key_id)
+            logger.debug(self.signature)
+            logger.debug(self.headers)
+            logger.debug(self.key_id)
 
             raise Exception(f"Unsupported algorithm {self.algorithm}")
 
@@ -196,9 +222,11 @@ class HttpSignature:
         message = self.build_message()
 
         signature_string = sign_message(private_key, message)
-        headers = "(request-target) " + " ".join(
-            name for name, _ in self.fields
-        )  # noqa: E501
+        # headers = "(request-target) " + " ".join(
+        #    name for name, _ in self.fields
+        # )  # noqa: E501
+
+        headers = " ".join(name for name, _ in self.fields)
 
         signature_parts = [
             f'keyId="{key_id}"',
@@ -211,7 +239,20 @@ class HttpSignature:
 
     def verify(self, public_key, signature):
         message = self.build_message()
-        return verify_signature(public_key, message, signature)
+        public_key_loaded = load_pem_public_key(public_key.encode("utf-8"))
+
+        try:
+            public_key_loaded.verify(
+                base64.standard_b64decode(signature),
+                message.encode("utf-8"),
+                padding.PKCS1v15(),
+                hashes.SHA256(),
+            )
+        except InvalidSignature:
+            logger.warning("Could not verify signature")
+            return False
+        return True
+        # return verify_signature(public_key, message, signature)
 
     def with_field(self, field_name, field_value):
         self.fields.append((field_name, field_value))
@@ -259,7 +300,13 @@ class SignatureChecker:
 
     def validate(self, request: HttpRequest, digest=None):
         if "signature" not in request.headers:
-            logger.error("Signature not present")
+            """
+            This is a request without a signature.
+
+            .. todo::
+                Eventually raise an Exception here?
+            """
+            logger.debug("Signature not present")
             return None
 
         if digest is not None:
@@ -274,11 +321,11 @@ class SignatureChecker:
             parsed_signature = Signature.from_signature_header(
                 request.headers["signature"]
             )
+            logger.debug(request.headers["signature"])
             signature_fields = parsed_signature.fields()
 
             if (
-                "(request-target)" not in signature_fields
-                or "date" not in signature_fields
+                "(request-target)" not in signature_fields or "date" not in signature_fields  # noqa: E501,BLK100
             ):
                 logger.error("Required field not present in signature")
                 return None
@@ -302,7 +349,7 @@ class SignatureChecker:
                 else:
                     http_signature.with_field(field, request.headers[field])
 
-            public_key = self.key_retriever(parsed_signature.key_id).publicKey[
+            public_key = self.key_retriever(parsed_signature.key_id).get('publicKey')[  # noqa: E501
                 "publicKeyPem"
             ]  # noqa: E501
 

@@ -29,7 +29,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 
 from .forms import UserChangeForm, UserCreationForm
-from .models import Action, Note, Profile, User  # todo:: refactor own package
+from .models import Action, Actor, Note, Profile, User
 from .tasks import generateProfileKeyPair
 
 try:
@@ -50,15 +50,12 @@ except ImportError:
     )
     from django.contrib.contenttypes.fields import GenericForeignKey
 
-from django.contrib.contenttypes.models import ContentType
-
-from django.utils.encoding import force_str as force_text  # Django >= 4.0
-
 from django.contrib.admin.widgets import url_params_from_lookup_dict
-from django.http import HttpResponse, HttpResponseNotAllowed
-from django.utils.text import capfirst
-
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, HttpResponseNotAllowed
+from django.utils.encoding import force_str as force_text  # Django >= 4.0
+from django.utils.text import capfirst
 
 JS_PATH = getattr(settings, "GENERICADMIN_JS", "genericadmin/js/")
 
@@ -101,8 +98,7 @@ class BaseGenericModelAdmin(object):
         if hasattr(self, "generic_fk_fields") and self.generic_fk_fields:
             for fields in self.generic_fk_fields:
                 if (
-                    fields["ct_field"] not in exclude
-                    and fields["fk_field"] not in exclude
+                    fields["ct_field"] not in exclude and fields["fk_field"] not in exclude  # noqa: E501
                 ):
                     fields["inline"] = prefix != ""
                     fields["prefix"] = prefix
@@ -117,9 +113,7 @@ class BaseGenericModelAdmin(object):
 
             for field in virtual_fields:
                 if (
-                    isinstance(field, GenericForeignKey)
-                    and field.ct_field not in exclude
-                    and field.fk_field not in exclude
+                    isinstance(field, GenericForeignKey) and field.ct_field not in exclude and field.fk_field not in exclude  # noqa: E501
                 ):
                     field_list.append(
                         {
@@ -244,7 +238,6 @@ class ProfileAdmin(admin.ModelAdmin):
         "consent",
         "public",
         "ap_id",
-        "key_id",
     )
 
 
@@ -258,11 +251,31 @@ class NoteAdmin(admin.ModelAdmin):
 admin.site.register(Note, NoteAdmin)
 
 
+class ActorAdmin(admin.ModelAdmin):
+    model = Actor
+    list_display = (
+        "id",
+        "type",
+        "profile",
+    )
+
+
+admin.site.register(Actor, ActorAdmin)
+
+
 class ActionAdmin(GenericAdminModelAdmin):
     date_hierarchy = "timestamp"
-    list_display = ("__str__", "actor", "verb", "target", "public")
-    list_editable = ("verb",)
-    list_filter = ("timestamp",)
+    list_display = (
+        "__str__",
+        "timestamp",
+        "actor",
+        "activity_type",
+        "target",
+        "action_object",
+        "public",
+    )
+    list_editable = ("activity_type",)
+    list_filter = ("timestamp", "activity_type")
     # raw_id_fields = (
     #     "actor_content_type",
     #     "target_content_type",
@@ -315,7 +328,10 @@ class UserAdmin(admin.ModelAdmin):
     change_user_password_template = None
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
+        (
+            _("Personal info"),
+            {"fields": ("first_name", "last_name", "email")},
+        ),
         (
             _("Permissions"),
             {
@@ -492,8 +508,7 @@ class UserAdmin(admin.ModelAdmin):
 
         return TemplateResponse(
             request,
-            self.change_user_password_template
-            or "admin/auth/user/change_password.html",
+            self.change_user_password_template or "admin/auth/user/change_password.html",  # noqa: E501
             context,
         )
 
@@ -509,8 +524,7 @@ class UserAdmin(admin.ModelAdmin):
         # * The user has pressed the 'Save and add another' button
         # * We are adding a user in a popup
         if (
-            "_addanother" not in request.POST
-            and IS_POPUP_VAR not in request.POST  # noqa: E501
+            "_addanother" not in request.POST and IS_POPUP_VAR not in request.POST  # noqa: E501
         ):
             request.POST = request.POST.copy()
             request.POST["_continue"] = 1

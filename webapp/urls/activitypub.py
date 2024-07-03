@@ -21,11 +21,12 @@ from webapp.views import (
     ActorView,
     InboxView,
     OutboxView,
-    FollowView,
+    # FollowView,
     FollowersView,
     FollowingView,
     NoteView,
     ActionView,
+    SignatureView,
 )
 
 logger = logging.getLogger(__name__)
@@ -50,12 +51,7 @@ urlpatterns = [
         OutboxView.as_view(),
         name="profile-outbox",  # noqa: E501
     ),
-    path(r"follow/", FollowView.as_view(), name="profile-follow"),
-    # path(
-    #    'activity/<str:activity_id>/',
-    #    ActivityView.as_view(),
-    #    name='activity-detail'
-    # ),
+    # path(r"follow/", FollowView.as_view(), name="profile-follow"),
     path(
         r"accounts/<slug:slug>/followers",
         FollowersView.as_view(),
@@ -70,5 +66,10 @@ urlpatterns = [
 
 urlpatterns += [
     path(r"note/<uuid:pk>", NoteView.as_view(), name="note-detail"),
-    path(r"action/<uuid:pk>", ActionView.as_view(), name="action-detail"),
+    path(r"action/<uuid:pk>", ActionView.as_view(), name="action_detail"),
+]
+
+urlpatterns += [
+    # Debug view to show the signature of a given object
+    path(r"signature", SignatureView.as_view(), name="signature"),
 ]

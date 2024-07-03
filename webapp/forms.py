@@ -11,7 +11,10 @@ from django.contrib.auth import (
 )
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.forms import UsernameField, ReadOnlyPasswordHashField
+from django.contrib.auth.forms import (
+    UsernameField,
+    ReadOnlyPasswordHashField,
+)
 
 # from crispy_forms.helper import FormHelper
 # from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit

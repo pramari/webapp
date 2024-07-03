@@ -14,8 +14,6 @@ import logging
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.generic import View
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 
@@ -89,29 +87,29 @@ class VersionView(View):
         }
         return JsonResponse(r)
 
-
-class FollowView(View):
+    # class FollowView(View):
     """
     .. todo::
         This is actually unused, is it?
         Most likely this is not from the standard.
     """
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        # from .models import Activity
-        try:
-            # Assuming the request payload is a valid JSON activity
-            activity = request.json
-        except ValueError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+#    @method_decorator(csrf_exempt)
+#    def dispatch(self, *args, **kwargs):
+#        return super().dispatch(*args, **kwargs)
 
-        # Extract the relevant information from the Follow activity
-        actor = activity.get("actor")
-        object = activity.get("object")
+#    def post(self, request, *args, **kwargs):
+#        # from .models import Activity
+#        try:
+#            # Assuming the request payload is a valid JSON activity
+#            activity = request.json
+#        except ValueError:
+#            return JsonResponse({"error": "Invalid JSON"}, status=400)
+#
+#        # Extract the relevant information from the Follow activity
+#        actor = activity.get("actor")
+#        object = activity.get("object")
 
-        # Return a success response
-        return JsonResponse({"status": f"success: {actor} followed {object}"})
+# Return a success response
+#        return JsonResponse({"status": f"success: {actor} followed {object}"})

@@ -31,11 +31,7 @@ def getAppAndAccessToken(
     return (app, accessToken)
 
 
-@shared_task
-def generateProfileKeyPair(
-    modeladmin: str, request, queryset, verbose=True
-) -> bool:  # noqa: E501
-    """ """
+def genKeyPair() -> Tuple[str, str]:
     from cryptography.hazmat.primitives import (
         serialization as crypto_serialization,
     )  # noqa: E501
@@ -44,7 +40,48 @@ def generateProfileKeyPair(
         default_backend as crypto_default_backend,
     )  # noqa: E501
 
+    key = rsa.generate_private_key(
+        backend=crypto_default_backend(),
+        public_exponent=65537,
+        key_size=2048,  # noqa: E501
+    )
+
+    private_key = key.private_bytes(
+        crypto_serialization.Encoding.PEM,
+        crypto_serialization.PrivateFormat.PKCS8,
+        crypto_serialization.NoEncryption(),
+    ).decode("utf-8")
+
+    public_key = (
+        key.public_key()
+        .public_bytes(
+            crypto_serialization.Encoding.PEM,
+            crypto_serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        .decode("utf-8")
+    )
+    return (private_key, public_key)
+
+
+@shared_task
+def generateProfileKeyPair(
+    modeladmin: str, request, queryset, verbose=True
+) -> bool:  # noqa: E501
+    """
+    Wrap `genKeyPair` in a Celery task to generate key pairs
+    for all users in the queryset.
+    """
+    """
+    from cryptography.hazmat.primitives import (
+        serialization as crypto_serialization,
+    )  # noqa: E501
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.hazmat.backends import (
+        default_backend as crypto_default_backend,
+    )  # noqa: E501
+    """
     for user in queryset.all():
+        """
         key = rsa.generate_private_key(
             backend=crypto_default_backend(),
             public_exponent=65537,
@@ -65,10 +102,14 @@ def generateProfileKeyPair(
             )
             .decode("utf-8")
         )
-        print(type(user.profile.private_key))
-        print(user.profile.private_key)
-        print(type(user.profile.public_key))
-        print(user.profile.public_key)
+        """
+        (
+            user.profile.private_key_pem,
+            user.profile.public_key_pem,
+        ) = genKeyPair()
+        """
+        Optimize below?
+        """
         user.profile.save()
         user.save()
         user.profile.save()

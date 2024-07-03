@@ -1,8 +1,7 @@
-from django.test import TestCase
-from django.test import Client
-from django.contrib.auth import get_user_model
-
 import logging
+
+from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +12,13 @@ class OutboxTest(TestCase):
 
         self.client = Client()  # A client for all tests.
         User = get_user_model()
-        user = User.objects.create_user(
+        user, created = User.objects.get_or_create(
             username="andreas",
             email="andreas@neumeier.org",
             password="top_secret",  # noqa: E501
         )
-
-        user.save()
+        if created:
+            user.save()
         profile = Profile.objects.get(user=user)
         self.assertTrue(isinstance(profile, Profile))
 
@@ -38,9 +37,10 @@ class OutboxTest(TestCase):
         Test whether the outbox is reachable.
         This time when the outbox is not empty.
         """
-        from webapp.models import Note
         from django.contrib.auth import get_user_model
         from django.dispatch import Signal
+
+        from webapp.models import Note
 
         User = get_user_model()
 

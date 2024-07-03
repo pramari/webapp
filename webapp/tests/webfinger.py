@@ -1,6 +1,5 @@
-from django.test import TestCase
-from django.test import Client
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
 
 
 class WebfingerTests(TestCase):
@@ -11,11 +10,12 @@ class WebfingerTests(TestCase):
     def setUp(self):
         self.client = Client()
         User = get_user_model()
-        user = User.objects.create_user(
+        user, created = User.objects.get_or_create(
             username="andreas", email="andreas@neumeier.org"
         )  # noqa: E501
         user.set_password("password")
-        user.save()
+        if created:
+            user.save()
 
     def test_webfinger_get_no_query(self):
         """

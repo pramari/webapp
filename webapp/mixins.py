@@ -42,8 +42,7 @@ class JsonLDMixin(object):
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613
         if (
-            "Accept" in request.headers
-            and "application/activity+json" in request.headers.get("Accept")
+            "Accept" in request.headers and "application/activity+json" in request.headers.get("Accept")  # noqa: E501
         ):
             return JsonResponse(
                 self.to_jsonld(request, *args, **kwargs),

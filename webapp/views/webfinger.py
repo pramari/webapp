@@ -9,6 +9,7 @@ Webfinger allows to discover information about a user based on resource name.
 import logging
 from django.http import JsonResponse
 from django.views import View
+from django.contrib.sites.models import Site
 from ..models import Profile
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,7 @@ class WebFingerView(View):
         except Profile.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
 
+        base = f"{Site.objects.get_current().domain}"
         webfinger_data = {
             # The user's profile URL
             # subject is the user's profile identified
@@ -76,7 +78,7 @@ class WebFingerView(View):
                 {
                     "rel": "http://webfinger.net/rel/profile-page",
                     "type": "text/html",
-                    "href": f"https://{request.get_host()}{profile.get_absolute_url}",  # noqa: E501
+                    "href": f"https://{base}{profile.get_absolute_url}",  # noqa: E501
                 },
                 {
                     "rel": "http://webfinger.net/rel/avatar",
@@ -86,7 +88,7 @@ class WebFingerView(View):
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": f"{profile.get_actor_url}",  # noqa: E501
+                    "href": f"https://{base}{profile.get_actor_url}",  # noqa: E501
                 },
                 # {
                 #    "rel": "http://ostatus.org/schema/1.0/subscribe",

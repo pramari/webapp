@@ -15,7 +15,7 @@ version = "1.1.23"
 authors = [
   { name="Andreas Neumeier", email="andreas@neumeier.org" },
 ]
-description = "Authentication and Userprofiles in  pramari.de"
+description = "Authentication, Userprofiles, Federation"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -29,10 +29,13 @@ dependencies = [
   "Pillow",
   "pyyaml",
   "celery",
-  "http-message-signatures",
-  #"requests-http-signature",
+  "pyld",
+  # "http-message-signatures",
+  # "requests-http-signature",
   "PyJWT",
+  "types-requests",
 ]
+
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

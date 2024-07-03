@@ -24,13 +24,15 @@ from .following import FollowingView
 from .activitypub import (
     NodeInfoView,
     VersionView,
-    FollowView,
+    # FollowView,
 )
 
 from .activity import (
     NoteView,
     ActionView,
 )
+
+from .signature import SignatureView
 
 __all__ = [
     "HomeView",
@@ -51,6 +53,7 @@ __all__ += [
     "FollowView",
     "FollowersView",
     "FollowingView",
+    "SignatureView",
 ]
 
 __all__ += [

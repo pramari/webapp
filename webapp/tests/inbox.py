@@ -1,9 +1,8 @@
-from django.test import TestCase
-from django.test import Client
-from django.contrib.auth import get_user_model
-
 import json
 import logging
+
+from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
 
 logger = logging.getLogger(__name__)
 
@@ -14,13 +13,13 @@ class InboxTest(TestCase):
 
         self.client = Client()  # A client for all tests.
         User = get_user_model()
-        user = User.objects.create_user(
+        user, created = User.objects.get_or_create(
             username="andreas",
             email="andreas@neumeier.org",
             password="top_secret",  # noqa: E501
         )
-
-        user.save()
+        if created:
+            user.save()
         profile = Profile.objects.get(user=user)
         self.assertTrue(isinstance(profile, Profile))
 
@@ -53,8 +52,9 @@ class InboxTest(TestCase):
             from ActivityPub and others.
         """
         from webapp.exceptions import ParseActivityError
+        from webapp.tests.messages import follow
 
-        data = json.dumps({"bar": "baz"})
+        data = json.dumps(follow)
         self.client.post(
             "/accounts/andreas/inbox",
             data,

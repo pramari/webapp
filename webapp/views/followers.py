@@ -26,7 +26,6 @@ class FollowersView(JsonLDMixin, ListView):
         wrap = {
             "@context": "https://www.w3.org/ns/activitystreams",
             "id": f"{base}{profile.get_followers_url}",
-            "summary": f"{profile}'s followers",
             "type": "OrderedCollection",
             "totalItems": len(followers),
             "items": [f"{item.get_actor_url}" for item in followers],

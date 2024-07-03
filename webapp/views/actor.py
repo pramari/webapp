@@ -3,7 +3,7 @@ from django.views import View
 from django.contrib.sites.models import Site
 import logging
 
-from ..models import Profile
+from webapp.models import Profile
 from ..mixins import JsonLDMixin
 
 logger = logging.getLogger(__name__)
@@ -30,11 +30,13 @@ class ActorView(JsonLDMixin, View):
 
     def to_jsonld(self, *args, **kwargs):
         slug = kwargs.get("slug")
+        base = f"https://{Site.objects.get_current().domain}"
         profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
 
-        base = f"https://{Site.objects.get_current().domain}"
+        assert f"{base}/@{slug}" == profile.actor.id
+
         username = f"{profile.user.username}"  # pylint: disable=E1101
-        actorid = f"{profile.ap_id}"
+        actorid = f"{profile.actor.id}"
         inbox = f"{base}{profile.get_inbox_url}"
         outbox = f"{base}{profile.get_outbox_url}"  # noqa: F841
         followers = f"{base}{profile.get_followers_url}"  # noqa: F841
@@ -91,8 +93,7 @@ class ActorView(JsonLDMixin, View):
         profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
 
         if (
-            "Accept" in request.headers
-            and "application/activity+json" in request.headers.get("Accept")
+            "Accept" in request.headers and "application/activity+json" in request.headers.get("Accept")  # noqa: E501, BLK100
         ):
             return JsonResponse(
                 self.to_jsonld(profile),

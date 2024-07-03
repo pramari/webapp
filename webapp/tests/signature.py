@@ -1,8 +1,11 @@
 import datetime
-from django.test import TestCase
-from django.contrib.auth import get_user_model
 
-from webapp.signature import Signature, SignatureChecker
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+
+from webapp.models import Profile
+from webapp.signature import Signature, SignatureChecker, signedRequest
+from webapp.tests.messages import follow
 
 testsignature = {
     "signature": 'keyId="https://23.social/users/andreasofthings#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest content-type",signature="e5Vj4XBt9B/TJSI4iJPDW3NtAXtOM8Z6y0j72uglfSi/R1xVwUvGcgu/r0h5yaf8e5weBZcuQ7t4ztMJfQGhol2weRWqFiC5vN1SkJTnen669sX0z6JPR/9FV9piEeSLCGHdW1wscR0c1XIQNciciPB8RrgouEQxmOxPCvlXFxqQeAVRH82d5UObSU9XQOx9/j8et/lCPegQuDM00l6qmhAAwqX7UnVDrNUJgN3eYcJpOMGfGNeymdZwf3j8/CAdQGgQPfzuNmDHvy4Wo79BZV4ud9mkVquEAh7RagfwIQRUtM/mI2i2qGrXwnpjwhOgxJkjoG7Fc18qvzuT3nQfQg=="',  # noqa: E501
@@ -40,36 +43,65 @@ class SignatureTest(TestCase):
         return public_key_pem.decode("utf-8"), private_key_pem.decode("utf-8")
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
+        self.user, created = get_user_model().objects.get_or_create(
             username="testuser", password="testpassword"
         )
+        from webapp.tasks import genKeyPair
 
-    def test_signed_request(self):
-        from webapp.tests.messages import follow
-        from webapp.signature import signedRequest
+        if created:
+            self.user.save()
 
-        r = signedRequest(
+        profile = Profile.objects.get(user=self.user)
+        (
+            profile.private_key_pem,
+            profile.public_key_pem,
+        ) = genKeyPair()  # noqa: E501
+        profile.save()
+
+        """This should create private/public keys."""
+
+    def test_request_signed(self):
+        """
+        Test whether a request can be signed.
+        """
+
+        user = Profile.objects.get(user=self.user)
+        key_id = user.get_key_id
+
+        ses, request = signedRequest(
+            "GET", "https://pramari.de/signature", follow, key_id
+        )  # noqa: E501
+
+        response = ses.send(request)
+        self.assertEqual(response.text, key_id)
+
+    def test_signature_from_header(self):
+        """
+        Test whether the signature is correctly parsed from the header.
+        """
+        user = Profile.objects.get(user=self.user)
+        key_id = user.get_key_id
+
+        ses, request = signedRequest(
             "POST",
             "https://pramari.de/accounts/andreas/inbox",
             follow,
-            "https://pramari.de/@andreas#main-key",
+            key_id,
         )  # noqa: E501
-        self.assertIsNotNone(r)
-
-    def test_signature_from_header(self):
-        self.signature = Signature.from_signature_header(
-            # testsignature["signature"]
-            self.request["signature"]
+        signature = Signature.from_signature_header(  # noqa: E501
+            request["signature"]
         )  # noqa: E501
-        self.assertEqual(isinstance(self.signature, Signature), True)
+        self.assertEqual(isinstance(signature, Signature), True)
 
     def test_signature_validate(self):
+        """
+        Test whether the signature is correctly validated.
+        """
         from django.test import RequestFactory
 
         request = RequestFactory().get(
             "/users/andreasofthings", **testhttpsignature
         )  # noqa: E501
-        print(request.headers)
 
         result = SignatureChecker().validate(request)  # noqa: E501
         self.assertEqual(result, True)

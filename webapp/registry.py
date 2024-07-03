@@ -67,40 +67,61 @@ def is_installed(model_class):
     return model_class._meta.app_config is not None
 
 
-def validate(model_class, exception_class=ImproperlyConfigured):
-    if isinstance(model_class, str):
-        model_class = apps.get_model(*model_class.split("."))
-    if not isinstance(model_class, ModelBase):
-        raise exception_class("Object %r is not a Model class." % model_class)
-    if model_class._meta.abstract:
-        raise exception_class(
-            "The model %r is abstract, so it cannot be registered with "
-            "actstream." % model_class
-        )
-    if not is_installed(model_class):
-        raise exception_class(
-            'The model %r is not installed, please put the app "%s" in your '
-            "INSTALLED_APPS setting."
-            % (model_class, model_class._meta.app_label)  # noqa: E501
-        )
-    return model_class
-
-
-class ActionableModelRegistry(dict):
+class ActorRegistry(dict):
     """
-    A dictionary that stores the models that have been registered
+    A dictionary that stores the models that
+    can be `Actor`s have been registered
     with webapp activity.
+
+    .. todo::
+        document this.
     """
+
+    def _validate(self, model_class, exception_class=ImproperlyConfigured):
+        """
+        Validate that the model is a Model class and is not abstract.
+
+        :param model_class: The model class to validate.
+        :param exception_class: The exception class to raise if the model is
+        invalid. Defaults to ImproperlyConfigured.
+        """
+        if isinstance(model_class, str):
+            """
+            If model_class is a string, try to import the model class by name.
+            """
+            model_class = apps.get_model(*model_class.split("."))
+
+        if not isinstance(model_class, ModelBase):
+            raise exception_class(
+                f"Object {model_class} is not a Model class."
+            )  # noqa: E501
+
+        if model_class._meta.abstract:
+            raise exception_class(
+                "The model %r is abstract, so it cannot be registered with "
+                "actstream." % model_class
+            )
+
+        if not is_installed(model_class):
+            raise exception_class(
+                "The model %r is not installed, please put the"
+                "app '%s' in your 'INSTALLED_APPS' setting."
+                % (model_class, model_class._meta.app_label)  # noqa: E501
+            )
+        return model_class
 
     def register(self, *model_classes_or_labels):
+        """
+        Register one or more models with the registry.
+        """
         for class_or_label in model_classes_or_labels:
-            model_class = validate(class_or_label)
+            model_class = self._validate(class_or_label)
             if model_class not in self:
                 self[model_class] = setup_generic_relations(model_class)
 
     def unregister(self, *model_classes_or_labels):
         for class_or_label in model_classes_or_labels:
-            model_class = validate(class_or_label)
+            model_class = self._validate(class_or_label)
             if model_class in self:
                 del self[model_class]
 
@@ -109,7 +130,7 @@ class ActionableModelRegistry(dict):
             model_class_or_object = model_class_or_object._meta.proxy_for_model
         if not isclass(model_class_or_object):
             model_class_or_object = model_class_or_object.__class__
-        model_class = validate(model_class_or_object, RuntimeError)
+        model_class = self._validate(model_class_or_object, RuntimeError)
         if model_class not in self:
             raise ImproperlyConfigured(
                 f"The model {model_class.__name__} is not registered."
@@ -117,7 +138,7 @@ class ActionableModelRegistry(dict):
             )
 
 
-registry = ActionableModelRegistry()
+registry = ActorRegistry()
 register = registry.register
 unregister = registry.unregister
 check = registry.check
