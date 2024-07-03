@@ -58,15 +58,15 @@ legacy_tox_ini = """
         py312
         py311
         py310
-        py39
         type
 
     [testenv]
     setenv =
-        PYTHONPATH = "."
-        DJANGO_SETTINGS_MODULE = "tests.settings"
+        PYTHONPATH = ".";{toxinidir}:{toxinidir}
+        DJANGO_SETTINGS_MODULE=tests.settings
     
     deps =
+        pytest
         behave
         coverage
 
@@ -81,6 +81,14 @@ legacy_tox_ini = """
     [testenv:lint]
     deps = flake8
     commands = flake8 webapp
+
+    [testenv:pep8]
+    show-source = True
+    commands = {envbindir}/flake8 --max-line-length=80 --exclude=.tox,docs,sample_app/tests/settings.py,sample_app/__init__.py,sample_app/migrations sample_app
+    # Flake8 only needed when linting.
+    # Do not care about other dependencies, it's just for linting.
+    deps = flake8
+    changedir = {toxinidir}
 """
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
