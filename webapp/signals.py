@@ -118,10 +118,19 @@ def createUserProfile(sender, instance, created, **kwargs):
     leverage `Django Signals` for this purpose.
     """
     if created:  # not user.profile:
-        from .models import Profile
+        from .models import Profile, Actor
+        from django.contrib.sites.models import Site
 
-        Profile.objects.create(user=instance)
+        base = f"https://{Site.objects.get_current().domain}"
+        profile = Profile.objects.create(user=instance, slug=instance.username)
+        Actor.objects.create(
+            profile=profile, type="Person", id=f"{base}/@{instance.username}"
+        )
+        # if not self.slug:
+        #    self.slug = slugify(self.user.username)  # pylint: disable=E1101
 
 
+"""
 def make_activitypub_handle_on_profile(sender, instance, **kwargs):
     instance.ap_id = "https://pramari.de" + instance.get_absolute_url
+"""

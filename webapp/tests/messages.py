@@ -104,7 +104,7 @@ w3c_activity = {
         {
             "@context": "https://www.w3.org/ns/activitystreams",
             "summary": "Sally accepted an invitation to a party",
-            "type": "Accept",
+            "@type": "Accept",
             "actor": {"type": "Person", "name": "Sally"},
             "object": {
                 "type": "Invite",

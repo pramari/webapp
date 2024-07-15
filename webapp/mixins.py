@@ -2,9 +2,10 @@ from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.views.decorators.vary import vary_on_cookie
 
-from django.http import JsonResponse, HttpResponseRedirect
-from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse
+from django.http import JsonResponse  # , HttpResponseRedirect
+
+# from django.core.exceptions import ImproperlyConfigured
+# from django.urls import reverse
 
 
 class CacheMixin(object):
@@ -23,35 +24,30 @@ class CacheMixin(object):
 
 
 class JsonLDMixin(object):
-    redirect_to = None
+    """
+    A mixin that returns a JSON-LD response if the request
+    specifies 'application/activity+json' in the Accept header.
 
-    def get_redirect_url(self, *args, **kwargs):
-        """
-        Get the specified redirect_to url
-        """
+    This mixin is intended to be used with Django Class Based Views.
 
-        if not self.redirect_to:
-            raise ImproperlyConfigured(
-                "no url to redirect to. please specify a redirect url"
-            )
+    to_jsonld() is a method that should be implemented by the class.
 
-        return reverse(self.redirect_to, kwargs={"slug": kwargs.get("slug")})
+
+    Example usage:
+        class
+    """
 
     def to_jsonld(self, *args, **kwargs):
         raise NotImplementedError()
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613
         if (
-            "Accept" in request.headers and "application/activity+json" in request.headers.get("Accept")  # noqa: E501
+            "Accept" in request.headers
+            and "application/activity+json"
+            in request.headers.get("Accept")  # noqa: E501
         ):
             return JsonResponse(
                 self.to_jsonld(request, *args, **kwargs),
                 content_type="application/activity+json",
             )
-        else:
-            if self.redirect_to:
-                return HttpResponseRedirect(
-                    self.get_redirect_url(request, *args, **kwargs)
-                )  # noqa: E501
-            else:
-                return super().get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)

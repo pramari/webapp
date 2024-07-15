@@ -6,7 +6,7 @@ import json
 import logging
 from typing import List
 
-from webapp.schema import ACTIVITY_TYPES
+# from webapp.schema import ACTIVITY_TYPES
 
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,6 @@ class ActivityMessage(object):
     """
 
     def __init__(self, message: dict = {}, *args, **kwargs) -> None:
-        print(f"receved: {message}")
         if len(message) == 0:
             raise ValueError("Empty incoming message")
         match message:
@@ -71,27 +70,23 @@ class ActivityMessage(object):
 
     def _fromDict(self, incoming: dict) -> None:
         """ """
+        print(incoming)
         if not isinstance(incoming, dict):
             raise ValueError("Invalid type for incoming")
         try:
-            print(f"Incoming message: {incoming}")
-            context = incoming["@context"]
-            print(f"Context: {context}")
-            context = incoming.pop("@context")
-            print(f"Context: {context}")
+            context = incoming.pop("@context", None)
         except KeyError as e:
             logger.error(f"Error: {e}")
             logger.error(f"Missing @context in ActivityMessage: {incoming}")
             raise
-        assert context in "https://www.w3.org/ns/activitystreams"
+        assert "https://www.w3.org/ns/activitystreams" in context
         self.id = incoming.pop("id", None)
 
         # assert id is not None
-        type = incoming.pop("type", None)
-        assert type in ACTIVITY_TYPES.keys()
+        type = incoming.pop("type", None)  # noqa: F841
+        # assert type in ACTIVITY_TYPES.keys()
 
-        for key, value in incoming.items():
-            self[key] = value
+        self.__dict__.update(incoming)
 
     def json(self) -> dict:
         """ """

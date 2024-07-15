@@ -15,6 +15,14 @@ from django.utils.translation import gettext as _
 
 # https://www.w3.org/TR/activitystreams-vocabulary/#activity-types
 
+ACTOR_TYPES = {
+    "Application": _("Application"),
+    "Group": _("Group"),
+    "Organization": _("Organization"),
+    "Person": _("Person"),
+    "Service": _("Service"),
+}
+
 ACTIVITY_TYPES = {
     "accept": _("Accept"),
     "add": _("Add"),

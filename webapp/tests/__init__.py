@@ -3,8 +3,8 @@ import logging
 from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 
-from webapp.tests.activity import ActionTest, ActivityTest
-from webapp.tests.activitystreams import ActivityStreamsTest
+from webapp.tests.activity import ActionTest
+from webapp.tests.activitypub import ActivityPubTest
 from webapp.tests.following import FollowingTest
 from webapp.tests.inbox import InboxTest
 from webapp.tests.outbox import OutboxTest
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "ActionTest",
-    "ActivityTest",
+    "ActivityPubTest",
     "InboxTest",
     "OutboxTest",
     "FollowingTest",

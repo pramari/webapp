@@ -23,6 +23,7 @@ class Profile(models.Model):
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     slug = models.SlugField(null=True, help_text=_("Slug"))
+
     follows = models.ManyToManyField(
         "self", related_name="followed_by", symmetrical=False, blank=True
     )
@@ -124,7 +125,7 @@ class Profile(models.Model):
 
             Actor.objects.create(
                 profile=self,
-                id=self.ap_id,
+                id=self.slug,
                 type="Person",
                 preferredUsername=self.slug,  # noqa: E501
             )

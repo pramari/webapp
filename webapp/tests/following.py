@@ -25,7 +25,7 @@ class FollowingTest(TestCase):
             reverse("profile-following", kwargs={"slug": "user"})
         )  # noqa: E501
 
-        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.status_code, 406)
         self.assertEqual(result["Content-Type"], "text/html; charset=utf-8")
 
     def test_following_activity_json(self):
