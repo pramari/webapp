@@ -61,7 +61,7 @@ class InboxView(DetailView):
         logger.debug(f"Request Headers: {request.headers}")
         signature = False
 
-        actorObject = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841
+        actorObject = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841, E501
 
         try:
             # Assuming the request payload is a valid JSON activity
@@ -105,7 +105,6 @@ class InboxView(DetailView):
         signature = SignatureChecker().validate(request)
 
         logger.debug(f"Signature: {signature}")
-
 
         return actorObject, activity, signature
 

@@ -70,7 +70,6 @@ class ActivityMessage(object):
 
     def _fromDict(self, incoming: dict) -> None:
         """ """
-        print(incoming)
         if not isinstance(incoming, dict):
             raise ValueError("Invalid type for incoming")
         try:

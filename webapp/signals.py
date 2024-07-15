@@ -119,9 +119,10 @@ def createUserProfile(sender, instance, created, **kwargs):
     """
     if created:  # not user.profile:
         from .models import Profile, Actor
-        from django.contrib.sites.models import Site
+        # from django.contrib.sites.models import Site
 
-        base = f"https://{Site.objects.get_current().domain}"
+        # base = f"https://{Site.objects.get_current().domain}"
+        base = "https://pramari.de"
         profile = Profile.objects.create(user=instance, slug=instance.username)
         Actor.objects.create(
             profile=profile, type="Person", id=f"{base}/@{instance.username}"

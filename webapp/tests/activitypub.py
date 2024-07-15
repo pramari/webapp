@@ -46,7 +46,6 @@ class ActivityPubTest(TestCase):
 
         for verb, messages in w3c_activity.items():
             for message in messages:
-                print(message)
                 activity = ActivityMessage(message=message)  # noqa: F841
                 # apactivity = APObject.load(message)  # noqa: F841
                 # self.assertEqual(activity.toDict(), message)
