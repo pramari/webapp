@@ -12,9 +12,10 @@ class InboxTest(TestCase):
         from webapp.models import Profile
 
         self.client = Client()  # A client for all tests.
+        self.username = "andreas"
         User = get_user_model()
         user, created = User.objects.get_or_create(
-            username="andreas",
+            username=self.username,
             email="andreas@neumeier.org",
             password="top_secret",  # noqa: E501
         )
@@ -32,13 +33,12 @@ class InboxTest(TestCase):
         Post a follow activity.
         """
 
-        with open(
-            "submodules/taktivitypub/tests/data/follow-mastodon.json"
-        ) as f:  # noqa: E501
-            data = f.read()
+        from webapp.tests.messages import w3c_activity
+
+        for message in w3c_activity['follow']:
             self.client.post(
-                "/accounts/andreas/inbox",
-                data,
+                f"/accounts/{self.username}/inbox",
+                data=message,
                 content_type="application/json",
             )
         self.assertRaises(Exception)
@@ -56,7 +56,7 @@ class InboxTest(TestCase):
 
         data = json.dumps(follow)
         self.client.post(
-            "/accounts/andreas/inbox",
+            f"/accounts/{self.username}/inbox",
             data,
             content_type="application/json",
         )

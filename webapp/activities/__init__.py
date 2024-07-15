@@ -76,19 +76,6 @@ def delete(self, message: dict) -> JsonResponse:
 def undo(self, message: dict):
     """
     Undo an activity.
-
-    Ruby from Paul Kinlan:
-        // Undo a follow.
-        const undoObject: AP.Undo = <AP.Undo>message;
-        if (undoObject == null || undoObject.id == null) return;
-        if (undoObject.object == null) return;
-        if ("actor" in undoObject.object == false
-            && (<CoreObject>undoObject.object).type != "Follow") return;
-
-        const docId = undoObject.actor.toString().replace(/\//g, "_");  # noqa: W605, E501
-        const res = await db.collection('followers').doc(docId).delete();
-
-        console.log("Deleted", res)
     """
     logger.error(f"Activity Object: {message}")
 

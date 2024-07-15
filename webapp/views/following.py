@@ -57,4 +57,4 @@ class FollowingView(View):
         #     context.update(
         #         {"items": [f"{base}{item.get_actor_url}," for item in follows]}  # noqa: E501
         #     )
-        return {}
+        # return {}

@@ -127,7 +127,6 @@ class Profile(models.Model):
                 profile=self,
                 id=self.slug,
                 type="Person",
-                preferredUsername=self.slug,  # noqa: E501
             )
         return result
 

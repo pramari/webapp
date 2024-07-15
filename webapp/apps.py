@@ -23,7 +23,7 @@ class WebAppConfig(AppConfig):
         # pylint: disable=C0415,C0103
         from django.db.models.signals import post_save
         from webapp import registry
-        from webapp.models import Actor, Note, Profile
+        from webapp.models import Actor # , Note, Profile
         from webapp.signals import (
             action,
             signalHandler,
@@ -47,14 +47,14 @@ class WebAppConfig(AppConfig):
         try:
             registry.register(Actor)
             logger.error("Successfully registered 'Actor'")
-            registry.register(Note)
-            logger.error("Successfully registered 'Note'")
-            registry.register(Profile)
-            logger.error("Successfully registered 'Profile'")
+            # registry.register(Note)
+            # logger.error("Successfully registered 'Note'")
+            # registry.register(Profile)
+            # logger.error("Successfully registered 'Profile'")
         except ImportError as e:
-            logger.error(f"Model for 'Note' not installed {e}")
+            logger.error(f"Model for 'Actor' not installed {e}")
         except Exception as e:
-            logger.error(f"Cannot register `Notes` for Activities. {e}")
+            logger.error(f"Cannot register `Actor` for Activities. {e}")
 
         action.connect(signalHandler, dispatch_uid="activitypub")
 

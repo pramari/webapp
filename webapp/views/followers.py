@@ -39,7 +39,7 @@ class FollowersView(JsonLDMixin, ListView):
         return profile.followed_by.filter(consent=True)
         # .filter(user__is_verified=True)
 
-    def oldget(self, request, *args, **kwargs):  # pylint: disable=W0613
+    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
         if request.accepts("application/json") or request.accepts(
             "application/activity+json"
         ):

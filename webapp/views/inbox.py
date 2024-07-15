@@ -17,6 +17,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 
 # from taktivitypub import APObject, ObjectType
 
@@ -59,6 +60,9 @@ class InboxView(DetailView):
         """
         logger.debug(f"Request Headers: {request.headers}")
         signature = False
+
+        actorObject = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841
+
         try:
             # Assuming the request payload is a valid JSON activity
             body = request.body.decode("utf-8")
@@ -102,7 +106,6 @@ class InboxView(DetailView):
 
         logger.debug(f"Signature: {signature}")
 
-        actorObject = Profile.objects.get(id=kwargs.get("slug"))  # noqa: F841
 
         return actorObject, activity, signature
 
