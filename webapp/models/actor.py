@@ -37,7 +37,7 @@ class Actor(models.Model):
         Profile, on_delete=models.CASCADE, blank=True, null=True
     )
 
-    id = models.URLField(
+    id = models.CharField(
         max_length=255, primary_key=True, unique=True, blank=False
     )  # noqa: E501
     type = models.CharField(
@@ -48,8 +48,8 @@ class Actor(models.Model):
     # preferredUsername = models.CharField(max_length=255, blank=True, null=True)  # noqa: E501
     # base = models.CharField(max_length=255, default=Site.objects.get_current())  # noqa: E501
 
-    follows = models.ManyToManyField(
-        "self", related_name="followed_by", symmetrical=False, blank=True
+    following = models.ManyToManyField(
+        "self", related_name="followers", symmetrical=False, blank=True
     )
 
     class Meta:

@@ -109,29 +109,20 @@ class Profile(models.Model):
         """
         return self.user.username  # pylint: disable=E1101
 
-    def notsave(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         """
         Profile.save()
 
         Create a slug from the username if none is provided.
-        
+
         see::
-          signals.py:createUserProfile
+          signals.py:createUserProfile, connected to User.post_save
         """
         if not self.slug:
             self.slug = slugify(self.user.username)  # pylint: disable=E1101
         if not self.ap_id:  # and self.user.is_verified:
             self.ap_id = f"https://pramari.de/@{self.slug}"
-        result = super().save(*args, **kwargs)  # Call save()
-        if not self.actor:
-            from webapp.models import Actor
-
-            Actor.objects.create(
-                profile=self,
-                id=self.slug,
-                type="Person",
-            )
-        return result
+        return super().save(*args, **kwargs)  # Call save()
 
     @property
     def get_absolute_url(self):
