@@ -8,8 +8,11 @@ class ActionTest(TestCase):
         """
         from webapp.models import Actor, Note
 
-        self.a = Actor.objects.create(id="https://test.com/@Test")
+        self.id = "https://test.com/@Test"
+        self.a = Actor.objects.create(id=self.id)
         self.n = Note.objects.create(content="Hello, World!")
+
+        print(f"Actor: {self.a}, (id: {self.a.pk})")
 
     def test_signal(self):
         """
@@ -36,5 +39,5 @@ class ActionTest(TestCase):
     def test_actor_model(self):
         from webapp.models import Action, Profile
 
-        p = Profile.objects.get(pk=1)
+        p = Profile.objects.get(id=self.id)
         Action.objects.actor(p)

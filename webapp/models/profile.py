@@ -109,11 +109,14 @@ class Profile(models.Model):
         """
         return self.user.username  # pylint: disable=E1101
 
-    def save(self, *args, **kwargs):
+    def notsave(self, *args, **kwargs):
         """
         Profile.save()
 
         Create a slug from the username if none is provided.
+        
+        see::
+          signals.py:createUserProfile
         """
         if not self.slug:
             self.slug = slugify(self.user.username)  # pylint: disable=E1101
