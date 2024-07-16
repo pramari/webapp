@@ -41,6 +41,7 @@ class WebAppConfig(AppConfig):
         from django.conf import settings
         settings = settings._wrapped.__dict__
         settings.setdefault('BLOCKED_SERVERS', [])
+        settings.setdefault('FETCH_RELATIONS', False)
 
         # Activity signals
 

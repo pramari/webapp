@@ -33,17 +33,18 @@ class ActorView(DetailView):
 
     def to_jsonld(self, *args, **kwargs):
         base = f"https://{Site.objects.get_current().domain}"
-        profile = self.get_object()
+        actor = self.get_object().actor_set.get()
 
         # assert f"{base}/@{slug}" == profile.actor.id
 
-        username = f"{profile.user.username}"  # pylint: disable=E1101
-        actorid = f"{base}/@{profile.slug}"
-        inbox = f"{base}{profile.get_inbox_url}"
-        outbox = f"{base}{profile.get_outbox_url}"  # noqa: F841
-        followers = f"{base}{profile.get_followers_url}"  # noqa: F841
-        following = f"{base}{profile.get_following_url}"  # noqa: F841
-        public_key = profile.get_public_key(base)
+        username = f"{actor.profile.username}"  # pylint: disable=E1101
+        actorid = f"{base}/@{actor.profile.slug}"
+        inbox = f"{base}{actor.inbox}"
+        outbox = f"{base}{actor.outbox}"  # noqa: F841
+        followers = f"{base}{actor.followers_url}"  # noqa: F841
+        following = f"{base}{actor.following_url}"  # noqa: F841
+        likes = f"{base}{actor.likes_url}"  # noqa: F841
+        public_key = actor.profile.get_public_key(base)
 
         jsonld = {
             "@context": [
@@ -59,6 +60,7 @@ class ActorView(DetailView):
             "outbox": outbox,
             "followers": followers,
             "following": following,
+            "likes": likes,
             "publicKey": public_key,
             "image": {
                 "type": "Image",

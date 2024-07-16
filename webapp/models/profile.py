@@ -147,69 +147,7 @@ class Profile(models.Model):
             result = None
         return result
 
-    @property
-    def get_actor_url(self):
-        """
-        Return the URL of the actor.
-        Activity Streams 2.0
 
-        .. todo::
-            This is not the same as `get_absolute_url`, but the actor ID,
-            that is stored in self.ap_id
-            Currently only the `actor-view` does use this.
-        """
-
-        # return self.ap_id
-        view = reverse("actor-view", args=[str(self.slug)])
-        return f"{view}"
-
-    @property
-    def get_inbox_url(self):
-        """
-        Return the URL of the inbox.
-
-        """
-        return reverse(
-            "profile-inbox",
-            args=[self.slug],
-        )
-
-    @property
-    def get_outbox_url(self):
-        """
-        Return the URL of the outbox.
-        """
-        return reverse(
-            "profile-outbox",
-            args=[self.slug],
-        )
-
-    @property
-    def get_followers_url(self):
-        """
-        Return the URL of the followers.
-        """
-        return reverse(
-            "profile-followers",
-            args=[self.slug],
-        )
-
-    @property
-    def get_following_url(self):
-        """
-        Return the URL of the following.
-        """
-        return reverse(
-            "profile-following",
-            args=[self.slug],
-        )
-
-    @property
-    def get_key_id(self) -> str:
-        """
-        Return the key id.
-        """
-        return f"{self.ap_id}#main-key"
 
     def get_public_key(self, base: str) -> dict[str, str]:
         """
@@ -222,14 +160,3 @@ class Profile(models.Model):
             "publicKeyPem": self.public_key_pem,
         }
         return public_key_data
-
-        #   @property
-        #   def activities(self) -> list:
-        """
-        Return all activities of this profile.
-
-        .. todo::
-            Implement this.
-        """
-
-    #    return Action.objects.filter(actor=self)

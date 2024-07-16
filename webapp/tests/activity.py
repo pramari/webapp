@@ -37,7 +37,7 @@ class ActionTest(TestCase):
         self.assertEqual(Action.objects.count(), 1)
 
     def test_actor_model(self):
-        from webapp.models import Action, Profile
+        from webapp.models import Action, Actor
 
-        p = Profile.objects.get(id=self.id)
+        p = Actor.objects.get(id=self.id)
         Action.objects.actor(p)

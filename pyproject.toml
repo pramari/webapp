@@ -56,8 +56,6 @@ legacy_tox_ini = """
     isolated_build = True
     env_list =
         py312
-        py311
-        py310
         type
 
     [testenv]

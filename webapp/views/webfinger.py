@@ -72,7 +72,7 @@ class WebFingerView(View):
             "subject": f"acct:{profile.user.username}@{request.get_host()}",
             "aliases": [
                 f"https://{request.get_host()}{profile.get_absolute_url}",
-                f"{profile.get_actor_url}",
+                f"{profile.actor.actorID}",
             ],
             "links": [
                 {
@@ -88,7 +88,7 @@ class WebFingerView(View):
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": f"https://{base}{profile.get_actor_url}",  # noqa: E501
+                    "href": f"https://{base}{profile.actor.actorID}",  # noqa: E501
                 },
                 # {
                 #    "rel": "http://ostatus.org/schema/1.0/subscribe",

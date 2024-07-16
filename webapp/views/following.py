@@ -4,7 +4,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.http import HttpResponse
 
 from django.http import JsonResponse
-from webapp.models import Actor
+from webapp.models import Profile
 
 # from django.contrib.sites.models import Site
 
@@ -43,24 +43,24 @@ context = {
 class FollowingView(SingleObjectMixin, View):
     template_name = "activitypub/following.html"
     paginate_by = 10
-    model = Actor
-
-    def get_queryset(self):
-        return self.object.follows()
-
-    def to_jsonld(self, *args, **kwargs):  # actor, follows):
-
-        result = [p.id for p in selfxxxx.objectall()]
-        print(f"result: {result}")
-        return result
+    model = Profile
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+        actor = self.get_object().actor_set.get()
+        totalItems = self.get_object().actor_set.get().following.count() # noqa: E501, F841
+        orderedItems = [p.id for p in self.get_object().actor_set.get().following.all()]  # noqa: E501, F841
+
         if (
             "Accept" in request.headers
             and "application/activity+json"
             in request.headers.get("Accept")  # noqa: E501
         ):
-            jsonld = (self.to_jsonld(request, *args, **kwargs),)
+            jsonld = context
+            jsonld["id"] = f"{actor.id}/following"
+            jsonld["totalItems"] = totalItems
+            jsonld["first"] = f"{actor.id}/following?page=1"
+            jsonld["orderedItems"] = orderedItems
+
             print(f"jsonld: {jsonld}")
             print(f"jsonld: {type(jsonld)}")
             return JsonResponse(

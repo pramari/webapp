@@ -38,8 +38,8 @@ class OutboxView(View):
             "@context": "https://www.w3.org/ns/activitystreams",
             "type": "OrderedCollection",
             "totalItems": paginator.count,
-            "first": f"{profile.get_outbox_url}?page=1",
-            "last": f"{profile.get_outbox_url}?page={paginator.num_pages}",
+            "first": f"{profile.actor.outbox}?page=1",
+            "last": f"{profile.actor.outbox}?page={paginator.num_pages}",
         }
 
         if page:
@@ -52,7 +52,7 @@ class OutboxView(View):
             activity_stream["type"] = "OrderedCollectionPage"
             activity_stream[
                 "current"
-            ] = f"{profile.get_outbox_url}?page={page}"  # pylint: disable=E501
+            ] = f"{profile.actor.outbox}?page={page}"  # pylint: disable=E501
             activity_stream["orderedItems"] = data
 
         # Return the activity stream as a JSON response

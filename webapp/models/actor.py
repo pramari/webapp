@@ -11,6 +11,7 @@ import logging
 from django.db import models
 from webapp.models.profile import Profile
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 
 # from django.contrib.sites.models import Site
 
@@ -40,13 +41,13 @@ class Actor(models.Model):
     id = models.CharField(
         max_length=255, primary_key=True, unique=True, blank=False
     )  # noqa: E501
+
     type = models.CharField(
         max_length=255, default="Person", choices=get_actor_types
     )  # noqa: E501
 
-    # slug = models.SlugField(null=True, help_text=_("Slug"))
-    # preferredUsername = models.CharField(max_length=255, blank=True, null=True)  # noqa: E501
-    # base = models.CharField(max_length=255, default=Site.objects.get_current())  # noqa: E501
+    # slug = profile.slug
+    # preferredUsername = profie.preferredUsername
 
     following = models.ManyToManyField(
         "self", related_name="followers", symmetrical=False, blank=True
@@ -59,7 +60,75 @@ class Actor(models.Model):
 
     @property
     def remote(self):
+        """
+        If this does not belong to a profile, it is remote.
+        """
         return self.profile_set.count() == 0
 
     def __str__(self):
         return self.id
+
+
+    @property
+    def actorID(self):
+        """
+        Return the URL of the actor.
+        Activity Streams 2.0
+
+        .. todo::
+            This is not the same as `get_absolute_url`, but the actor ID,
+            that is stored in self.ap_id
+            Currently only the `actor-view` does use this.
+        """
+
+        # return self.ap_id
+        view = reverse("actor-view", args=[str(self.profile.user)])
+        return f"{view}"
+
+    @property
+    def inbox(self):
+        """
+        Return the URL of the inbox.
+
+        """
+        return reverse(
+            "profile-inbox",
+            args=[self.profile.slug],
+        )
+
+    @property
+    def outbox(self):
+        """
+        Return the URL of the outbox.
+        """
+        return reverse(
+            "profile-outbox",
+            args=[self.profile.slug],
+        )
+
+    @property
+    def followers_url(self):
+        """
+        Return the URL of the followers.
+        """
+        return reverse(
+            "profile-followers",
+            args=[self.profile.slug],
+        )
+
+    @property
+    def following_url(self):
+        """
+        Return the URL of the following.
+        """
+        return reverse(
+            "profile-following",
+            args=[self.profile.slug],
+        )
+
+    @property
+    def get_key_id(self) -> str:
+        """
+        Return the key id.
+        """
+        return f"{self.id}#main-key"
