@@ -55,7 +55,7 @@ class ActorView(DetailView):
             "type": "Person",
             "name": username,
             "preferredUsername": username,
-            "summary": profile.bio,
+            "summary": actor.profile.bio,
             "inbox": inbox,
             "outbox": outbox,
             "followers": followers,
@@ -65,12 +65,12 @@ class ActorView(DetailView):
             "image": {
                 "type": "Image",
                 "mediaType": "image/jpeg",
-                "url": profile.imgurl,
+                "url": actor.profile.imgurl,
             },  # noqa: E501
             "icon": {
                 "type": "Image",
                 "mediaType": "image/png",
-                "url": profile.icon,
+                "url": actor.profile.icon,
             },  # noqa: E501
         }
         return jsonld
