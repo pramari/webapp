@@ -8,13 +8,17 @@
             <h2>{{ object }}</h2>
             <div class="row">
                 <div class="col">
-                    Following: <a href="{% url "profile-following" object.slug %}">{{ object.follows.count }}</a>
+                    Following: <a href="{% url "actor-following" object.slug %}">{{ object.actor.following.count }}</a>
                 </div>
                 <div class="col">
-                    Followers: <a href="{% url "profile-followers" object.slug %}">{{ object.followed_by.count }}</a>
+                    Followers: <a href="{% url "actor-followers" object.slug %}">{{ object.actor.followers.count }}</a>
                 </div>
             </div>
-            <a href="{{ object.mastodon }}" rel="me">mastodon</a>
+            <div class="row">
+                <div class="col">
+                        <a href="{{ object.mastodon }}" rel="me">mastodon</a>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

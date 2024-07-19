@@ -22,8 +22,14 @@ def get_actor_types():
     """
     Activity Streams 2.0 Abstraction Layer for Activity Types
     """
-    from webapp.schema import ACTOR_TYPES
-
+    # from webapp.schema import ACTOR_TYPES
+    ACTOR_TYPES = {
+        "Application": _("Application"),
+        "Group": _("Group"),
+        "Organization": _("Organization"),
+        "Person": _("Person"),
+        "Service": _("Service"),
+    }
     return ACTOR_TYPES
 
 
@@ -68,7 +74,6 @@ class Actor(models.Model):
     def __str__(self):
         return self.id
 
-
     @property
     def actorID(self):
         """
@@ -92,7 +97,7 @@ class Actor(models.Model):
 
         """
         return reverse(
-            "profile-inbox",
+            "actor-inbox",
             args=[self.profile.slug],
         )
 
@@ -102,7 +107,7 @@ class Actor(models.Model):
         Return the URL of the outbox.
         """
         return reverse(
-            "profile-outbox",
+            "actor-outbox",
             args=[self.profile.slug],
         )
 
@@ -112,7 +117,7 @@ class Actor(models.Model):
         Return the URL of the followers.
         """
         return reverse(
-            "profile-followers",
+            "actor-followers",
             args=[self.profile.slug],
         )
 
@@ -122,7 +127,17 @@ class Actor(models.Model):
         Return the URL of the following.
         """
         return reverse(
-            "profile-following",
+            "actor-following",
+            args=[self.profile.slug],
+        )
+
+    @property
+    def likes_url(self):
+        """
+        Return the URL for likes.
+        """
+        return reverse(
+            "actor-likes",
             args=[self.profile.slug],
         )
 

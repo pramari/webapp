@@ -12,6 +12,63 @@ from typing import List
 logger = logging.getLogger(__name__)
 
 
+def default_document_loader(url: str, options: dict = {}):
+    from webapp.schema import schemas
+    from urllib.parse import urlparse
+
+    parsedurl = urlparse(url)
+    stripped_path = parsedurl.path.rstrip("/")
+    if not parsedurl.hostname:
+        logging.info(f"json-ld schema '{url!r}' has no hostname")
+        return schemas["unknown"]
+    key = f"{parsedurl.hostname}{stripped_path}"
+    try:
+        return schemas[key]
+    except KeyError:
+        try:
+            key = f"*{stripped_path}"
+            return schemas[key]
+        except KeyError:
+            # Return an empty context instead of throwing
+            # an error, as per the ActivityStreams spec
+            return schemas["unknown"]
+
+
+def canonicalize(ld_data: dict) -> dict:
+    """ """
+    from pyld import jsonld
+
+    if not isinstance(ld_data, dict):
+        raise ValueError("Pass decoded JSON data into LDDocument")
+
+    context = ld_data.get("@context", [])
+
+    if not isinstance(context, list):
+        context = [context]
+
+    if not context:
+        context.append("https://www.w3.org/ns/activitystreams")
+        context.append("https://w3id.org/security/v1")
+        context.append(
+            {
+                "blurhash": "toot:blurhash",
+                "Emoji": "toot:Emoji",
+                "featured": {"@id": "toot:featured", "@type": "@id"},
+                "focalPoint": {"@container": "@list", "@id": "toot:focalPoint"},  # noqa: E501
+                "Hashtag": "as:Hashtag",
+                "indexable": "toot:indexable",
+                "manuallyApprovesFollowers": "as:manuallyApprovesFollowers",
+                "sensitive": "as:sensitive",
+                "toot": "http://joinmastodon.org/ns#",
+                "votersCount": "toot:votersCount",
+            }
+        )
+    ld_data["@context"] = context
+
+    jsonld.set_document_loader(default_document_loader)
+    return jsonld.compact(jsonld.expand(ld_data), context)
+
+
 class ActivityObject(object):
     def __init__(self, *args, **kwargs) -> None:
         self.type = "Object"
@@ -19,7 +76,9 @@ class ActivityObject(object):
 
     def toDict(self, *args, **kwargs) -> dict:
         result = {"@context": "https://www.w3.org/ns/activitystreams"}
-        result.update({k: v for k, v in self.__dict__.items() if not k.startswith("_")})  # noqa: E501
+        result.update(
+            {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+        )  # noqa: E501
         return result
 
     attachment: List[dict]  # Object

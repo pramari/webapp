@@ -3,11 +3,10 @@ from django.views.generic import ListView
 from django.http import JsonResponse
 
 from webapp.models import Profile
-from webapp.mixins import JsonLDMixin
 from django.contrib.sites.models import Site
 
 
-class FollowersView(JsonLDMixin, ListView):
+class FollowersView(ListView):
     """
     Provide a list of followers for a given profile.
 
@@ -15,29 +14,20 @@ class FollowersView(JsonLDMixin, ListView):
     """
 
     template_name = "activitypub/followers.html"
+    model = Profile
 
     def to_jsonld(self, *args, **kwargs):
-        slug = kwargs.get("slug")
-        profile = get_object_or_404(Profile, slug=slug)
-        followers = profile.followed_by.filter(consent=True)
-        # .filter(user__is_verified=True)
-
+        actor = self.get_object().actor
+        followers = actor.followers.all()
         base = f"https://{Site.objects.get_current().domain}"
         wrap = {
             "@context": "https://www.w3.org/ns/activitystreams",
-            "id": f"{base}{profile.get_followers_url}",
+            "id": f"https://{base}{actor.followers_url}",
             "type": "OrderedCollection",
             "totalItems": len(followers),
             "items": [f"{item.get_actor_url}" for item in followers],
         }
         return wrap
-
-    def get_queryset(self):
-        from django.shortcuts import get_object_or_404
-
-        profile = get_object_or_404(Profile, slug=self.kwargs["slug"])
-        return profile.followed_by.filter(consent=True)
-        # .filter(user__is_verified=True)
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613
         if request.accepts("application/json") or request.accepts(

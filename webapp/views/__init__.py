@@ -20,6 +20,7 @@ from .inbox import InboxView
 from .outbox import OutboxView
 from .followers import FollowersView
 from .following import FollowingView
+from .likes import LikesView
 
 from .activitypub import (
     NodeInfoView,
@@ -53,6 +54,7 @@ __all__ += [
     "FollowView",
     "FollowersView",
     "FollowingView",
+    "LikesView",
     "SignatureView",
 ]
 

@@ -157,12 +157,18 @@ class ProfileDetailView(UserPassesTestMixin, DetailView):
     - User consent.
     - A verified Profile.
     - A public Profile.
+
+    reverse::
+        `profile-detail`
     """
 
     model = Profile
     template_name = "account/profile_detail.html"
 
     def test_func(self):
+        """Public profiles are visible to all."""
+        if self.get_object().public:
+            return True
         """This view requires a verfied profile."""
         if self.request.user.is_authenticated:
             return self.request.user.is_verified

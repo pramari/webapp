@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import DetailView
 from django.contrib.sites.models import Site
 import logging
@@ -16,8 +16,8 @@ class ActorView(DetailView):
     Example urlconf:
         path(
         r'@<slug:slug>',
-        ActivityView.as_view(),
-        name='activity-view'
+        ActorView.as_view(),
+        name='actor-view'
     )
 
     If the request header contains 'application/activity+json',
@@ -37,8 +37,8 @@ class ActorView(DetailView):
 
         # assert f"{base}/@{slug}" == profile.actor.id
 
-        username = f"{actor.profile.username}"  # pylint: disable=E1101
-        actorid = f"{base}/@{actor.profile.slug}"
+        actorid = f"{actor.id}"
+        username = f"{actor.profile.user}"  # pylint: disable=E1101
         inbox = f"{base}{actor.inbox}"
         outbox = f"{base}{actor.outbox}"  # noqa: F841
         followers = f"{base}{actor.followers_url}"  # noqa: F841
@@ -85,4 +85,9 @@ class ActorView(DetailView):
                 self.to_jsonld(request, *args, **kwargs),
                 content_type="application/activity+json",
             )
-        return super().get(request, *args, **kwargs)
+        from django.urls import reverse
+
+        return HttpResponseRedirect(
+            reverse(self.redirect_to, kwargs={"slug": self.kwargs["slug"]})
+        )
+        # return super().get(request, *args, **kwargs)

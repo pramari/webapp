@@ -22,7 +22,6 @@ from django.shortcuts import get_object_or_404
 # from taktivitypub import APObject, ObjectType
 
 from webapp.models import Actor, Profile
-from webapp.schema import ACTIVITY_TYPES
 from webapp.activities import follow, undo, create, delete, accept
 
 from ..exceptions import ParseError  # noqa: E501
@@ -85,7 +84,6 @@ class InboxView(DetailView):
 
         assert activity is not None
         assert activity["type"] is not None
-        assert activity["type"].lower() in ACTIVITY_TYPES.keys()
 
         """
         try:

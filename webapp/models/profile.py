@@ -147,15 +147,13 @@ class Profile(models.Model):
             result = None
         return result
 
-
-
     def get_public_key(self, base: str) -> dict[str, str]:
         """
         Return the public key as JSON-LD.
         """
-        actorid = f"{self.get_actor_url}"
+        actorid = f"{self.actor.id}"
         public_key_data = {
-            "id": f"{self.get_key_id}",
+            "id": f"{self.actor.get_key_id}",
             "owner": actorid,
             "publicKeyPem": self.public_key_pem,
         }

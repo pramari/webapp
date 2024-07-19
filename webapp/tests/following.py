@@ -22,7 +22,7 @@ class FollowingTest(TestCase):
         Nothing more than a simple GET request.
         """
         result = self.client.get(
-            reverse("profile-following", kwargs={"slug": "user"})
+            reverse("actor-following", kwargs={"slug": "user"})
         )  # noqa: E501
 
         self.assertEqual(result.status_code, 406)
@@ -34,7 +34,7 @@ class FollowingTest(TestCase):
         Nothing more than a simple GET request.
         """
         result = self.client.get(
-            reverse("profile-following", kwargs={"slug": "user"}),
+            reverse("actor-following", kwargs={"slug": "user"}),
             headers={"Accept": "application/activity+json"},
         )  # noqa: E501
 

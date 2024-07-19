@@ -21,9 +21,9 @@ from webapp.views import (
     ActorView,
     InboxView,
     OutboxView,
-    # FollowView,
     FollowersView,
     FollowingView,
+    LikesView,
     NoteView,
     ActionView,
     SignatureView,
@@ -42,25 +42,30 @@ urlpatterns = [
         name="actor-view",  # noqa: E501
     ),
     path(
-        r"accounts/<slug:slug>/inbox",
+        r"@<slug:slug>/inbox",
         InboxView.as_view(),
-        name="profile-inbox",  # noqa: E501
+        name="actor-inbox",  # noqa: E501
     ),
     path(
         r"accounts/<slug:slug>/outbox",
         OutboxView.as_view(),
-        name="profile-outbox",  # noqa: E501
+        name="actor-outbox",  # noqa: E501
     ),
     # path(r"follow/", FollowView.as_view(), name="profile-follow"),
     path(
         r"accounts/<slug:slug>/followers",
         FollowersView.as_view(),
-        name="profile-followers",
+        name="actor-followers",
     ),
     path(
         r"accounts/<slug:slug>/following",
         FollowingView.as_view(),
-        name="profile-following",
+        name="actor-following",
+    ),
+    path(
+        r"accounts/<slug:slug>/likes",
+        LikesView.as_view(),
+        name="actor-likes",
     ),
 ]
 

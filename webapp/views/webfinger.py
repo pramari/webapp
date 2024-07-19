@@ -69,10 +69,11 @@ class WebFingerView(View):
         webfinger_data = {
             # The user's profile URL
             # subject is the user's profile identified
-            "subject": f"acct:{profile.user.username}@{request.get_host()}",
+            # "subject": f"acct:{profile.user.username}@{request.get_host()}",
+            "subject": f"acct:{profile.actor.actorID}",
             "aliases": [
+                f"https://{base}{profile.actor.actorID}",
                 f"https://{request.get_host()}{profile.get_absolute_url}",
-                f"{profile.actor.actorID}",
             ],
             "links": [
                 {
@@ -81,19 +82,19 @@ class WebFingerView(View):
                     "href": f"https://{base}{profile.get_absolute_url}",  # noqa: E501
                 },
                 {
-                    "rel": "http://webfinger.net/rel/avatar",
-                    "type": "image/jpeg",
-                    "href": profile.imgurl,
-                },
-                {
                     "rel": "self",
                     "type": "application/activity+json",
                     "href": f"https://{base}{profile.actor.actorID}",  # noqa: E501
                 },
-                # {
-                #    "rel": "http://ostatus.org/schema/1.0/subscribe",
-                #    "template": "https://pramari.de/authorize_interaction?uri={uri}",  # noqa: E501
-                # },
+                {
+                    "rel": "http://ostatus.org/schema/1.0/subscribe",
+                    "template": "https://pramari.de/authorize_interaction?uri={uri}",  # noqa: E501
+                },
+                {
+                    "rel": "http://webfinger.net/rel/avatar",
+                    "type": "image/jpeg",
+                    "href": profile.imgurl,
+                },
             ],
         }
 

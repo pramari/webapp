@@ -16,6 +16,7 @@ from django.urls import path
 from django.conf.urls import include
 from django.views.decorators.cache import cache_page  # , never_cache
 
+
 from webapp.views import (
     StatusView,
     HomeView,
