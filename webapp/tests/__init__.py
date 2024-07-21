@@ -5,8 +5,8 @@ from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from webapp.tests.activity import ActionTest
-from webapp.tests.activitypub import ActivityPubTest
+from webapp.tests.activitypub.action import ActionTest
+from webapp.tests.activitypub.remote import ActivityPubTest
 from webapp.tests.following import FollowingTest
 from webapp.tests.inbox import InboxTest
 from webapp.tests.outbox import OutboxTest

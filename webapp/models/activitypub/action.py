@@ -4,11 +4,10 @@
 # pylint: disable=invalid-name
 
 """
-Activitypub models for `Angry Planet Cloud`.
+Activitypub related models for `Angry Planet Cloud`.
 
 Specifically:
     - Action
-    - Note
 
 """
 
@@ -180,31 +179,3 @@ class Action(models.Model):
 
         base = f"https://{Site.objects.get_current().domain}"
         return f"{base}{self.get_absolute_url()}"
-
-
-class Note(models.Model):
-    """
-    Activity Streams 2.0
-
-    Note
-    """
-
-    class Meta:
-        verbose_name = _("Note (Activity Streams 2.0)")
-        verbose_name_plural = _("Notes (Activity Streams 2.0)")
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    content = models.TextField()
-
-    published = models.DateTimeField(default=now, db_index=True)
-    updated = models.DateTimeField(default=now, db_index=True)
-
-    public = models.BooleanField(default=True, db_index=True)
-    sensitive = models.BooleanField(default=False, db_index=True)
-
-    def __str__(self):
-        return self.content
-
-    def get_absolute_url(self):
-        return reverse("note-detail", args=[self.id])

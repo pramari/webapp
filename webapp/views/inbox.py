@@ -14,14 +14,13 @@ import json
 import logging
 
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-
-# from taktivitypub import APObject, ObjectType
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 from webapp.models import Actor, Profile
+from webapp.signature import SignatureChecker
 from webapp.activities import follow, undo, create, delete, accept
 
 from ..exceptions import ParseError  # noqa: E501
@@ -60,7 +59,7 @@ class InboxView(DetailView):
         logger.debug(f"Request Headers: {request.headers}")
         signature = False
 
-        actorObject = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841, E501
+        target = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841, E501
 
         try:
             # Assuming the request payload is a valid JSON activity
@@ -98,7 +97,6 @@ class InboxView(DetailView):
         .. todo::
             - Verify the signature of the incoming activity
         """
-        from webapp.signature import SignatureChecker
 
         signature = SignatureChecker().validate(request)
 
@@ -120,15 +118,13 @@ class InboxView(DetailView):
         # Process the incoming activity
 
         try:
-            actor, message, signature = self.parse(request, args, kwargs)
+            target, message, signature = self.parse(request, args, kwargs)
         except ParseError as e:
-            logger.debug(f"InboxView: ParseError {e}")
+            logger.debug("InboxView: ParseError %s", e)
             return JsonResponse({"error": str(e.message)}, status=400)
 
         if not signature:
-            """
-            If the signature is not valid, return an error.
-            """
+            # If the signature is not valid, return an error.
             logger.debug(
                 "InboxView: Invalid Signature %s", message["actor"]
             )  # noqa: E501
@@ -139,15 +135,15 @@ class InboxView(DetailView):
 
         match message.get("type", None).lower():
             case "follow":
-                result = follow(message=message)
+                result = follow(target=target, message=message)
             case "undo":
-                result = undo(message=message)
+                result = undo(target=target, message=message)
             case "create":
-                result = create(message=message)
+                result = create(target=target, message=message)
             case "delete":
-                result = delete(message=message)
+                result = delete(target=target, message=message)
             case "accept":
-                result = accept(message=message)
+                result = accept(target=target, message=message)
             case _:
                 error = f"InboxView: Unsupported activity: {message.type}"
                 logger.error(f"Actvity error: {error}")
