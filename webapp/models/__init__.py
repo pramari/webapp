@@ -15,7 +15,7 @@ import logging
 from webapp.models.user import User
 from webapp.models.actor import Actor
 from webapp.models.profile import Profile
-from webapp.models.activitypub.action import Action, Note
+from webapp.models.activitypub import Action, Note, Like
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ __all__ = [
     "Profile",
     "Action",
     "Note",
+    "Like",
     "Actor",
 ]
 

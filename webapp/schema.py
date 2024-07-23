@@ -10,16 +10,56 @@ https://github.com/digitalbazaar/pyld
 
 """
 
+from django.utils.translation import gettext as _
+
 
 # https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 
-# https://www.w3.org/TR/activitystreams-vocabulary/#activity-types
 
-
+"""
 context = {
     "@context": "https://www.w3.org/ns/activitystreams",
 }
+"""
 
+"""
+ACTIVITY_TYPES
+
+As defined by `w3.org`_
+
+.. _w3.org: https://www.w3.org/TR/activitystreams-vocabulary/#activity-types
+"""
+
+ACTIVITY_TYPES = {
+    "accept": _("Accept"),
+    "add": _("Add"),
+    "announce": _("Announce"),
+    "arrive ": _("Arrive"),
+    "block": _("Block"),
+    "create": _("Create"),
+    "delete": _("Delete"),
+    "dislike": _("Dislike"),
+    "flag": _("Flag"),
+    "follow": _("Follow"),
+    "ignore": _("Ignore"),
+    "invite": _("Invite"),
+    "join": _("Join"),
+    "leave": _("Leave"),
+    "like": _("Like"),
+    "listen": _("Listen"),
+    "move": _("Move"),
+    "offer": _("Offer"),
+    "question": _("Question"),
+    "reject": _("Reject"),
+    "read": _("Read"),
+    "remove": _("Remove"),
+    "tentativereject": _("TentativeReject"),
+    "tentativeaccept": _("TentativeAccept"),
+    "travel": _("Travel"),
+    "undo": _("Undo"),
+    "update": _("Update"),
+    "view": _("View"),
+}
 schemas = {
     "unknown": {
         "contentType": "application/ld+json",

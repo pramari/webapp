@@ -32,38 +32,8 @@ def get_activity_types():
     """
     Activity Streams 2.0 Abstraction Layer for Activity Types
     """
-    # from webapp.schema import ACTIVITY_TYPES
+    from webapp.schema import ACTIVITY_TYPES
 
-    ACTIVITY_TYPES = {
-        "accept": _("Accept"),
-        "add": _("Add"),
-        "announce": _("Announce"),
-        "arrive ": _("Arrive"),
-        "block": _("Block"),
-        "create": _("Create"),
-        "delete": _("Delete"),
-        "dislike": _("Dislike"),
-        "flag": _("Flag"),
-        "follow": _("Follow"),
-        "ignore": _("Ignore"),
-        "invite": _("Invite"),
-        "join": _("Join"),
-        "leave": _("Leave"),
-        "like": _("Like"),
-        "listen": _("Listen"),
-        "move": _("Move"),
-        "offer": _("Offer"),
-        "question": _("Question"),
-        "reject": _("Reject"),
-        "read": _("Read"),
-        "remove": _("Remove"),
-        "tentativereject": _("TentativeReject"),
-        "tentativeaccept": _("TentativeAccept"),
-        "travel": _("Travel"),
-        "undo": _("Undo"),
-        "update": _("Update"),
-        "view": _("View"),
-    }
     return ACTIVITY_TYPES
 
 

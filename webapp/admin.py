@@ -29,7 +29,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 
 from .forms import UserChangeForm, UserCreationForm
-from .models import Action, Actor, Note, Profile, User
+from .models import Action, Actor, Note, Profile, User, Like
 from .tasks import generateProfileKeyPair
 
 try:
@@ -98,7 +98,8 @@ class BaseGenericModelAdmin(object):
         if hasattr(self, "generic_fk_fields") and self.generic_fk_fields:
             for fields in self.generic_fk_fields:
                 if (
-                    fields["ct_field"] not in exclude and fields["fk_field"] not in exclude  # noqa: E501
+                    fields["ct_field"] not in exclude
+                    and fields["fk_field"] not in exclude  # noqa: E501
                 ):
                     fields["inline"] = prefix != ""
                     fields["prefix"] = prefix
@@ -113,7 +114,9 @@ class BaseGenericModelAdmin(object):
 
             for field in virtual_fields:
                 if (
-                    isinstance(field, GenericForeignKey) and field.ct_field not in exclude and field.fk_field not in exclude  # noqa: E501
+                    isinstance(field, GenericForeignKey)
+                    and field.ct_field not in exclude
+                    and field.fk_field not in exclude  # noqa: E501
                 ):
                     field_list.append(
                         {
@@ -251,6 +254,14 @@ class NoteAdmin(admin.ModelAdmin):
 admin.site.register(Note, NoteAdmin)
 
 
+class LikeAdmin(admin.ModelAdmin):
+    model = Like
+    list_display = ("actor", "object", "created_at")
+
+
+admin.site.register(Like, LikeAdmin)
+
+
 class ActorAdmin(admin.ModelAdmin):
     model = Actor
     list_display = (
@@ -266,16 +277,16 @@ admin.site.register(Actor, ActorAdmin)
 class ActionAdmin(GenericAdminModelAdmin):
     date_hierarchy = "timestamp"
     list_display = (
+        "target",
         "__str__",
         "timestamp",
         "actor",
         "activity_type",
-        "target",
         "action_object",
         "public",
     )
     list_editable = ("activity_type",)
-    list_filter = ("timestamp", "activity_type")
+    list_filter = ("target", "timestamp", "activity_type")
     # raw_id_fields = (
     #     "actor_content_type",
     #     "target_content_type",
@@ -508,7 +519,8 @@ class UserAdmin(admin.ModelAdmin):
 
         return TemplateResponse(
             request,
-            self.change_user_password_template or "admin/auth/user/change_password.html",  # noqa: E501
+            self.change_user_password_template
+            or "admin/auth/user/change_password.html",  # noqa: E501
             context,
         )
 
@@ -524,7 +536,8 @@ class UserAdmin(admin.ModelAdmin):
         # * The user has pressed the 'Save and add another' button
         # * We are adding a user in a popup
         if (
-            "_addanother" not in request.POST and IS_POPUP_VAR not in request.POST  # noqa: E501
+            "_addanother" not in request.POST
+            and IS_POPUP_VAR not in request.POST  # noqa: E501
         ):
             request.POST = request.POST.copy()
             request.POST["_continue"] = 1

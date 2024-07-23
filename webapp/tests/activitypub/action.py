@@ -12,8 +12,6 @@ class ActionTest(TestCase):
         self.a = Actor.objects.create(id=self.id)
         self.n = Note.objects.create(content="Hello, World!")
 
-        print(f"Actor: {self.a}, (id: {self.a.pk})")
-
     def test_signal(self):
         """
         Action Signal Test.
@@ -31,7 +29,6 @@ class ActionTest(TestCase):
         )  # noqa: E501
 
         for f, r in a:
-            print(f"{f}: {r}")
             self.assertTrue(isinstance(r, Action))
 
         self.assertEqual(Action.objects.count(), 1)

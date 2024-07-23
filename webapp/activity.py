@@ -141,8 +141,8 @@ class ActivityMessage(object):
         self.id = incoming.pop("id", None)
 
         # assert id is not None
-        type = incoming.pop("type", None)  # noqa: F841
-        # assert type in ACTIVITY_TYPES.keys()
+        self.type = incoming.pop("type", None)  # noqa: F841
+        # assert self.type in ACTIVITY_TYPES.keys()
 
         self.__dict__.update(incoming)
 

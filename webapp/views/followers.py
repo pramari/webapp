@@ -10,7 +10,13 @@ class FollowersView(ListView):
     """
     Provide a list of followers for a given profile.
 
-    .. url:: /accounts/<slug:slug>/followers/
+
+    .. note::
+        The reverse for this view is `actor-followers`.
+        The URL pattern `/accounts/<slug:slug>/followers/`
+
+    .. seealso::
+        The `W3C followers definition <https://www.w3.org/TR/activitystreams-vocabulary/#followers>`_.  # noqa
     """
 
     template_name = "activitypub/followers.html"

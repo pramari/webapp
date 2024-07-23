@@ -5,8 +5,7 @@
 """
 ActivityPub views to drive social interactions in pramari.de.
 
-See::
-    https://paul.kinlan.me/adding-activity-pub-to-your-static-site/
+Herein are NodeInfo and Version views.
 """
 
 import logging
@@ -19,7 +18,7 @@ from django.contrib.sites.models import Site
 
 from webapp.models import Profile
 
-from .. import __version__
+from webapp import __version__
 
 
 User = get_user_model()
@@ -86,30 +85,3 @@ class VersionView(View):
             },
         }
         return JsonResponse(r)
-
-    # class FollowView(View):
-    """
-    .. todo::
-        This is actually unused, is it?
-        Most likely this is not from the standard.
-    """
-
-
-#    @method_decorator(csrf_exempt)
-#    def dispatch(self, *args, **kwargs):
-#        return super().dispatch(*args, **kwargs)
-
-#    def post(self, request, *args, **kwargs):
-#        # from .models import Activity
-#        try:
-#            # Assuming the request payload is a valid JSON activity
-#            activity = request.json
-#        except ValueError:
-#            return JsonResponse({"error": "Invalid JSON"}, status=400)
-#
-#        # Extract the relevant information from the Follow activity
-#        actor = activity.get("actor")
-#        object = activity.get("object")
-
-# Return a success response
-#        return JsonResponse({"status": f"success: {actor} followed {object}"})

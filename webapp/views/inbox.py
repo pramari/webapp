@@ -22,6 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from webapp.models import Actor, Profile
 from webapp.signature import SignatureChecker
 from webapp.activities import follow, undo, create, delete, accept
+from webapp.activity import ActivityMessage
 
 from ..exceptions import ParseError  # noqa: E501
 from ..exceptions import ParseJSONError, ParseUTF8Error
@@ -70,39 +71,21 @@ class InboxView(DetailView):
             raise ParseUTF8Error(message)
 
         try:
-            # js = json.loads(body)
             activity = json.loads(body)
+            activity = ActivityMessage(activity)
         except ValueError as e:
             message = f"InboxView: Received invalid JSON {e}"
             logger.error(message)
             raise ParseJSONError(message) from e
-
-        # from webapp.activity import ActivityMessage
-
-        # activity = ActivityMessage(activity)
-
-        assert activity is not None
-        assert activity["type"] is not None
-
-        """
-        try:
-            activity = APObject.load(js)
-        except ValueError as e:
-            message = f"InboxView: Invalid activity message: {e}"
-            logger.error(message)
-            raise ParseActivityError(message) from e
-        """
-
-        """
-        .. todo::
-            - Verify the signature of the incoming activity
-        """
+        except ParseError as e:
+            logger.error(f"ParseError: {e}")
+            raise e
 
         signature = SignatureChecker().validate(request)
 
         logger.debug(f"Signature: {signature}")
 
-        return actorObject, activity, signature
+        return target, activity, signature
 
     def post(self, request, *args, **kwargs):
         """
@@ -124,13 +107,8 @@ class InboxView(DetailView):
             return JsonResponse({"error": str(e.message)}, status=400)
 
         if not signature:
-            # If the signature is not valid, return an error.
-            logger.debug(
-                "InboxView: Invalid Signature %s", message["actor"]
-            )  # noqa: E501
             return JsonResponse({"error": "Invalid Signature"}, status=400)
 
-        # Process the activity based on its type
         logger.debug(f"Activity Object: {message}")
 
         match message.get("type", None).lower():

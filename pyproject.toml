@@ -30,6 +30,7 @@ dependencies = [
   "pyyaml",
   "celery",
   "pyld",
+  "rfc3987",
   # "http-message-signatures",
   # "requests-http-signature",
   "PyJWT",

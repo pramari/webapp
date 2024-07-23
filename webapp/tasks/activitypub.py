@@ -162,12 +162,10 @@ def requestFollow(localID: str, remoteID: str) -> bool:
             "object": remoteID,
         }
     )
-    print(message)
 
     signed = signedRequest(  # noqa: F841,E501
         "POST", remoteActor.inbox, message, f"{localActor.id}#main-key"
     )  # noqa: F841,E501
-    print(signed.text)
     return True
 
 

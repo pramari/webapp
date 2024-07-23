@@ -10,17 +10,15 @@ logger = logging.getLogger(__name__)
 
 
 def action_decorator(f):
-    def wrapper(*args, **kwargs):
+    def wrapper(target, *args, **kwargs):
         from actstream import action
-
-        target = kwargs.get("target")
 
         try:
             actor = Actor.objects.get(id=kwargs["message"].get("actor"))
         except Actor.DoesNotExist:
             logger.error(f"Actor not found: {kwargs['message']['actor']}")
             return JsonResponse({"error": "Actor not found"}, status=404)
-        
+
         verb = kwargs["message"].get("type").lower()
         assert verb == f.__name__
         message = kwargs["message"]
@@ -35,38 +33,36 @@ def action_decorator(f):
 
 
 @action_decorator
-def create(self, target=target, message: dict) -> JsonResponse:
+def create(self, target, message: dict) -> JsonResponse:
     """
     Create a new `:model:Note`.
-    """
-    
-    """
-    Type: Note 
+
+    Type: Note
         {
-        'id': 'https://23.social/users/andreasofthings/statuses/112728133944821188', 
-        'type': 'Note', 
-        'summary': None, 
-        'inReplyTo': None, 
-        'published': '2024-07-04T12:06:57Z', 
-        'url': 'https://23.social/@andreasofthings/112728133944821188', 
-        'attributedTo': 'https://23.social/users/andreasofthings', 
-        'to': ['https://www.w3.org/ns/activitystreams#Public'], 
-        'cc': ['https://23.social/users/andreasofthings/followers'], 
-        'sensitive': False, 
-        'atomUri': 'https://23.social/users/andreasofthings/statuses/112728133944821188', 
-        'inReplyToAtomUri': None, 
-        'conversation': 'tag:23.social,2024-07-04:objectId=4444254:objectType=Conversation', 
-        'content': '<p>I implemented http signatures (both sign and verify) for the fediverse.</p><p>In python.</p><p>I feel like I made fire.</p>', 
-        'contentMap': {'en': '<p>I implemented http signatures (both sign and verify) for the fediverse.</p><p>In python.</p><p>I feel like I made fire.</p>'}, 
-        'attachment': [], 
-        'tag': [], 
+        'id': 'https://23.social/users/andreasofthings/statuses/112728133944821188',
+        'type': 'Note',
+        'summary': None,
+        'inReplyTo': None,
+        'published': '2024-07-04T12:06:57Z',
+        'url': 'https://23.social/@andreasofthings/112728133944821188',
+        'attributedTo': 'https://23.social/users/andreasofthings',
+        'to': ['https://www.w3.org/ns/activitystreams#Public'],
+        'cc': ['https://23.social/users/andreasofthings/followers'],
+        'sensitive': False,
+        'atomUri': 'https://23.social/users/andreasofthings/statuses/112728133944821188',
+        'inReplyToAtomUri': None,
+        'conversation': 'tag:23.social,2024-07-04:objectId=4444254:objectType=Conversation',
+        'content': '<p>I implemented http signatures (both sign and verify) for the fediverse.</p><p>In python.</p><p>I feel like I made fire.</p>',
+        'contentMap': {'en': '<p>I implemented http signatures (both sign and verify) for the fediverse.</p><p>In python.</p><p>I feel like I made fire.</p>'},
+        'attachment': [],
+        'tag': [],
         'replies': {
-            'id': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies', 
-            'type': 'Collection', 
+            'id': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies',
+            'type': 'Collection',
             'first': {
-                'type': 'CollectionPage', 
-                'next': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies?only_other_accounts=true&page=true', 
-                'partOf': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies', 
+                'type': 'CollectionPage',
+                'next': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies?only_other_accounts=true&page=true',
+                'partOf': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies',
                 'items': []
             }
         }
@@ -76,13 +72,14 @@ def create(self, target=target, message: dict) -> JsonResponse:
     logger.error(f"Create Object: {message}")
 
     note = message.get("object")
-    if note.type = "Note":
-        localNote = Note.objects.create(
+    if note.type == "Note":
+        from webapp.models import Note
+
+        localNote = Note.objects.create(  # noqa: F841
             remoteID=note.get("id"),
             content=note.get("content"),
-            a
             published=note.get("published"),
-        )
+        )  # noqa: F841
 
     return JsonResponse(
         {

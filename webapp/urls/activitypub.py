@@ -23,7 +23,10 @@ from webapp.views import (
     OutboxView,
     FollowersView,
     FollowingView,
-    LikesView,
+    LikeCreateView,
+    LikeDetailView,
+    LikeDeleteView,
+    LikeListView,
     NoteView,
     ActionView,
     SignatureView,
@@ -64,9 +67,16 @@ urlpatterns = [
     ),
     path(
         r"accounts/<slug:slug>/likes",
-        LikesView.as_view(),
+        LikeListView.as_view(),
         name="actor-likes",
     ),
+]
+
+urlpatterns += [
+    path(r"like/", LikeCreateView.as_view(), name="like-create"),
+    path(r"like/list", LikeCreateView.as_view(), name="like-list"),
+    path(r"like/<uuid:pk>", LikeDetailView.as_view(), name="like-detail"),
+    path(r"like/<uuid:pk>/delete", LikeDeleteView.as_view(), name="like-delete"),  # noqa: E501
 ]
 
 urlpatterns += [
