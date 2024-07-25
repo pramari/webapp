@@ -23,7 +23,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
-from django.utils.translation import gettext
+# from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -475,7 +475,7 @@ class UserAdmin(admin.ModelAdmin):
                     request, form, None
                 )  # noqa: E501
                 self.log_change(request, user, change_message)
-                msg = gettext("Password changed successfully.")
+                msg = _("Password changed successfully.")
                 messages.success(request, msg)
                 update_session_auth_hash(request, form.user)
                 return HttpResponseRedirect(

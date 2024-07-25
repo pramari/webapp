@@ -215,6 +215,40 @@ def acceptFollow(message: dict) -> bool:
     return True
 
 
+@shared_task
+def sendLike(localActor: str, object: str) -> bool:
+    """
+    .. py:function:: sendLike(actor: dict, object: dict) -> bool
+    .. todo::
+        - Add tests
+        - Implement
+    """
+    from webapp.signature import signedRequest
+    from webapp.tasks.activitypub import Fetch
+
+    fetched = Fetch(object)
+    remote = fetched.get("attributedTo")
+    actor_inbox = Fetch(remote).get("inbox")
+    """
+    {'@context': ['https://www.w3.org/ns/activitystreams', {'ostatus': 'http://ostatus.org#', 'atomUri': 'ostatus:atomUri', 'inReplyToAtomUri': 'ostatus:inReplyToAtomUri', 'conversation': 'ostatus:conversation', 'sensitive': 'as:sensitive', 'toot': 'http://joinmastodon.org/ns#', 'votersCount': 'toot:votersCount'}], 'id': 'https://23.social/users/andreasofthings/statuses/112826215633359303', 'type': 'Note', 'summary': None, 'inReplyTo': None, 'published': '2024-07-21T19:50:25Z', 'url': 'https://23.social/@andreasofthings/112826215633359303', 'attributedTo': 'https://23.social/users/andreasofthings', 'to': ['https://www.w3.org/ns/activitystreams#Public'], 'cc': ['https://23.social/users/andreasofthings/followers'], 'sensitive': False, 'atomUri': 'https://23.social/users/andreasofthings/statuses/112826215633359303', 'inReplyToAtomUri': None, 'conversation': 'tag:23.social,2024-07-21:objectId=4978426:objectType=Conversation', 'content': '<p>Harris/Ocasio-Cortez</p>', 'contentMap': {'en': '<p>Harris/Ocasio-Cortez</p>'}, 'attachment': [], 'tag': [], 'replies': {'id': 'https://23.social/users/andreasofthings/statuses/112826215633359303/replies', 'type': 'Collection', 'first': {'type': 'CollectionPage', 'next': 'https://23.social/users/andreasofthings/statuses/112826215633359303/replies?min_id=112826217149903948&page=true', 'partOf': 'https://23.social/users/andreasofthings/statuses/112826215633359303/replies', 'items': ['https://23.social/users/andreasofthings/statuses/112826217149903948']}}}  # noqa: E501
+    """
+
+    message = json.dumps(
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Like",
+            "actor": localActor,
+            "object": object,
+        }
+    )
+
+    signed = signedRequest(  # noqa: F841,E501
+        "POST", actor_inbox, message, f"{localActor}#main-key"
+    )  # noqa: F841,E501
+
+    return True
+
+
 """
 @shared_task
 def activitypub_send_task(user: User, message: str) -> Tuple[bool]:

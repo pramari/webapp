@@ -4,6 +4,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from webapp.models import Like
 from django import forms
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LikesForm(forms.ModelForm):
@@ -31,7 +34,15 @@ class LikeCreateView(CreateView):
         return context
 
     def form_valid(self, form):
-        # Do something with the form data
+        from webapp.tasks.activitypub import sendLike
+        from webapp.signals import action
+
+        action.send(
+            sender=self.request.user.profile_set.get().actor,
+            verb="liked",
+            object=self.object,
+        )
+        sendLike.delay(self.request.user.profile_set.get().actor.id, object)
         return super().form_valid(form)
 
 
@@ -54,6 +65,7 @@ class LikeListView(ListView):
 
     def get_queryset(self):
         from webapp.models import Profile
+
         slug = self.kwargs.get("slug")
         actor = Profile.objects.get(slug=slug).actor
         return Like.objects.all().order_by("-created_at").filter(actor=actor)

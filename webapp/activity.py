@@ -1,5 +1,8 @@
 """
-https://docs.python.org/3/library/typing.html
+.. py:module:: activity
+    :synopsis: ActivityPub schema and utilities
+
+    https://docs.python.org/3/library/typing.html
 """
 
 import json

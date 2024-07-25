@@ -14,39 +14,10 @@ class Note(models.Model):
     """
     Activity Streams 2.0
 
-    Type: Note
-        {
-        'id': 'https://23.social/users/andreasofthings/statuses/112728133944821188',  # noqa: E501
-        'type': 'Note',
-        'summary': None,
-        'inReplyTo': None,
-        'published': '2024-07-04T12:06:57Z',
-        'url': 'https://23.social/@andreasofthings/112728133944821188',
-        'attributedTo': 'https://23.social/users/andreasofthings',
-        'to': ['https://www.w3.org/ns/activitystreams#Public'],
-        'cc': ['https://23.social/users/andreasofthings/followers'],
-        'sensitive': False,
-        'atomUri': 'https://23.social/users/andreasofthings/statuses/112728133944821188',  # noqa: E501
-        'inReplyToAtomUri': None,
-        'conversation': 'tag:23.social,2024-07-04:objectId=4444254:objectType=Conversation',
-        'content': '<p>I implemented http signatures (both sign and verify) for the fediverse.</p><p>In python.</p><p>I feel like I made fire.</p>',  # noqa: E501
-        'contentMap': {'en': '<p>I implemented http signatures (both sign and verify) for the fediverse.</p><p>In python.</p><p>I feel like I made fire.</p>'},  # noqa: E501
-        'attachment': [],
-        'tag': [],
-        'replies':
-            {
-            'id': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies',
-            'type': 'Collection',
-            'first':
-                {
-                'type': 'CollectionPage',
-                'next': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies?only_other_accounts=true&page=true',
-                'partOf': 'https://23.social/users/andreasofthings/statuses/112728133944821188/replies',
-                'items': []
-            }
-        }
-    }  # noqa: E501
+    .. Type: Note
 
+    .. seealso::
+        Activity `Extended Type Note <https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note>`_  # noqa: E501
     """
 
     class Meta:

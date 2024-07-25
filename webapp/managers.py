@@ -1,5 +1,6 @@
 from django.db.models import Manager, Model
-from django.db.models.query import QuerySet, EmptyQuerySet
+from django.db.models.query import QuerySet
+from django.db.models.query import EmptyQuerySet
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.conf import settings
 

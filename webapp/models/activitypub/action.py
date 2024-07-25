@@ -144,7 +144,8 @@ class Action(models.Model):
     def get_absolute_url(self):
         return reverse("action_detail", args=[self.pk])
 
-    def get_activity_id(self):
+    @property
+    def activity_id(self):
         from django.contrib.sites.models import Site
 
         base = f"https://{Site.objects.get_current().domain}"

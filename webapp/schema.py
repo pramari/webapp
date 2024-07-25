@@ -10,7 +10,7 @@ https://github.com/digitalbazaar/pyld
 
 """
 
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 # https://www.w3.org/TR/activitystreams-vocabulary/#actor-types

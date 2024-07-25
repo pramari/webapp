@@ -1,9 +1,12 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.signals import user_logged_in  # type: ignore
-from django.dispatch import receiver  # type: ignore
 from django.dispatch import Signal
+from django.contrib.contenttypes.models import ContentType
+from django.apps import apps
+from django.utils import timezone
+from webapp.registry import check
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,6 @@ def signalLogger(request, **kwargs):
     logger.error(kwargs)
 
 
-# @receiver(action)
 def signalHandler(*args, **kwargs):
     """
     Handler function to create Action instance upon action signal call.
@@ -50,11 +52,6 @@ def signalHandler(*args, **kwargs):
         action.send(sender=a, actor=a, verb="created", action_object=n)
 
     """
-    from django.contrib.contenttypes.models import ContentType
-    from django.apps import apps
-    from django.utils import timezone
-    from webapp.registry import check
-
     logger.debug("Entering signal handler")
     signal = kwargs.pop("signal", None)  # noqa: F841
     actor = kwargs.pop("sender")
@@ -103,12 +100,11 @@ def signalHandler(*args, **kwargs):
     return activity
 
 
+"""
 @receiver(user_logged_in, sender=User)
 def userLogin(sender, request, user, signal, *args, **kwargs):
-    """
-    Signal to process UserLogin
-    """
     pass
+"""
 
 
 def createUserProfile(sender, instance, created, **kwargs):
@@ -119,6 +115,7 @@ def createUserProfile(sender, instance, created, **kwargs):
     """
     if created:  # not user.profile:
         from .models import Profile, Actor
+
         # from django.contrib.sites.models import Site
 
         # base = f"https://{Site.objects.get_current().domain}"
@@ -127,11 +124,3 @@ def createUserProfile(sender, instance, created, **kwargs):
         Actor.objects.create(
             profile=profile, type="Person", id=f"{base}/@{instance.username}"
         )
-        # if not self.slug:
-        #    self.slug = slugify(self.user.username)  # pylint: disable=E1101
-
-
-"""
-def make_activitypub_handle_on_profile(sender, instance, **kwargs):
-    instance.ap_id = "https://pramari.de" + instance.get_absolute_url
-"""

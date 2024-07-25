@@ -34,9 +34,9 @@ class InboxView(DetailView):
     """
     InboxView
 
-    Leveraging the Django Rest Framework to process incoming ActivityPub
-    Messages, rely on `serializers:ActivitySerializer` to validate the
-    incoming data.
+    .. seealso::
+        `ActivityPub Inbox <https://www.w3.org/TR/activitypub/#inbox>_`
+
     """
 
     model = Profile
@@ -44,17 +44,19 @@ class InboxView(DetailView):
     def parse(self, request, *args, **kwargs) -> tuple[Actor, dict, bool]:
         """
         Parse the incoming activity request.
+
         Fulfils two tasks:
-            - Parse the incoming JSON activity
-            - Verify the signature of the incoming activity
 
-        Parameters::
+        - Parse the incoming JSON activity
+        - Verify the signature of the incoming activity
 
-            request (Request): The incoming request
+        :param request: The incoming request
+        :param args: The positional arguments
+        :param kwargs: The keyword arguments
 
-        Returns::
-
-            dict: The parsed activity
+        :return: tuple
+            Actor: The target actor
+            message: The parsed activity
             bool: The status of the signature verification
         """
         logger.debug(f"Request Headers: {request.headers}")

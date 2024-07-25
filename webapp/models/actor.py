@@ -37,7 +37,28 @@ class Actor(models.Model):
     """
     Activity Streams 2.0
 
-    Actor
+    .. type:: Actor
+
+    .. seealso::
+        `Actor Objects <https://www.w3.org/TR/activitypub/#actor-objects>`_
+
+    `:py:class:Actor` objects **MUST** have, in addition to the properties i
+    mandated by `Object Identifiers <https://www.w3.org/TR/activitypub/#obj-id>`_,  # noqa: E501
+    the following properties:
+
+    - `:py:meth:inbox` (Link to an `OrderedCollection`): An `Inbox` is a
+    `Collection` to which `Items` are added, typically by the `owner` of
+    the `Inbox`. The `inbox` property is REQUIRED for `Actor` objects.
+    - `outbox` (Link to an `OrderedCollection`): An `Outbox` is a
+    `Collection` to which `Items` are added, typically by the `owner`
+    of the `Outbox`. The `outbox` property is REQUIRED for `Actor` objects.
+    - `following` (Link to an `OrderedCollection`): A collection of
+    `actors` that this `actor` is `following`. The `following` property
+    is OPTIONAL for `Actor` objects.
+    - `followers` (Link to an `OrderedCollection`): A collection of `actors`
+    that follow this `actor`. The `followers` property is OPTIONAL for `Actor`
+    objects.
+
     """
 
     profile = models.ForeignKey(

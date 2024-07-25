@@ -30,4 +30,4 @@ class Like(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse("like-detail", kwargs={'pk':self.id})
+        return reverse("like-detail", kwargs={'pk': self.id})

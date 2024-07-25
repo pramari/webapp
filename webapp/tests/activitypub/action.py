@@ -38,3 +38,10 @@ class ActionTest(TestCase):
 
         p = Actor.objects.get(id=self.id)
         Action.objects.actor(p)
+
+    def test_action_serializer(self):
+        from webapp.models import Action
+        from webapp.serializers.action import ActionSerializer
+        a = Action.objects.all()  # noqa: F841
+        s = ActionSerializer(a)
+        print("Serializer data: %s" % s.data)

@@ -12,7 +12,9 @@ class ActionView(DetailView):
 
     "who did what to whom"
 
-    .. url:: /action/<uuid:uuid>/
+    .. seealso::
+        :py:mod:webapp.urls.activitypub
+        `/action/<uuid:uuid>/`
     """
 
     model = Action
@@ -21,7 +23,17 @@ class ActionView(DetailView):
 
 class NoteView(DetailView):
     """
-    .. url:: /action/<uuid:uuid>/
+    Boilerplate for ActivityPub Note view.
+
+    A Note is a short written work, typically
+    less than a single paragraph in length.
+
+    This view will return a json-ld representation
+    of the note if requested.
+
+    .. seealso::
+        :py:mod:webapp.urls.activitypub
+        `/action/<uuid:uuid>/`
 
     """
 
