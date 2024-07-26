@@ -1,6 +1,6 @@
 from django.db import models
 
-from webapp.models import Actor
+from webapp.models.activitypub.actor import Actor
 from webapp.validators import validate_iri
 
 import uuid
