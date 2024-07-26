@@ -277,16 +277,16 @@ admin.site.register(Actor, ActorAdmin)
 class ActionAdmin(GenericAdminModelAdmin):
     date_hierarchy = "timestamp"
     list_display = (
-        "target",
+        # "target",
         "__str__",
         "timestamp",
-        "actor",
-        "activity_type",
-        "action_object",
+        # "actor",
+        # "activity_type",
+        # "action_object",
         "public",
     )
-    list_editable = ("activity_type",)
-    list_filter = ("target", "timestamp", "activity_type")
+    # list_editable = ("activity_type",)
+    list_filter = ("timestamp", )  # "activity_type")
     # raw_id_fields = (
     #     "actor_content_type",
     #     "target_content_type",

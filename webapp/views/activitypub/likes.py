@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import DeleteView
 from django.views.generic.detail import DetailView
@@ -18,7 +19,7 @@ class LikesForm(forms.ModelForm):
         }
 
 
-class LikeCreateView(CreateView):
+class LikeCreateView(LoginRequiredMixin, CreateView):
     template_name = "activitypub/like_create.html"
     form_class = LikesForm
     model = Like
@@ -46,18 +47,18 @@ class LikeCreateView(CreateView):
         return super().form_valid(form)
 
 
-class LikeDetailView(DetailView):
+class LikeDetailView(LoginRequiredMixin, DetailView):
     model = Like
     template_name = "activitypub/like_detail.html"
 
 
-class LikeDeleteView(DeleteView):
+class LikeDeleteView(LoginRequiredMixin, DeleteView):
     model = Like
     template_name = "activitypub/like_delete.html"
     success_url = "/thanks/"
 
 
-class LikeListView(ListView):
+class LikeListView(LoginRequiredMixin, ListView):
     model = Like
     template_name = "activitypub/like_list.html"
     context_object_name = "likes"

@@ -46,9 +46,9 @@ class ActorView(DetailView):
         username = f"{actor.profile.user}"  # pylint: disable=E1101
         inbox = f"{base}{actor.inbox}"
         outbox = f"{base}{actor.outbox}"  # noqa: F841
-        followers = f"{base}{actor.followers_url}"  # noqa: F841
-        following = f"{base}{actor.following_url}"  # noqa: F841
-        likes = f"{base}{actor.likes_url}"  # noqa: F841
+        followers = f"{base}{actor.followers}"  # noqa: F841
+        following = f"{base}{actor.following}"  # noqa: F841
+        liked = f"{base}{actor.liked}"  # noqa: F841
         public_key = actor.profile.get_public_key(base)
 
         jsonld = {
@@ -65,7 +65,7 @@ class ActorView(DetailView):
             "outbox": outbox,
             "followers": followers,
             "following": following,
-            "likes": likes,
+            "liked": liked,
             "publicKey": public_key,
             "image": {
                 "type": "Image",

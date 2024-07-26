@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class InboxView(DetailView):
     """
-    InboxView
+    .. py:class:: webapp.views.InboxView
 
     .. seealso::
         `ActivityPub Inbox <https://www.w3.org/TR/activitypub/#inbox>_`

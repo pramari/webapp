@@ -51,7 +51,7 @@ class FollowingView(ListView):
         actor = self.get_queryset().get().actor
         print(f"actor: {actor}")
         print("-----------")
-        totalItems = actor.following.count()  # noqa: F841
+        totalItems = actor.follows.count()  # noqa: F841
 
         orderedCollection.update({"totalItems": totalItems})
         if not page:

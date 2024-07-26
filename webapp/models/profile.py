@@ -150,10 +150,13 @@ class Profile(models.Model):
     def get_public_key(self, base: str) -> dict[str, str]:
         """
         Return the public key as JSON-LD.
+
+        .. todo::
+            refactor this live as part of the actor class
         """
         actorid = f"{self.actor.id}"
         public_key_data = {
-            "id": f"{self.actor.get_key_id}",
+            "id": f"{self.actor.key_id}",
             "owner": actorid,
             "publicKeyPem": self.public_key_pem,
         }

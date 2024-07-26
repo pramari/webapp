@@ -35,27 +35,49 @@ def get_actor_types():
 
 class Actor(models.Model):
     """
-    Activity Streams 2.0
+    Activity Streams 2.0 - Actor
+
+
 
     .. type:: Actor
 
     .. seealso::
         `Actor Objects <https://www.w3.org/TR/activitypub/#actor-objects>`_
 
-    `:py:class:Actor` objects **MUST** have, in addition to the properties i
-    mandated by `Object Identifiers <https://www.w3.org/TR/activitypub/#obj-id>`_,  # noqa: E501
-    the following properties:
+    .. py:class:: webapp.models.Actor
 
-    - `:py:meth:inbox` (Link to an `OrderedCollection`): An `Inbox` is a
-    `Collection` to which `Items` are added, typically by the `owner` of
-    the `Inbox`. The `inbox` property is REQUIRED for `Actor` objects.
-    - `outbox` (Link to an `OrderedCollection`): An `Outbox` is a
-    `Collection` to which `Items` are added, typically by the `owner`
-    of the `Outbox`. The `outbox` property is REQUIRED for `Actor` objects.
-    - `following` (Link to an `OrderedCollection`): A collection of
-    `actors` that this `actor` is `following`. The `following` property
-    is OPTIONAL for `Actor` objects.
-    - `followers` (Link to an `OrderedCollection`): A collection of `actors`
+        `:py:class:Actor` objects **MUST** have, in addition to the properties
+        mandated by `Object Identifiers <https://www.w3.org/TR/activitypub/#obj-id>`_,  # noqa: E501
+        the following properties:
+
+    .. py:property:: `self.inbox`
+
+        :type: URL
+        :classmethod:
+
+        return a link to an `OrderedCollection`: An `Inbox` is a
+        `Collection` to which `Items` are added, typically by the `owner` of
+        the `Inbox`. The `inbox` property is REQUIRED for `Actor` objects.
+
+    .. py:property:: outbox
+
+        :type: URL
+        :classmethod:
+
+        return a link to an `OrderedCollection`: An `Outbox` is a
+        `Collection` to which `Items` are added, typically by the `owner`
+        of the `Outbox`. The `outbox` property is REQUIRED for `Actor` objects.
+
+    .. py:property:: following
+
+        :type: URL
+        :classmethod:
+
+        return a link to an `OrderedCollection`: A collection of
+        `actors` that this `actor` is `following`. The `following` property
+        is OPTIONAL for `Actor` objects.
+
+    - `:py:attr:followers` (Link to an `OrderedCollection`): A collection of `actors`
     that follow this `actor`. The `followers` property is OPTIONAL for `Actor`
     objects.
 
@@ -76,8 +98,8 @@ class Actor(models.Model):
     # slug = profile.slug
     # preferredUsername = profie.preferredUsername
 
-    following = models.ManyToManyField(
-        "self", related_name="followers", symmetrical=False, blank=True
+    follows = models.ManyToManyField(
+        "self", related_name="followed_by", symmetrical=False, blank=True
     )
 
     class Meta:
@@ -85,14 +107,10 @@ class Actor(models.Model):
         verbose_name_plural = _("Actors (Activity Streams 2.0)")
         unique_together = ("id", "type", "profile")
 
-    @property
-    def remote(self):
-        """
-        If this does not belong to a profile, it is remote.
-        """
-        return self.profile_set.count() == 0
-
     def __str__(self):
+        """
+        Return the string representation of the object.
+        """
         return self.id
 
     @property
@@ -112,9 +130,24 @@ class Actor(models.Model):
         return f"{view}"
 
     @property
+    def remote(self):
+        """
+        If this does not belong to a profile, it is remote.
+        """
+        return self.profile_set.count() == 0
+
+    @property
     def inbox(self):
         """
+        :py:attr:inbox returns a link to an `OrderedCollection`
+
         Return the URL of the inbox.
+
+        :: return: URL
+        :: rtype: str
+
+        .. seealso::
+            :py:class:`webapp.views.inbox.InboxView`
 
         """
         return reverse(
@@ -125,7 +158,15 @@ class Actor(models.Model):
     @property
     def outbox(self):
         """
+        :py:attr:outbox returns a link to an `OrderedCollection`
+
         Return the URL of the outbox.
+
+        :: return: URL
+        :: rtype: str
+
+        .. seealso::
+            :py:class:`webapp.views.outbox.OutboxView`
         """
         return reverse(
             "actor-outbox",
@@ -133,9 +174,12 @@ class Actor(models.Model):
         )
 
     @property
-    def followers_url(self):
+    def followers(self):
         """
         Return the URL of the followers.
+
+        .. seealso::
+            :py:class:`webapp.views.followers.FollowersView`
         """
         return reverse(
             "actor-followers",
@@ -143,9 +187,16 @@ class Actor(models.Model):
         )
 
     @property
-    def following_url(self):
+    def following(self):
         """
-        Return the URL of the following.
+            :py:attr:following returns a link to an `OrderedCollection`, a
+            collection of `actors` that this `actor` is `following`.
+
+        .. seealso::
+            :py:class:FollowingView
+
+        :: return: URL
+        :: rtype: str
         """
         return reverse(
             "actor-following",
@@ -153,9 +204,17 @@ class Actor(models.Model):
         )
 
     @property
-    def likes_url(self):
+    def liked(self):
         """
-        Return the URL for likes.
+        Following the definition of the `Activity Streams 2.0` specification,
+        the `liked` property returns a link to a collection of `Objects` tha
+        this `actor` has `liked`.
+
+        Return the URL to the likes-collection.
+
+        :: return: URL
+        :: rtype: str
+
         """
         return reverse(
             "actor-likes",
@@ -163,8 +222,8 @@ class Actor(models.Model):
         )
 
     @property
-    def get_key_id(self) -> str:
+    def key_id(self) -> str:
         """
-        Return the key id.
+        The :py:class:Actor main key-id.
         """
         return f"{self.id}#main-key"
