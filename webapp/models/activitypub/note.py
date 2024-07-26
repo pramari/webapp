@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.timezone import now
 import uuid
 
-from webapp.models import Actor
+from webapp.models.activitypub.actor import Actor
 import logging
 
 logger = logging.getLogger(__name__)
