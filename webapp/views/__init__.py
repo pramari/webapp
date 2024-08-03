@@ -14,12 +14,12 @@ from .web import (
     SearchView,
 )
 
-from .webfinger import WebFingerView
-from .actor import ActorView
-from .inbox import InboxView
-from .outbox import OutboxView
-from .followers import FollowersView
-from .following import FollowingView
+from .activitypub.webfinger import WebFingerView
+from .activitypub.actor import ActorView
+from .activitypub.inbox import InboxView
+from .activitypub.outbox import OutboxView
+from .activitypub.followers import FollowersView
+from .activitypub.following import FollowingView
 from webapp.views.activitypub.likes import (
     LikeCreateView,
     LikeDeleteView,
@@ -33,7 +33,7 @@ from .activitypub import (
     # FollowView,
 )
 
-from .activity import (
+from .activitypub.activity import (
     NoteView,
     ActionView,
 )

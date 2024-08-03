@@ -75,18 +75,16 @@ def canonicalize(ld_data: dict) -> dict:
 class ActivityObject:
     """
     ActivityObject is a base class for all ActivityPub objects.
- 
+
     .. seealso::
-        The W3C definition of `ActivityPub Objects <https://www.w3.org/ns/activitystreams>_`.
+        The W3C definition of `ActivityPub Objects <https://www.w3.org/ns/activitystreams>_`.  # noqa: E501
     """
-    def __init__(self, *args, **kwargs) -> None:
-        self.type = "Object"
-        message = kwargs.pop("message", {})
+    def __init__(self, message, *args, **kwargs) -> None:
         match message:
             case dict():
                 self._fromDict(incoming=message)
             case str():
-                self._fromDict(incoming=json.loads(message))
+                self._fromStr(incoming=message)
             case _:
                 raise ValueError("Invalid type for message")
 
@@ -103,7 +101,7 @@ class ActivityObject:
         """ """
         if not isinstance(incoming, dict):
             raise ValueError("Invalid type for incoming")
-        self.__dict__.update(json.loads(incoming))
+        self.__dict__.update(incoming)
 
     def _fromJson(self, incoming: str) -> None:
         """ """

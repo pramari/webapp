@@ -10,7 +10,7 @@ import logging
 from django.http import JsonResponse
 from django.views import View
 from django.contrib.sites.models import Site
-from ..models import Profile
+from ...models import Profile
 
 logger = logging.getLogger(__name__)
 

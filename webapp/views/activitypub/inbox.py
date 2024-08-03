@@ -24,8 +24,8 @@ from webapp.signature import SignatureChecker
 from webapp.activities import follow, undo, create, delete, accept
 from webapp.activity import ActivityMessage
 
-from ..exceptions import ParseError  # noqa: E501
-from ..exceptions import ParseJSONError, ParseUTF8Error
+from ...exceptions import ParseError  # noqa: E501
+from ...exceptions import ParseJSONError, ParseUTF8Error
 
 logger = logging.getLogger(__name__)
 

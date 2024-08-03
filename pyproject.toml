@@ -68,10 +68,10 @@ legacy_tox_ini = """
         pytest
         # behave
         coverage
-        flake8
+        ruff
 
     commands =
-        flake8 webapp
+        ruff check webapp
         coverage run --source webapp tests/manage.py test --settings=tests.settings
         coverage xml
         # behave
