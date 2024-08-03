@@ -144,6 +144,17 @@ class Actor(models.Model):
         return f"{view}"
 
     @property
+    def keyID(self) -> str:
+        """
+        The :py:class:Actor main key-id.
+
+        .. todo::
+            This currently lives in the parent profile.
+            It should be moved to the Actor object.
+        """
+        return f"{self.id}#main-key"
+
+    @property
     def remote(self):
         """
         If this does not belong to a profile, it is remote.
@@ -249,10 +260,3 @@ class Actor(models.Model):
             "actor-likes",
             args=[self.profile.slug],
         )
-
-    @property
-    def key_id(self) -> str:
-        """
-        The :py:class:Actor main key-id.
-        """
-        return f"{self.id}#main-key"

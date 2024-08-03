@@ -13,6 +13,8 @@ class ActorView(DetailView):
     Return the actor object for a given user.
     User is identified by the slug.
 
+    :py:class:`webapp.models.activitypub.Actor` is the model that hosts the actor object.
+
     Example urlconf:
         ```
         path(
