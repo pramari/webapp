@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: ai ts=4 sts=4 et sw=4 nu
+# noqa: E501
+
+"""
+.. module:: signals
+
+"""
+
 import logging
 
 from django.contrib.auth import get_user_model
@@ -21,9 +31,11 @@ def signalLogger(request, **kwargs):
     """
     Generic signal logger.
 
-    args:
-        request: The request object.
-        **kwargs: Additional keyword arguments.
+    This function logs the request and any additional keyword arguments.
+
+
+    :param request: The request object.
+    :param \*\*kwargs: Additional keyword arguments.  # noqa: W605
     """
     logger.error(request)
     logger.error(kwargs)
@@ -36,22 +48,45 @@ def signalHandler(*args, **kwargs):
     This function is called whenever an action signal is called. It creates an
     instance of the Action model and saves it to the database.
 
-    Reference:
-        https://github.com/justquick/django-activity-stream/blob/main/actstream/actions.py
+    :param  \*args: Additional arguments for the action.  # noqa: W605
+    :param  \*\*kwargs: Additional keyword arguments to an action. # noqa: W605
 
-    Args:
-        verb (str): The action verb.
-        **kwargs: Additional keyword arguments for the action.
+    :return: The created Action instance.
 
-    Usage:
+    This function will handle signals sent by the action signal. It will create
+    an instance of the Action model and save it to the database. It will allow
+    the following pattern:
+
+    .. testsetup::
         from webapp.models import Actor, Note
         from webapp.signals import action
+
+    This function will handle signals sent by the action signal. It will create
+    an instance of the Action model and save it to the database. With that, one
+    can easily track actions in the application. It will allow the following
+    pattern:
+
+    .. doctest::
         a = Actor.objects.get(id="https://pramari.de/@andreas")
         n = Note.objects.all()[0]
 
-        action.send(sender=a, actor=a, verb="created", action_object=n)
+    Interacting with the signal will allow to do the following:
 
-    """
+    .. testcode::
+        action.send(sender=a, actor=a, verb="created", action_object=n)
+        action.send(sender=a, actor=a, verb="liked", action_object=n)
+
+    This will create two actions in the database. One for the creation of the
+    note and one for the like action. The actions can be queried as follows:
+
+    .. testoutput::
+        Action.objects.count() > 0
+
+    .. seealso::
+        `Django Activity Streams <https://github.com/justquick/django-activity-stream/blob/main/actstream/actions.py>`_, from which this is heavily inspired.  # noqa: E501
+
+    """  # noqa: E501
+
     logger.debug("Entering signal handler")
     signal = kwargs.pop("signal", None)  # noqa: F841
     actor = kwargs.pop("sender")

@@ -37,49 +37,63 @@ class Actor(models.Model):
     """
     Activity Streams 2.0 - Actor
 
+    :py:class:webapp.models.activitypub:Actor objects **MUST** have, in
+    addition to the properties mandated by `Object Identifiers <https://www.w3.org/TR/activitypub/#obj-id>`_,  # noqa: E501
+    the following properties:
 
 
-    .. type:: Actor
+        - `actorID` -  A unique `URL` for the `Actor`. The `id` property is *REQUIRED*
+        for `Actor` objects.
+
+        - `inbox` - A link to an `OrderedCollection` of `Activities` that this
+        `Actor` has received, typically from clients. The `inbox` property is
+        *REQUIRED* for `Actor` objects.
+
+        - `outbox` - A link to an `OrderedCollection` of `Activities` that this
+        `Actor` has published, such as `Posts`, `Comments`, etc. The `outbox`
+        property is *REQUIRED* for `Actor` objects.
+
+        - `followers` - A link to an `OrderedCollection` of `actors` that are
+        `following` this `actor`. The `followers` property is *OPTIONAL* for
+        `Actor` objects.
+
+        - `following` - A link to an `OrderedCollection` of `actors` that this
+        `actor` is `following`. The `following` property is *OPTIONAL* for
+        `Actor` objects.
+
+        - `liked` - A link to an `OrderedCollection` of `Objects` that this
+        `actor` has `liked`. The `liked` property is *OPTIONAL* for `Actor`
+        objects.
+
 
     .. seealso::
-        `Actor Objects <https://www.w3.org/TR/activitypub/#actor-objects>`_
+        The definition of W3C ActivityPub `Actor Objects <https://www.w3.org/TR/activitypub/#actor-objects>`_
 
-    .. py:class:: webapp.models.Actor
+    .. testsetup::
 
-        `:py:class:Actor` objects **MUST** have, in addition to the properties
-        mandated by `Object Identifiers <https://www.w3.org/TR/activitypub/#obj-id>`_,  # noqa: E501
-        the following properties:
+        from webapp.models.actor import Actor
 
-    .. py:property:: `self.inbox`
+    The model persists the `Actor` object in the database. The `Actor` object
+    provides all the necessary properties to interact with the
+    `Activity Streams 2.0` specification. Just like with regualar Django
+    objects, you can create, update, delete and query `Actor` objects:
 
-        :type: URL
-        :classmethod:
+    .. doctest::
 
-        return a link to an `OrderedCollection`: An `Inbox` is a
-        `Collection` to which `Items` are added, typically by the `owner` of
-        the `Inbox`. The `inbox` property is REQUIRED for `Actor` objects.
+        Actor.objects.create(id='https://example.com/actor')
+        actor = Actor.objects.get(id='https://example.com/actor')
 
-    .. py:property:: outbox
+    The `Actor` object will provide required and some optional properties:
 
-        :type: URL
-        :classmethod:
+    .. testcode::
 
-        return a link to an `OrderedCollection`: An `Outbox` is a
-        `Collection` to which `Items` are added, typically by the `owner`
-        of the `Outbox`. The `outbox` property is REQUIRED for `Actor` objects.
+        actor.inbox
 
-    .. py:property:: following
+    This will produce the full url for the `inbox` of the actor:
 
-        :type: URL
-        :classmethod:
+    .. testoutput::
 
-        return a link to an `OrderedCollection`: A collection of
-        `actors` that this `actor` is `following`. The `following` property
-        is OPTIONAL for `Actor` objects.
-
-    - `:py:attr:followers` (Link to an `OrderedCollection`): A collection of `actors`
-    that follow this `actor`. The `followers` property is OPTIONAL for `Actor`
-    objects.
+        'https://example.com/actor/inbox'
 
     """
 
@@ -141,7 +155,10 @@ class Actor(models.Model):
         """
         :py:attr:inbox returns a link to an `OrderedCollection`
 
-        Return the URL of the inbox.
+        Return the URL of the `inbox`, that contains an `OrderedCollection`.
+        An `Inbox` is a `Collection` to which `Items` are added, typically by
+        the `owner` of the `Inbox`. The `inbox` property is *REQUIRED* for
+        `Actor` objects.
 
         :: return: URL
         :: rtype: str
@@ -176,10 +193,20 @@ class Actor(models.Model):
     @property
     def followers(self):
         """
-        Return the URL of the followers.
+        `followers` will return the URL to an `OrderedCollection`, a
+        collection of `actors` that are `following` this `actor`.
+
+        :return: URL
 
         .. seealso::
+            The view to serve this `OrderedCollection` is served by
             :py:class:`webapp.views.followers.FollowersView`
+
+        .. seealso:: Following the `Activity Streams 2.0` specification for
+            `followers <https://www.w3.org/TR/activitypub/#actor-objects>`_,
+            the `followers` property is OPTIONAL.
+
+
         """
         return reverse(
             "actor-followers",
@@ -189,14 +216,16 @@ class Actor(models.Model):
     @property
     def following(self):
         """
-            :py:attr:following returns a link to an `OrderedCollection`, a
-            collection of `actors` that this `actor` is `following`.
+        `following` returns a link to an `OrderedCollection`, a
+        collection of `actors` that this `actor` is `following`.
+
+        :return: URL
+        :rtype: str
 
         .. seealso::
-            :py:class:FollowingView
+            The view to serve this `OrderedCollection` is served by
+            :py:class:`webapp.views.following.FollowingView`
 
-        :: return: URL
-        :: rtype: str
         """
         return reverse(
             "actor-following",

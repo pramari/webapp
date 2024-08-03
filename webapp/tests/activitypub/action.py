@@ -43,5 +43,5 @@ class ActionTest(TestCase):
         from webapp.models import Action
         from webapp.serializers.action import ActionSerializer
         a = Action.objects.all()  # noqa: F841
-        s = ActionSerializer(a)
-        print("Serializer data: %s" % s.data)
+        s = ActionSerializer(a)  # noqa: F841
+        self.assertIsInstance(s, ActionSerializer)

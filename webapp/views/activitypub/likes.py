@@ -6,6 +6,8 @@ from django.views.generic.list import ListView
 from webapp.models import Like
 from django import forms
 import logging
+from webapp.tasks.activitypub import sendLike
+from webapp.signals import action
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,7 @@ class LikesForm(forms.ModelForm):
         model = Like
         fields = ["actor", "object"]
         widgets = {
-            "likes": forms.URLInput(attrs={"class": "form-control"}),
+            "object": forms.URLInput(attrs={"class": "form-control"}),
         }
 
 
@@ -35,15 +37,26 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        from webapp.tasks.activitypub import sendLike
-        from webapp.signals import action
+        """
+        Upon succesful save, send a signal to the
+        activitypub app to send a like to the object.
+
+        .. todo:: This should be done through a signal in first place.
+
+        .. seealso:: :py:func:`webapp.signals.action`
+
+        .. seealso:: :py:func:`webapp.tasks.activitypub.sendLike`
+
+        """
+        self.object = form.save()
 
         action.send(
             sender=self.request.user.profile_set.get().actor,
-            verb="liked",
-            object=self.object,
+            verb="like",
+            action_object=self.object,
         )
-        sendLike.delay(self.request.user.profile_set.get().actor.id, object)
+        actor = self.request.user.profile_set.get().actor
+        sendLike.delay(actor.id, form.cleaned_data["object"])
         return super().form_valid(form)
 
 
@@ -56,6 +69,27 @@ class LikeDeleteView(LoginRequiredMixin, DeleteView):
     model = Like
     template_name = "activitypub/like_delete.html"
     success_url = "/thanks/"
+
+    def form_valid(self, form):
+        """
+        :py:method:form_valid validates form input.
+
+        Upon succesful save, send a signal to the
+        activitypub app to undo the like of the object.
+
+        .. seealso:: To learn about signals see: :py:func:`webapp.signals.action`
+
+        .. seealso:: :py:func:`webapp.tasks.activitypub.sendUndo`
+
+        .. seealso:: `ActivityPub Undo <https://www.w3.org/TR/activitystreams-vocabulary/#dfn-undo>`_  # noqa: E501
+        """
+        self.object = form.save()
+        action.send(
+            sender=self.request.user.profile_set.get().actor,
+            verb="undo",
+            action_object=self.object,
+        )
+        return super().form_valid(form)
 
 
 class LikeListView(LoginRequiredMixin, ListView):

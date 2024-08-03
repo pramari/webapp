@@ -8,8 +8,7 @@
 import json
 import logging
 from typing import List
-
-# from webapp.schema import ACTIVITY_TYPES
+from dataclasses import dataclass
 
 
 logger = logging.getLogger(__name__)
@@ -72,17 +71,45 @@ def canonicalize(ld_data: dict) -> dict:
     return jsonld.compact(jsonld.expand(ld_data), context)
 
 
-class ActivityObject(object):
+@dataclass
+class ActivityObject:
+    """
+    ActivityObject is a base class for all ActivityPub objects.
+ 
+    .. seealso::
+        The W3C definition of `ActivityPub Objects <https://www.w3.org/ns/activitystreams>_`.
+    """
     def __init__(self, *args, **kwargs) -> None:
         self.type = "Object"
+        message = kwargs.pop("message", {})
+        match message:
+            case dict():
+                self._fromDict(incoming=message)
+            case str():
+                self._fromDict(incoming=json.loads(message))
+            case _:
+                raise ValueError("Invalid type for message")
+
         super().__init__(*args, **kwargs)
 
+    """
     def toDict(self, *args, **kwargs) -> dict:
         result = {"@context": "https://www.w3.org/ns/activitystreams"}
-        result.update(
-            {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
-        )  # noqa: E501
+        result.update({k: v for k, v in self.__dict__.items() if not k.startswith("_")})  # noqa: E501
         return result
+    """
+
+    def _fromDict(self, incoming: dict) -> None:
+        """ """
+        if not isinstance(incoming, dict):
+            raise ValueError("Invalid type for incoming")
+        self.__dict__.update(json.loads(incoming))
+
+    def _fromJson(self, incoming: str) -> None:
+        """ """
+        if not isinstance(incoming, str):
+            raise ValueError("Invalid type for incoming")
+        self.__dict__.update(json.loads(incoming))
 
     attachment: List[dict]  # Object
     attributedTo: List[dict]  # Person or Organization

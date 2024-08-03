@@ -218,13 +218,18 @@ def acceptFollow(message: dict) -> bool:
 @shared_task
 def sendLike(localActor: str, object: str) -> bool:
     """
-    .. py:function:: sendLike(actor: dict, object: dict) -> bool
+    .. py:function:: sendLike(localActor: dict, object: str) -> bool
     .. todo::
         - Add tests
         - Implement
     """
     from webapp.signature import signedRequest
     from webapp.tasks.activitypub import Fetch
+
+    if not isinstance(localActor, str):
+        raise ValueError("localActor must be a string")
+    if not isinstance(object, str):
+        raise ValueError("object must be a string")
 
     fetched = Fetch(object)
     remote = fetched.get("attributedTo")
@@ -242,6 +247,9 @@ def sendLike(localActor: str, object: str) -> bool:
         }
     )
 
+    print("sending like")
+    print(f"to: {actor_inbox}")
+    print(message)
     signed = signedRequest(  # noqa: F841,E501
         "POST", actor_inbox, message, f"{localActor}#main-key"
     )  # noqa: F841,E501

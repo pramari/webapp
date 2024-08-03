@@ -49,8 +49,6 @@ class FollowingView(ListView):
     def jsonld(self, request, *args, **kwargs):
         page = request.GET.get("page", None)
         actor = self.get_queryset().get().actor
-        print(f"actor: {actor}")
-        print("-----------")
         totalItems = actor.follows.count()  # noqa: F841
 
         orderedCollection.update({"totalItems": totalItems})

@@ -3,21 +3,16 @@
 # vim: ts=4 et sw=4 sts=4
 
 """
-======
-WebApp
-======
+WebApp is a Django-based web application that provides models
+and views for a user profiles and federation capaibilities in web
+application.
 
-.. py:module:: webapp
-    :synopsis: WebApp is a Django-based web application that provides models
-    and views for a user profiles and federation capaibilities in web
-    application.
-
-The WebApp is a Django-based web application that provides models and views for
-a web application. The WebApp is a Django-based web application foundation
-providing user-profiles, user-roles, and user-permissions.
+:py:module:WebApp is a Django-based web application that provides models and
+views for a web application. The WebApp is a Django-based web application
+foundation providing user-profiles, user-roles, and user-permissions.
 Along with that, it aims to add federation capabilities, such as ActivityPub.
 
-`webapp` may really have been named `fedapp`.
+`webapp` should really have been named `fedapp`.
 
 In its structure, it is not different from other Django-based web applications.
 """

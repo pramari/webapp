@@ -23,7 +23,7 @@ class WebAppConfig(AppConfig):
         # pylint: disable=C0415,C0103
         from django.db.models.signals import post_save
         from webapp import registry
-        from webapp.models import Actor, Note  # , Profile
+        from webapp.models import Actor, Note, Like  # , Profile
         from webapp.signals import (
             action,
             signalHandler,
@@ -54,6 +54,8 @@ class WebAppConfig(AppConfig):
             logger.error("Successfully registered 'Actor'")
             registry.register(Note)
             logger.error("Successfully registered 'Note'")
+            registry.register(Like)
+            logger.error("Successfully registered 'Like'")
             # registry.register(Profile)
             # logger.error("Successfully registered 'Profile'")
         except ImportError as e:

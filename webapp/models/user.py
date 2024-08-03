@@ -17,9 +17,8 @@ class User(AbstractUser):
     Custom User Model.
 
     Configure in `settings.py`:
-        ```
-        AUTH_USER_MODEL = "webapp.User"
-        ```
+
+        `AUTH_USER_MODEL = "webapp.User"`
 
     Model extends AbstractUser to store information
     specific to an APC User. Core function is to return
@@ -32,10 +31,11 @@ class User(AbstractUser):
         """
         Return Verification Status.
 
-        Return True if any of the registered email
-        addresses have been verified. Filter all `EmailAddress`es
-        for this user `self`.
+        :return: True if any of the registered email addresses have been
+            verified. Filter all `EmailAddress`es for this user `self`.
+
         """
+
         queryset = EmailAddress.objects.filter(  # noqa: E501
             user=self, verified=True, primary=True
         )
@@ -43,15 +43,15 @@ class User(AbstractUser):
 
     public = models.BooleanField(default=False)
     consent = models.BooleanField(default=False)
-    # dob = models.DateField(blank=True, null=True)
 
     @property
     def services(self) -> list[str]:
         """
         List all services a user has associated.
 
-        returns:
-            List of strings.
+        :return: List of strings.
+
+        .. todo:: Implement this method working.
         """
         accounts = []
         try:

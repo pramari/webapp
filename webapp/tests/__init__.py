@@ -11,6 +11,7 @@ from webapp.tests.following import FollowingTest
 from webapp.tests.inbox import InboxTest
 from webapp.tests.outbox import OutboxTest
 from webapp.tests.webfinger import WebfingerTests
+from webapp.tests.activitypub.activityobject import ActivityObjectTest
 
 # from webapp.tests.signature import SignatureTest
 
@@ -25,6 +26,7 @@ __all__ = [
     "WebfingerTests",
     # "SignatureTest",
     "ActivityStreamsTest",
+    "ActivityObjectTest",
 ]
 
 
