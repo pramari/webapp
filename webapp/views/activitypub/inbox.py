@@ -63,6 +63,7 @@ class InboxView(DetailView):
         signature = False
 
         target = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841, E501
+        target = self.get_object()  # this should work with DetailView?
 
         try:
             # Assuming the request payload is a valid JSON activity

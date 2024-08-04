@@ -38,3 +38,10 @@ class ActorTestCase(TestCase):
             # noqa: E501
         )
         self.assertEqual(result["Content-Type"], "application/json")
+
+    def test_serialization(self):
+        from webapp.models import Actor
+        actor = Actor.objects.get(username=self.username)
+        from webapp.serializers import ActorSerializer
+        serialized = ActorSerializer(actor)
+        self.assertEqual(serialized.data["username"], self.username)

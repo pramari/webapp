@@ -143,14 +143,21 @@ class Actor(models.Model):
         view = reverse("actor-view", args=[str(self.profile.user)])
         return f"{view}"
 
+    @property 
+    def publicKey(self):
+        """
+        The :py:class:Actor main public-key.
+ 
+        .. todo::
+            This currently lives in the parent profile.
+            It should be moved to the Actor object.
+        """
+        return f"{self.profile.public_key_pem}"
+
     @property
     def keyID(self) -> str:
         """
         The :py:class:Actor main key-id.
-
-        .. todo::
-            This currently lives in the parent profile.
-            It should be moved to the Actor object.
         """
         return f"{self.id}#main-key"
 

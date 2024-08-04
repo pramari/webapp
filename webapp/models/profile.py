@@ -49,9 +49,6 @@ class Profile(models.Model):
         unique=True,
     )  # noqa: E501
 
-    # key_id = models.CharField(
-    #    max_length=255, blank=True, help_text=_("Key ID"), unique=True
-    # )  # noqa: E501
     public_key_pem = models.TextField(blank=True, help_text=_("Public Key"))
     private_key_pem = models.TextField(blank=True, help_text=_("Private Key"))
 
@@ -147,7 +144,7 @@ class Profile(models.Model):
             result = None
         return result
 
-    def get_public_key(self, base: str) -> dict[str, str]:
+    def old_public_key(self, base: str) -> dict[str, str]:
         """
         Return the public key as JSON-LD.
 
@@ -156,7 +153,7 @@ class Profile(models.Model):
         """
         actorid = f"{self.actor.id}"
         public_key_data = {
-            "id": f"{self.actor.key_id}",
+            "id": f"{self.actor.keyID}",
             "owner": actorid,
             "publicKeyPem": self.public_key_pem,
         }

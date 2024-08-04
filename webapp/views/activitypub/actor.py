@@ -51,7 +51,7 @@ class ActorView(DetailView):
         followers = f"{base}{actor.followers}"  # noqa: F841
         following = f"{base}{actor.following}"  # noqa: F841
         liked = f"{base}{actor.liked}"  # noqa: F841
-        public_key = actor.profile.get_public_key(base)
+        publicKey = f"{actor.publicKey}"
 
         jsonld = {
             "@context": [
@@ -68,7 +68,11 @@ class ActorView(DetailView):
             "followers": followers,
             "following": following,
             "liked": liked,
-            "publicKey": public_key,
+            "publicKey": {
+                "id": f"{actor.keyID}",
+                "owner": actorid,
+                "publicKeyPem": publicKey,
+            },
             "image": {
                 "type": "Image",
                 "mediaType": "image/jpeg",
