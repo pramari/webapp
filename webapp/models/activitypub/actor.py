@@ -12,8 +12,10 @@ from django.db import models
 from webapp.models.profile import Profile
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
-
-# from django.contrib.sites.models import Site
+from webapp.validators import validate_iri
+from functools import cached_property
+from webapp.exceptions import RemoteActorError
+from django.contrib.sites.models import Site
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +104,11 @@ class Actor(models.Model):
     )
 
     id = models.CharField(
-        max_length=255, primary_key=True, unique=True, blank=False
+        max_length=255,
+        primary_key=True,
+        unique=True,
+        blank=False,
+        validators=[validate_iri],
     )  # noqa: E501
 
     type = models.CharField(
@@ -113,7 +119,7 @@ class Actor(models.Model):
     # preferredUsername = profie.preferredUsername
 
     follows = models.ManyToManyField(
-        "self", related_name="followed_by", symmetrical=False, blank=True
+        "self", related_name="followed_by", symmetrical=False, blank=True  # , through="Follow"
     )
 
     class Meta:
@@ -137,36 +143,43 @@ class Actor(models.Model):
             This is not the same as `get_absolute_url`, but the actor ID,
             that is stored in self.ap_id
             Currently only the `actor-view` does use this.
+
+        .. deprecated:: 0.1.0
+            see :py:attr:`id` instead.
         """
 
         # return self.ap_id
         view = reverse("actor-view", args=[str(self.profile.user)])
         return f"{view}"
 
-    @property 
-    def publicKey(self):
+    @cached_property
+    def remote(self):
+        """
+        If this does not belong to a profile, it is remote.
+        """
+        return self.profile is None
+
+    @property
+    def publicKey(self) -> str:
         """
         The :py:class:Actor main public-key.
- 
+
         .. todo::
             This currently lives in the parent profile.
             It should be moved to the Actor object.
         """
-        return f"{self.profile.public_key_pem}"
+        if not self.remote:
+            return f"{self.profile.public_key_pem}"
+        raise RemoteActorError("Remote actors do not have a public key.")
 
     @property
     def keyID(self) -> str:
         """
         The :py:class:Actor main key-id.
         """
-        return f"{self.id}#main-key"
-
-    @property
-    def remote(self):
-        """
-        If this does not belong to a profile, it is remote.
-        """
-        return self.profile_set.count() == 0
+        if not self.remote:
+            return f"{self.id}#main-key"
+        raise RemoteActorError("Remote actors do not have a key-id.")
 
     @property
     def inbox(self):
@@ -185,10 +198,13 @@ class Actor(models.Model):
             :py:class:`webapp.views.inbox.InboxView`
 
         """
-        return reverse(
-            "actor-inbox",
-            args=[self.profile.slug],
-        )
+        if not self.remote:
+            base = f"https://{Site.objects.get_current().domain}"
+            return f"{base}%s" % reverse(
+                "actor-inbox",
+                args=[self.profile.slug],
+            )
+        raise RemoteActorError("Remote actors do not have a local inbox.")
 
     @property
     def outbox(self):
@@ -267,3 +283,13 @@ class Actor(models.Model):
             "actor-likes",
             args=[self.profile.slug],
         )
+
+
+"""
+class Follow(models.Model):
+    actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
+    object = models.ForeignKey(Actor, on_delete=models.CASCADE)
+    id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
+    accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
+"""
+

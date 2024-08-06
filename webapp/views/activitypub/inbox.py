@@ -21,7 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from webapp.models import Actor, Profile
 from webapp.signature import SignatureChecker
 from webapp.activities import follow, undo, create, delete, accept
-from webapp.activity import ActivityMessage
+from webapp.activity import ActivityObject
 
 from ...exceptions import ParseError  # noqa: E501
 from ...exceptions import ParseJSONError, ParseUTF8Error
@@ -49,20 +49,25 @@ class InboxView(DetailView):
         - Parse the incoming JSON activity
         - Verify the signature of the incoming activity
 
+        Actor. The object that performed the activity.
+        Verb. The verb phrase that identifies the action of the activity.
+        Action Object. (Optional) The object linked to the action itself.
+        Target. (Optional) The object to which the activity was performed.
+
+
         :param request: The incoming request
         :param args: The positional arguments
         :param kwargs: The keyword arguments
 
         :return: tuple
-            Actor: The target actor
-            message: The parsed activity
             bool: The status of the signature verification
+            Actor: The actor object that performed the activity.
+            Verb: The verb phrase that identifies the action of the activity.
+            Action Object: The object linked to the action itself.
+            Target: The object to which the activity was performed.
+            message: The parsed activity
         """
         logger.debug(f"Request Headers: {request.headers}")
-        signature = False
-
-        target = self.get_object()  # this should work with DetailView?
-        logger.error(target)
 
         try:
             # Assuming the request payload is a valid JSON activity
@@ -74,7 +79,7 @@ class InboxView(DetailView):
 
         try:
             activity = json.loads(body)
-            activity = ActivityMessage(activity)
+            activity = ActivityObject(activity)
         except ValueError as e:
             message = f"InboxView: Received invalid JSON {e}"
             logger.error(message)
@@ -84,10 +89,11 @@ class InboxView(DetailView):
             raise e
 
         signature = SignatureChecker().validate(request)
-
         logger.debug(f"Signature: {signature}")
 
-        return target, activity, signature
+        target = self.get_object()  # this should work with DetailView?
+
+        return signature, activity, target
 
     def post(self, request, *args, **kwargs):
         """
@@ -103,7 +109,7 @@ class InboxView(DetailView):
         # Process the incoming activity
 
         try:
-            target, message, signature = self.parse(request, args, kwargs)
+            signature, activity, target = self.parse(request, args, kwargs)
         except ParseError as e:
             logger.debug("InboxView: ParseError %s", e)
             return JsonResponse({"error": str(e.message)}, status=400)
@@ -111,21 +117,21 @@ class InboxView(DetailView):
         if not signature:
             return JsonResponse({"error": "Invalid Signature"}, status=400)
 
-        logger.debug(f"Activity Object: {message}")
+        logger.debug(f"Activity Object: {activity}")
 
-        match message.get("type", None).lower():
+        match activity.type.lower():
             case "follow":
-                result = follow(target=target, message=message)
+                result = follow(target=target.actor, activity=activity)
             case "undo":
-                result = undo(target=target, message=message)
+                result = undo(target=target.actor, activity=activity)
             case "create":
-                result = create(target=target, message=message)
+                result = create(target=target.actor, message=activity)
             case "delete":
-                result = delete(target=target, message=message)
+                result = delete(target=target.actor, message=activity)
             case "accept":
-                result = accept(target=target, message=message)
+                result = accept(target=target.actor, message=activity)
             case _:
-                error = f"InboxView: Unsupported activity: {message.type}"
+                error = f"InboxView: Unsupported activity: {activity.type}"
                 logger.error(f"Actvity error: {error}")
                 return JsonResponse({"error": error}, status=400)  # noqa: E501
 

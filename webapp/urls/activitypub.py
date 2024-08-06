@@ -66,7 +66,7 @@ urlpatterns = [
         name="actor-following",
     ),
     path(
-        r"accounts/<slug:slug>/likes",
+        r"accounts/<slug:slug>/liked",
         LikeListView.as_view(),
         name="actor-likes",
     ),

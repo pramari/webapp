@@ -6,6 +6,7 @@ import socket
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
+from webapp.activity import ActivityObject
 
 # from taktivitypub.actor import Actor
 # from taktivitypub import Follow
@@ -170,7 +171,7 @@ def requestFollow(localID: str, remoteID: str) -> bool:
 
 
 @shared_task
-def acceptFollow(message: dict) -> bool:
+def acceptFollow(inbox: str, activity: ActivityObject, accept_id: str) -> bool:
     """
     >>> from webapp.signature import signedRequest
     >>> r = signedRequest(
@@ -180,39 +181,33 @@ def acceptFollow(message: dict) -> bool:
         "https://pramari.de/@andreas#main-key"
     )
     """
-    from webapp.signals import action
     from webapp.signature import signedRequest
-    from webapp.models import Actor as ActorModel
-    from django.contrib.site.models import Site
+    from django.contrib.sites.models import Site
 
     base = Site.objects.get_current().domain
-
-    remoteActor = getRemoteActor(message.get("actor"))
-    remoteActorObject = ActorModel.objects.get(id=remoteActor.get("id"))
-    localActorObject = ActorModel.objects.get(id=message.get("object"))
-
-    o = action.send(
-        sender=localActorObject, verb="Accept", target=remoteActorObject
-    )  # noqa: E501, BLK100
 
     message = json.dumps(
         {
             "@context": "https://www.w3.org/ns/activitystreams",
             "type": "Accept",
-            "id": f"https://{base}{o[0][1].id}",
-            "actor": remoteActor.get("id"),
-            "object": message,
+            "id": f"https://{base}/{accept_id}",
+            "actor": activity.object,
+            "object": activity.toDict(),
         }
     )
+    logger.error(f"acceptFollow to {activity.actor}")
+    logger.error(f"with message: {message=}")
 
     signed = signedRequest(  # noqa: F841,E501
         "POST",
-        remoteActor.get("inbox"),
+        inbox,
         message,
-        f"{localActorObject.id}#main-key",  # noqa: E501
+        f"{activity.object}#main-key",  # noqa: E501
     )  # noqa: F841,E501
 
-    return True
+    if signed.ok:
+        return True
+    return False
 
 
 @shared_task

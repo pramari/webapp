@@ -4,27 +4,30 @@ from webapp.models import Actor
 
 from django.http import JsonResponse
 from django.conf import settings
+from webapp.activity import ActivityObject
+from webapp.tasks.activitypub import getRemoteActor
+from webapp.signals import action
 
 
 logger = logging.getLogger(__name__)
 
 
 def action_decorator(f):
-    def wrapper(target, *args, **kwargs):
-        from actstream import action
+    def wrapper(target, activity: ActivityObject, *args, **kwargs):
+        try:
+            localactor = Actor.objects.get(id=activity.actor)
+        except Actor.DoesNotExist:
+            logger.error(f"Actor not found: '{activity.actor}'")
+            return JsonResponse({"error": "Actor f'{activity.actor}' not found"}, status=404)
 
         try:
-            actor = Actor.objects.get(id=kwargs["message"].get("actor"))
+            action_object = Actor.objects.get(id=activity.object)
         except Actor.DoesNotExist:
-            logger.error(f"Actor not found: {kwargs['message']['actor']}")
-            return JsonResponse({"error": "Actor not found"}, status=404)
-
-        verb = kwargs["message"].get("type").lower()
-        assert verb == f.__name__
-        message = kwargs["message"]
+            logger.error(f"Object not found: '{activity.object}'")
+            return JsonResponse({"error": "Actor f'{activity.object}' not found"}, status=404)
 
         action.send(
-            sender=actor, verb=verb, target=target, description=message
+            sender=localactor, verb=activity.type, action_object=action_object, target=target
         )  # noqa: E501
 
         return f(*args, **kwargs)
@@ -106,67 +109,70 @@ def delete(self, message: dict) -> JsonResponse:
     return JsonResponse({"status": "cannot delete"})
 
 
-def undo(self, message: dict):
+@action_decorator
+def undo(target: Actor, activity: ActivityObject):
     """
     Undo an activity.
     """
-    logger.error(f"Activity Object: {message}")
+    logger.error(f"Activity Object: {activity}")
 
-    if not message.get("id"):
+    if not activity.id:
         return JsonResponse({"status": "missing id"})
 
-    if not message.get("object"):
+    if not activity.object:
         return JsonResponse({"status": "missing object"})
 
     if (
-        not message.get("actor")
-        and message.get("type").lower() != "follow"  # noqa: E501
+        not activity.actor
+        and activity.type.lower() != "follow"  # noqa: E501
     ):  # noqa: E501
         return JsonResponse({"status": "invalid object"})
 
     try:
         followers = (  # noqa: F841, E501
-            Actor.objects.filter(ap_id=message.get("object"))
+            Actor.objects.filter(id=activity.object)
             .get()
             .followers  # noqa: E501
         )
     except Actor.DoesNotExist:
         return JsonResponse({"status": "no followers"})
 
-    logger.error(f"{message['actor']} unfollowed {message['object']}")
+    logger.error(f"{activity.actor} has undone {activity.object}")
     # followers.delete()
 
     return JsonResponse({"status": "undone"})
 
 
-def follow(self, message: dict):
-    """{
+@action_decorator
+def follow(target: Actor, activity: ActivityObject):
+    """
+
+    :param target: The target of the activity
+    :param activity: The :py:class:webapp.activity.Activityobject`
+
+    .. example:: Follow Activity {
         '@context': 'https://www.w3.org/ns/activitystreams',
         'id': 'https://neumeier.org/o/ca357ba56dc24554bfb7646a1db2c67f',
         'type': 'Follow',
         'actor': 'https://neumeier.org',
         'object': 'https://pramari.de/accounts/andreas/'
-    }"""
+    }
+
+    """
 
     logger.debug(
-        f"Activity: {message['actor']} wants to follow {message['object']}"
+        f"Activity: {activity.actor} wants to follow {activity.object}"
     )  # noqa: E501
 
-    assert message["actor"] is not None
-
-    # from webapp.tasks.activitypub import getRemoteActor
+    assert activity.actor is not None
 
     # Step 1:
     # Create the actor profile in the database
     # and establish the follow relationship
-
-    """
-    remoteActor, created = Actor.objects.get_or_create(id=message.get('actor'))  # noqa: E501
-    localActor = Actor.objects.get(id=message['object'])
-    remoteActor.follows.set(localActor)
-    if created:
-        remoteActor.save()
-    """
+    remoteActor = getRemoteActor(activity.actor)
+    remoteActorObject = Actor.objects.get(id=remoteActor.get("id"))
+    localActorObject = Actor.objects.get(id=activity.object)
+    remoteActorObject.follows.add(localActorObject) 
 
     # Step 2:
     # Confirm the follow request to message.actor
@@ -178,13 +184,17 @@ def follow(self, message: dict):
         - Store the follow request in the database
         - Defer the task to the background
     """
+    action_id = action.send(
+        sender=localActorObject, verb="Accept", action_object=remoteActorObject
+    )  # noqa: E501, BLK100
+
     if settings.DEBUG:
-        acceptFollow(message)
+        acceptFollow(remoteActor.inbox, activity, action_id[0][1].id)
     else:
-        acceptFollow.delay(message)
+        acceptFollow.delay(remoteActor.inbox, activity, action_id[0][1].id)
 
     return JsonResponse(
         {
-            "status": f"OK: {message['actor']} followed {message['object']}"  # noqa: E501
+            "status": f"OK: {activity.actor} followed {activity.object}"  # noqa: E501
         }  # noqa: E501
     )

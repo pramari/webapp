@@ -8,11 +8,11 @@ from django.urls import reverse
 from webapp.tests.activitypub.inbox import InboxTest
 from webapp.tests.activitypub.action import ActionTest
 from webapp.tests.activitypub.remote import ActivityPubTest
+from webapp.tests.activitypub.activityobject import ActivityObjectTest
 from webapp.tests.following import FollowingTest
 from webapp.tests.outbox import OutboxTest
 from webapp.tests.webfinger import WebfingerTests
-from webapp.tests.activitypub.activityobject import ActivityObjectTest
-
+from webapp.tests.actor import ActorTestCase
 # from webapp.tests.signature import SignatureTest
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "ActionTest",
     "ActivityPubTest",
+    "ActorTestCase",
     "InboxTest",
     "OutboxTest",
     "FollowingTest",

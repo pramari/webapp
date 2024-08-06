@@ -39,13 +39,3 @@ class ActivityPubTest(TestCase):
         result = getRemoteActor("https://pramari.de/@andreas")
 
         self.assertEqual(result.get("id"), "https://pramari.de/@andreas")  # noqa: E501
-
-    def test_document(self):
-        from webapp.activity import ActivityMessage
-        from webapp.tests.messages import w3c_activity
-
-        for verb, messages in w3c_activity.items():
-            for message in messages:
-                activity = ActivityMessage(message=message)  # noqa: F841
-                # apactivity = APObject.load(message)  # noqa: F841
-                # self.assertEqual(activity.toDict(), message)

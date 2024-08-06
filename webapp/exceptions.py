@@ -13,6 +13,10 @@ class WebappException(Exception):
         super().__init__(message)
 
 
+class RemoteActorError(WebappException):
+    """An error while trying to access properties on a remote actor."""
+    pass
+
 class ParseError(WebappException):
     """Generic error while parsing something."""
 
