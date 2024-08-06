@@ -8,8 +8,13 @@
 import json
 import logging
 from typing import List
+from typing import Optional
+from decimal import Decimal
 from dataclasses import dataclass
+from dataclasses import field
 
+# from dataclasses import asdict
+# from dataclasses import is_dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +61,10 @@ def canonicalize(ld_data: dict) -> dict:
                 "blurhash": "toot:blurhash",
                 "Emoji": "toot:Emoji",
                 "featured": {"@id": "toot:featured", "@type": "@id"},
-                "focalPoint": {"@container": "@list", "@id": "toot:focalPoint"},  # noqa: E501
+                "focalPoint": {
+                    "@container": "@list",
+                    "@id": "toot:focalPoint",
+                },  # noqa: E501
                 "Hashtag": "as:Hashtag",
                 "indexable": "toot:indexable",
                 "manuallyApprovesFollowers": "as:manuallyApprovesFollowers",
@@ -72,6 +80,23 @@ def canonicalize(ld_data: dict) -> dict:
 
 
 @dataclass
+class Location:
+    """
+    ActivityPub/Streams representation of of Location objects.
+
+    .. seealso::
+        The W3C definition of `location <https://www.w3.org/TR/activitystreams-vocabulary/#dfn-location>`_ in ActivityStreams.  # noqa: E501
+    """
+
+    name: str
+    type: str = "Place"
+    longitude: Decimal = 0
+    latitude: Decimal = 0
+    altitude: Decimal = 0
+    units: str = "m"
+
+
+@dataclass
 class ActivityObject:
     """
     ActivityObject is a base class for all ActivityPub objects.
@@ -79,68 +104,78 @@ class ActivityObject:
     .. seealso::
         The W3C definition of `ActivityPub Objects <https://www.w3.org/ns/activitystreams>_`.  # noqa: E501
     """
+
     def __init__(self, message, *args, **kwargs) -> None:
+        """
+        Initialize the ActivityObject.
+
+        .. todo::
+            sanitize the incoming message
+        """
         match message:
             case dict():
-                self._fromDict(incoming=message)
+                self._fromDict(incoming=canonicalize(message))
             case str():
-                self._fromStr(incoming=message)
+                self._fromDict(incoming=canonicalize(json.loads(message)))
             case _:
                 raise ValueError("Invalid type for message")
 
         super().__init__(*args, **kwargs)
 
-    """
     def toDict(self, *args, **kwargs) -> dict:
-        result = {"@context": "https://www.w3.org/ns/activitystreams"}
-        result.update({k: v for k, v in self.__dict__.items() if not k.startswith("_")})  # noqa: E501
+        """Conveniece method to convert the object to a dictionary."""
+        result = {  # noqa: F841
+            k: v for k, v in self.__dict__.items() if not k.startswith("_")
+        }  # noqa: E501
         return result
-    """
+        # return asdict(self)
 
     def _fromDict(self, incoming: dict) -> None:
-        """ """
+        """
+        Initialize the object from a dictionary.
+
+        .. important::
+            The function will convert '@context' to 'context' and update
+            the object. Python dataclasses do not allow '@' in attribute names.
+        """
         if not isinstance(incoming, dict):
             raise ValueError("Invalid type for incoming")
+        self.__dict__.update({"context": incoming.pop("@context", None)})
         self.__dict__.update(incoming)
 
-    def _fromJson(self, incoming: str) -> None:
-        """ """
-        if not isinstance(incoming, str):
-            raise ValueError("Invalid type for incoming")
-        self.__dict__.update(json.loads(incoming))
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.toDict()})"
 
-    attachment: List[dict]  # Object
-    attributedTo: List[dict]  # Person or Organization
-    audience: List[dict]  # Collection
-    content: str
-    context: dict  # Object
-    name: str
-    endTime: str
-    generator: dict  # Application
-    icon: dict  # Link
-    image: dict  # Link
-    inReplyTo: dict  # Object
-    location: dict  # Place
-    preview: dict  # Link
-    published: str
-    replies: dict  # Collection
-    startTime: str
-    summary: str  # Object
-    tag: List[dict]  # Object
-    updated: str
-    url: str
-    to: List[dict]  # Object
-    bto: List[dict]  # Object
-    cc: List[dict]  # Object
-    bcc: List[dict]  # Object
-    mediaType: str
-    duration: str  #
+    context: dict | str  # Object
+
+    attachment: Optional[List[dict]] = None  # Object
+    attributedTo: Optional[List[dict]] = None  # Person or Organization
+    audience: Optional[List[dict]] = None  # Collection
+    content: Optional[str] = None
+    name: Optional[str] = None
+    generator: Optional[dict] = None  # Application
+    icon: Optional[dict] = None  # Link
+    image: Optional[dict] = None  # Link
+    inReplyTo: Optional[dict] = None  # Object
+    location: Optional[Location] = None  # Place
+    preview: Optional[dict] = None  # Link
+    published: Optional[str] = ""
+    updated: Optional[str] = ""
+    replies: Optional[dict] = None  # Collection
+    summary: Optional[str] = ""
+    url: Optional[str] = ""
+    tag: Optional[List[dict]] = field(default_factory=lambda: [{}])
+    to: Optional[List[dict]] = field(default_factory=lambda: [])
+    bto: Optional[List[dict]] = field(default_factory=lambda: [])
+    cc: Optional[List[dict]] = field(default_factory=lambda: [])
+    bcc: Optional[List[dict]] = field(default_factory=lambda: [])
+    mediaType: Optional[str] = ""
+    duration: Optional[str] = ""
 
 
+"""
 class ActivityMessage(object):
-    """
-    https://www.w3.org/TR/activitystreams-vocabulary/
-    """
+    # https://www.w3.org/TR/activitystreams-vocabulary/
 
     def __init__(self, message: dict = {}, *args, **kwargs) -> None:
         if len(message) == 0:
@@ -156,7 +191,6 @@ class ActivityMessage(object):
         super().__init__(*args, **kwargs)
 
     def _fromDict(self, incoming: dict) -> None:
-        """ """
         if not isinstance(incoming, dict):
             raise ValueError("Invalid type for incoming")
         try:
@@ -175,9 +209,8 @@ class ActivityMessage(object):
         self.__dict__.update(incoming)
 
     def json(self) -> dict:
-        """ """
         return json.loads(self)
-
+"""
 
 """
 https://git.sr.ht/~tsileo/microblog.pub/tree/v2/item/app/utils/url.py

@@ -120,6 +120,15 @@ w3c_activity = {
             "object": {"type": "Person", "name": "Joe"},
             "target": {"type": "Group", "name": "The Club"},
         },
+        {
+            "context": "https://www.w3.org/ns/activitystreams",
+            "@id": "https://www.w3.org/ns/activitystreams",
+            "summary": "Sally accepted Joe into the club",
+            "type": "Accept",
+            "actor": {"type": "Person", "name": "Sally"},
+            "object": {"type": "Person", "name": "Joe"},
+            "target": {"type": "Group", "name": "The Club"},
+        },
     ],
     "tentative_accept": [
         {

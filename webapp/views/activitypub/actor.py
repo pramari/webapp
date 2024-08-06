@@ -46,7 +46,7 @@ class ActorView(DetailView):
 
         actorid = f"{actor.id}"
         username = f"{actor.profile.user}"  # pylint: disable=E1101
-        inbox = f"{base}{actor.inbox}"
+        inbox = f"{actor.inbox}"
         outbox = f"{base}{actor.outbox}"  # noqa: F841
         followers = f"{base}{actor.followers}"  # noqa: F841
         following = f"{base}{actor.following}"  # noqa: F841

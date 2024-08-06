@@ -15,6 +15,27 @@ from webapp.models import User
 logger = logging.getLogger(__name__)
 
 
+class ProfileManager(models.Manager):
+    """
+    Custom Manager for the Profile Model
+    """
+
+    def get_queryset(self):
+        """
+        Custom Queryset for the Profile Model
+        """
+        return super().get_queryset().filter(public=True)
+
+    def actors(self):
+        """
+        Return all actors
+
+        .. todo::
+            probably tricky
+        """
+        return self.get_queryset().filter(actor__isnull=False)
+
+
 class Profile(models.Model):
     """
     Also: ActivityPub Profile
