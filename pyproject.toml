@@ -19,7 +19,7 @@ description = "Authentication, Userprofiles, Federation"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "django>=4.2",
+  "django>=5",
   "django-allauth",
   "django-activity-stream",
   "django-oauth-toolkit",
@@ -31,10 +31,7 @@ dependencies = [
   "celery",
   "pyld",
   "rfc3987",
-  # "http-message-signatures",
-  # "requests-http-signature",
   "PyJWT",
-  "types-requests",
 ]
 
 classifiers = [
@@ -77,8 +74,6 @@ legacy_tox_ini = """
         # behave
         # echo "success"
      
-    # commands = python tests/manage.py test --settings=tests.settings
-
     [testenv:lint]
     deps = flake8
     commands = flake8 webapp

@@ -159,3 +159,4 @@ def createUserProfile(sender, instance, created, **kwargs):
         Actor.objects.create(
             profile=profile, type="Person", id=f"{base}/@{instance.username}"
         )
+        logger.error("Created profile for %s", instance.username)

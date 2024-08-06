@@ -12,23 +12,40 @@ class InboxTest(TestCase):
         from webapp.models import Profile
 
         self.client = Client()  # A client for all tests.
-        self.username = "andreas"
+        self.username = "inboxtest"
         User = get_user_model()
         user, created = User.objects.get_or_create(
             username=self.username,
             email="andreas@neumeier.org",
             password="top_secret",  # noqa: E501
         )
+        self.follower = User.objects.create(username="follower")
+        self.followed = User.objects.create(username="followed")
         if created:
             user.save()
         profile = Profile.objects.get(user=user)
         self.assertTrue(isinstance(profile, Profile))
 
     def test_inbox(self):
+        """
+        Test the gobal inbox view.
+
+        .. todo::
+            Implement a global inbox view.
+        """
         response = self.client.get("/inbox/")
         self.assertEqual(response.status_code, 404)
 
-    def test_follow(self):
+    def test_user_inbox(self):
+        """
+        Test the user inbox view.
+        .. :py:meth:webapp.tests.inbox.InboxTest.test_user_inbox
+        """
+        response = self.client.get("/accounts/{self.username}/inbox/")
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_follow_1(self):
         """
         Post a follow activity.
         """
@@ -41,7 +58,24 @@ class InboxTest(TestCase):
                 data=message,
                 content_type="application/json",
             )
-        self.assertRaises(Exception)
+
+    def test_follow_2(self):
+        """
+        Post a follow activity.
+        """
+        message = {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "summary": "Sally followed John",
+            "type": "Follow",
+            "actor": "http://{self.follower} ",
+            "object": "https://{self.followed}",
+        }
+        self.client.post(
+            f"/accounts/{self.username}/inbox",
+            data=message,
+            content_type="application/json",
+        )
+
 
     def test_random(self):
         """

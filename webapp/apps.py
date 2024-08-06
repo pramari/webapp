@@ -48,6 +48,7 @@ class WebAppConfig(AppConfig):
         User = get_user_model()
 
         post_save.connect(createUserProfile, sender=User)
+        logger.error("Connected signal `createUserProfile` to `post_save`")
 
         try:
             registry.register(Actor)

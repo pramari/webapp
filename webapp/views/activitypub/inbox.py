@@ -15,7 +15,6 @@ import logging
 
 from django.http import JsonResponse
 from django.views.generic import DetailView
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
@@ -62,8 +61,8 @@ class InboxView(DetailView):
         logger.debug(f"Request Headers: {request.headers}")
         signature = False
 
-        target = get_object_or_404(Profile, id=kwargs.get("slug"))  # noqa: F841, E501
         target = self.get_object()  # this should work with DetailView?
+        logger.error(target)
 
         try:
             # Assuming the request payload is a valid JSON activity
@@ -135,9 +134,16 @@ class InboxView(DetailView):
 
     def get(self, request, *args, **kwargs):
         """
-        Return a 404 for GET requests.
+        Return a 200 for GET requests.
+
+        Not sure this is necessary, but 
+        :py:meth:`webapp.tests.inbox.InboxTest.test_user_inbox` tests it.
         """
-        return JsonResponse({"error": "Not found"}, status=404)
+        actor = self.get_object().actor
+        assert request.method == "GET"
+        assert request.path == f"{actor.inbox}"
+        
+        return JsonResponse({"status": f"{actor.inbox} ok"}, status=200)
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):

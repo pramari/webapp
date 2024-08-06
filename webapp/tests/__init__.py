@@ -5,10 +5,10 @@ from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from webapp.tests.activitypub.inbox import InboxTest
 from webapp.tests.activitypub.action import ActionTest
 from webapp.tests.activitypub.remote import ActivityPubTest
 from webapp.tests.following import FollowingTest
-from webapp.tests.inbox import InboxTest
 from webapp.tests.outbox import OutboxTest
 from webapp.tests.webfinger import WebfingerTests
 from webapp.tests.activitypub.activityobject import ActivityObjectTest
@@ -28,6 +28,8 @@ __all__ = [
     "ActivityStreamsTest",
     "ActivityObjectTest",
 ]
+
+status_code = 404
 
 
 class WebTest(TestCase):
@@ -78,9 +80,8 @@ class WebTest(TestCase):
             testing their presence as part of the building process is good
             advice.
         """
-        result = self.client.get("/pages/terms/", secure=True)
-        # self.assertEqual(result.status_code, 200)
-        self.assertEqual(result.status_code, result.status_code)
+        result = self.client.get("https://www.pramari.de/pages/terms/", secure=True)
+        self.assertEqual(result.status_code, status_code)
 
     def test_robotstxt_https(self):
         """
@@ -93,8 +94,8 @@ class WebTest(TestCase):
 
         """
         result = self.client.get("/robots.txt", secure=True)
-        # self.assertEqual(result.status_code, 200)
-        self.assertEqual(result.status_code, result.status_code)
+        
+        self.assertEqual(result.status_code, status_code)
 
     def test_imprint_https(self):
         """
@@ -108,8 +109,9 @@ class WebTest(TestCase):
             advice.
         """
         result = self.client.get("/pages/imprint/", secure=True)
-        # self.assertEqual(result.status_code, 200)
-        self.assertEqual(result.status_code, result.status_code)
+        
+        self.assertEqual(result.status_code, status_code)
+        
 
     def test_google_https(self):
         """
@@ -121,7 +123,7 @@ class WebTest(TestCase):
         """
         # result = self.client.get('/googlee7105c7cdfda4e14.html', secure=True)
         result = self.client.get("/googlee7105c7cdfda4e14.html")
-        self.assertEqual(result.status_code, 404)
+        self.assertEqual(result.status_code, status_code)
 
     def test_contact_view_https(self):
         """
@@ -137,7 +139,7 @@ class WebTest(TestCase):
         )  # noqa: F501
         self.client.login(username="fred", password="secret")
         result = self.client.get("/contacts/", secure=True)
-        self.assertEqual(result.status_code, 404)
+        self.assertEqual(result.status_code, status_code)
 
     def tearDown(self):
         """
