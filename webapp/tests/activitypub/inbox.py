@@ -36,13 +36,18 @@ class InboxTest(TestCase):
         response = self.client.get("/inbox/")
         self.assertEqual(response.status_code, 404)
 
-    def test_user_inbox(self):
+    def test_user_inbox_unauthenticated(self):
         """
         Test the user inbox view.
         .. :py:meth:webapp.tests.inbox.InboxTest.test_user_inbox
+
+        .. todo::
+          - For authenticated users, this shall return an 
+          `OrderedCollection` with HTPP status 200.
         """
-        response = self.client.get("/accounts/{self.username}/inbox/")
-        self.assertEqual(response.status_code, 200)
+        from django.urls import reverse
+        response = self.client.get(reverse("actor-inbox", kwargs={'slug': self.username}))
+        self.assertEqual(response.status_code, 404)
 
 
     def test_follow_1(self):

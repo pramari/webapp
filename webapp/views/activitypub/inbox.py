@@ -33,6 +33,12 @@ class InboxView(DetailView):
     """
     .. py:class:: webapp.views.InboxView
 
+    The inbox is discovered through the inbox property of an 
+    :py:class:webapp.models.activitypub.Actor's profile. The 
+    inbox **MUST** be an `OrderedCollection`.
+
+    
+
     .. seealso::
         `ActivityPub Inbox <https://www.w3.org/TR/activitypub/#inbox>_`
 
@@ -145,11 +151,17 @@ class InboxView(DetailView):
         Not sure this is necessary, but 
         :py:meth:`webapp.tests.inbox.InboxTest.test_user_inbox` tests it.
         """
+        from urllib.parse import urlparse
         actor = self.get_object().actor
         assert request.method == "GET"
-        assert request.path == f"{actor.inbox}"
-        
-        return JsonResponse({"status": f"{actor.inbox} ok"}, status=200)
+        logger.error(f"GET request: {request.path}")
+        logger.error(f"Actor: {actor.inbox}")
+        assert request.path == urlparse(actor.inbox).path
+
+
+        if request.user.is_authenticated and request.user == actor.profile.user:
+            return JsonResponse({"status": f"{actor.inbox} ok"}, status=200)
+        return JsonResponse({"status": "not found"}, status=404)
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
