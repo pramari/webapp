@@ -119,7 +119,17 @@ class Actor(models.Model):
     # preferredUsername = profie.preferredUsername
 
     follows = models.ManyToManyField(
-        "self", related_name="followed_by", symmetrical=False, blank=True  # , through="Follow"
+        "self",
+        related_name="followed_by",
+        symmetrical=False,
+        blank=True,  # , through="Follow"
+    )
+
+    flw = models.ManyToManyField(  # this is to prep/test migration of the above.
+        "self",
+        related_name="flwng",
+        symmetrical=False,
+        blank=True,  # , through="Follow"
     )
 
     class Meta:
@@ -292,4 +302,15 @@ class Follow(models.Model):
     id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
     accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
 """
+
+
+"""
+class Fllwng(models.Model):
+
+    actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
+    object = models.ForeignKey(Actor, on_delete=models.CASCADE)
+    id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
+    accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
+"""
+
 

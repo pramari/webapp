@@ -20,7 +20,8 @@ from .activitypub.inbox import InboxView
 from .activitypub.outbox import OutboxView
 from .activitypub.followers import FollowersView
 from .activitypub.following import FollowingView
-from webapp.views.activitypub.likes import (
+
+from webapp.views.likes import (
     LikeCreateView,
     LikeDeleteView,
     LikeListView,

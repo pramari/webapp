@@ -14,7 +14,7 @@ import logging
 
 from django.urls import path
 
-from webapp.views import (
+from webapp.views.activitypub import (
     NodeInfoView,
     VersionView,
     WebFingerView,
@@ -23,13 +23,16 @@ from webapp.views import (
     OutboxView,
     FollowersView,
     FollowingView,
+    NoteView,
+    ActionView,
+    SignatureView,
+)
+
+from webapp.views import (
     LikeCreateView,
     LikeDetailView,
     LikeDeleteView,
     LikeListView,
-    NoteView,
-    ActionView,
-    SignatureView,
 )
 
 logger = logging.getLogger(__name__)
@@ -76,7 +79,9 @@ urlpatterns += [
     path(r"like/", LikeCreateView.as_view(), name="like-create"),
     path(r"like/list", LikeCreateView.as_view(), name="like-list"),
     path(r"like/<uuid:pk>", LikeDetailView.as_view(), name="like-detail"),
-    path(r"like/<uuid:pk>/delete", LikeDeleteView.as_view(), name="like-delete"),  # noqa: E501
+    path(
+        r"like/<uuid:pk>/delete", LikeDeleteView.as_view(), name="like-delete"
+    ),  # noqa: E501
 ]
 
 urlpatterns += [

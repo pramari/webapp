@@ -37,13 +37,6 @@ context = {
     "totalItems": 0,
 }
 
-class FollowForm(forms.ModelForm):
-    class Meta:
-        model = Like
-        fields = ["actor", "object"]
-        widgets = {
-            "object": forms.URLInput(attrs={"class": "form-control"}),
-        }
 
 
 class FollowingView(ListView):
