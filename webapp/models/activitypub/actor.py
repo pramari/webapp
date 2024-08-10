@@ -126,10 +126,7 @@ class Actor(models.Model):
     )
 
     flw = models.ManyToManyField(  # this is to prep/test migration of the above.
-        "self",
-        related_name="flwng",
-        symmetrical=False,
-        blank=True,  # , through="Follow"
+        "self", related_name="flwng", symmetrical=False, blank=True, through="Follow"
     )
 
     class Meta:
@@ -290,7 +287,7 @@ class Actor(models.Model):
 
         """
         return reverse(
-            "actor-likes",
+            "actor-liked",
             args=[self.profile.slug],
         )
 
@@ -304,13 +301,11 @@ class Follow(models.Model):
 """
 
 
-"""
 class Fllwng(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+        validators=[validate_iri],
     actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
     object = models.ForeignKey(Actor, on_delete=models.CASCADE)
     id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
     accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
-"""
-
-

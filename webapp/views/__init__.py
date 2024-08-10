@@ -5,7 +5,7 @@
 __name__ = "webapp.views"
 __author__ = "Andreas Neumeier"
 
-from .web import (
+from .profile import (
     HomeView,
     StatusView,
     AccountView,
@@ -21,12 +21,6 @@ from .activitypub.outbox import OutboxView
 from .activitypub.followers import FollowersView
 from .activitypub.following import FollowingView
 
-from webapp.views.likes import (
-    LikeCreateView,
-    LikeDeleteView,
-    LikeListView,
-    LikeDetailView,
-)
 
 from .activitypub import (
     NodeInfoView,

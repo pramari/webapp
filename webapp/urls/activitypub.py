@@ -23,17 +23,14 @@ from webapp.views.activitypub import (
     OutboxView,
     FollowersView,
     FollowingView,
-    NoteView,
-    ActionView,
-    SignatureView,
+    LikedView
 )
 
-from webapp.views import (
-    LikeCreateView,
-    LikeDetailView,
-    LikeDeleteView,
-    LikeListView,
+from webapp.views.activitypub.activity import (
+    NoteView,
+    ActionView,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -70,26 +67,12 @@ urlpatterns = [
     ),
     path(
         r"accounts/<slug:slug>/liked",
-        LikeListView.as_view(),
-        name="actor-likes",
+        LikedView.as_view(),
+        name="actor-liked",
     ),
-]
-
-urlpatterns += [
-    path(r"like/", LikeCreateView.as_view(), name="like-create"),
-    path(r"like/list", LikeCreateView.as_view(), name="like-list"),
-    path(r"like/<uuid:pk>", LikeDetailView.as_view(), name="like-detail"),
-    path(
-        r"like/<uuid:pk>/delete", LikeDeleteView.as_view(), name="like-delete"
-    ),  # noqa: E501
 ]
 
 urlpatterns += [
     path(r"note/<uuid:pk>", NoteView.as_view(), name="note-detail"),
     path(r"action/<uuid:pk>", ActionView.as_view(), name="action_detail"),
-]
-
-urlpatterns += [
-    # Debug view to show the signature of a given object
-    path(r"signature", SignatureView.as_view(), name="signature"),
 ]
