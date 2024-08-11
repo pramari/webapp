@@ -15,6 +15,8 @@ from webapp.tests.webfinger import WebfingerTests
 from webapp.tests.actor import ActorTestCase
 # from webapp.tests.signature import SignatureTest
 
+from webapp.tests.web import WebLikeTest
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -28,6 +30,10 @@ __all__ = [
     # "SignatureTest",
     "ActivityStreamsTest",
     "ActivityObjectTest",
+]
+
+__all__ = [
+    "WebLikeTest",
 ]
 
 status_code = 404
