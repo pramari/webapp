@@ -1,3 +1,4 @@
+import json
 from django.views.generic.detail import DetailView
 from django.http import JsonResponse
 from webapp.models import Profile
@@ -22,11 +23,16 @@ class LikedView(DetailView):
         :class:`django.http.HttpResponse`
     """
 
-    models = Profile
+    model = Profile
 
     def liked(self):
-        return self.get_object().actor.liked.all()
+        result = self.get_object().actor.like_set.all()
+        print("Likes: ", result)
+        return result
 
     def get(self, request, *args, **kwargs):
         result = {"type": "Collection", "totalItems": 0, "items": []}
-        return JsonResponse(result, contenttype="application/activity+json")
+        likes = self.liked().values_list("object", flat=True).order_by("-created_at")
+        result.update({"totalItems": len(likes)})
+        result.update({"items": json.dumps(list(likes))})
+        return JsonResponse(result, content_type="application/activity+json")

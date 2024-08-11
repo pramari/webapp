@@ -8,6 +8,7 @@ from django import forms
 import logging
 from webapp.tasks.activitypub import sendLike
 from webapp.signals import action
+from webapp.models import Profile
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,11 @@ class LikeDetailView(LoginRequiredMixin, DetailView):
     model = Like
     template_name = "activitypub/like_detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["slug"] = self.request.user.profile_set.get().slug
+        return context
+
 
 class LikeDeleteView(LoginRequiredMixin, DeleteView):
     model = Like
@@ -83,7 +89,6 @@ class LikeDeleteView(LoginRequiredMixin, DeleteView):
 
         .. seealso:: `ActivityPub Undo <https://www.w3.org/TR/activitystreams-vocabulary/#dfn-undo>`_  # noqa: E501
         """
-        self.object = form.save()
         action.send(
             sender=self.request.user.profile_set.get().actor,
             verb="undo",
@@ -99,8 +104,13 @@ class LikeListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        from webapp.models import Profile
 
         slug = self.kwargs.get("slug")
         actor = Profile.objects.get(slug=slug).actor
         return Like.objects.all().order_by("-created_at").filter(actor=actor)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs.get("slug")
+        context["actor"] = Profile.objects.get(slug=slug).actor
+        return context

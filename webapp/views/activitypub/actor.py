@@ -73,7 +73,7 @@ class ActorView(DetailView):
                 "owner": actorid,
                 "publicKeyPem": publicKey,
             },
-            "image": {
+            "image": {  # background image
                 "type": "Image",
                 "mediaType": "image/jpeg",
                 "url": actor.profile.imgurl,
@@ -81,10 +81,11 @@ class ActorView(DetailView):
             "icon": {
                 "type": "Image",
                 "mediaType": "image/png",
-                "url": actor.profile.icon,
+                "url": actor.profile.imgurl,
             },  # noqa: E501
         }
-        return jsonld
+        from webapp.activity import canonicalize
+        return canonicalize(jsonld)
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613
         if (

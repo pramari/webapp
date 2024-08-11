@@ -1,5 +1,4 @@
-# from django.views.generic import ListView
-from django.views.generic.list import ListView
+from django.views.generic import DetailView
 from django.http import HttpResponse
 
 from django.http import JsonResponse
@@ -39,24 +38,21 @@ context = {
 
 
 
-class FollowingView(ListView):
+class FollowingView(DetailView):
     template_name = "activitypub/following.html"
     paginate_by = 10
     model = Profile
 
-    def get_queryset(self):
-        return Profile.objects.filter(slug=self.kwargs["slug"])  # noqa: E501
-
     def jsonld(self, request, *args, **kwargs):
         page = request.GET.get("page", None)
-        actor = self.get_queryset().get().actor
+        actor = self.get_object().actor
         totalItems = actor.follows.count()  # noqa: F841
 
         orderedCollection.update({"totalItems": totalItems})
         if not page:
-            orderedCollection.update({"first": f"{actor.id}/following?page=1"})
+            orderedCollection.update({"first": f"{actor.following}?page=1"})
         if totalItems > 10:
-            orderedCollection.update({"next": f"{actor.id}/following?page=2"})
+            orderedCollection.update({"next": f"{actor.following}?page=2"})
 
         return JsonResponse(
             orderedCollection,

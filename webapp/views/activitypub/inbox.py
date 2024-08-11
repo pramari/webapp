@@ -131,11 +131,11 @@ class InboxView(DetailView):
             case "undo":
                 result = undo(target=target.actor, activity=activity)
             case "create":
-                result = create(target=target.actor, message=activity)
+                result = create(target=target.actor, activity=activity)
             case "delete":
-                result = delete(target=target.actor, message=activity)
+                result = delete(target=target.actor, activity=activity)
             case "accept":
-                result = accept(target=target.actor, message=activity)
+                result = accept(target=target.actor, activity=activity)
             case _:
                 error = f"InboxView: Unsupported activity: {activity.type}"
                 logger.error(f"Actvity error: {error}")

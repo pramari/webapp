@@ -140,19 +140,25 @@ def requestFollow(localID: str, remoteID: str) -> bool:
     args:
         id: str: The id of the remote actor
     """
-    from webapp.models import Actor as ActorModel
+    from webapp.models import Actor
     from webapp.signature import signedRequest
     from webapp.signals import action
 
-    localActor = ActorModel.objects.get(id=localID)
+    localActor = Actor.objects.get(id=localID)
     remoteActor = getRemoteActor(remoteID)
-    remoteActorObject = ActorModel.objects.get(id=remoteID)
+    remoteActorObject = Actor.objects.get(id=remoteActor.get('id'))
 
     activity_id = action.send(
         sender=localActor, verb="Follow", target=remoteActorObject
     )[0][
         1
-    ].get_activity_id()  # noqa: E501, BLK100
+    ].id  # noqa: E501, BLK100
+
+    print("Actor: ", localActor)
+    print("Type: ", type(localActor))
+    print("Actor Following: ", localActor.follows)
+    print("Type: ", type(localActor.follows))
+
 
     message = json.dumps(
         {
@@ -163,9 +169,10 @@ def requestFollow(localID: str, remoteID: str) -> bool:
             "object": remoteID,
         }
     )
+    localActor.follows.add(remoteActorObject)  # remember we follow this actor
 
     signed = signedRequest(  # noqa: F841,E501
-        "POST", remoteActor.inbox, message, f"{localActor.id}#main-key"
+        "POST", remoteActor.get('inbox'), message, f"{localActor.id}#main-key"
     )  # noqa: F841,E501
     return True
 

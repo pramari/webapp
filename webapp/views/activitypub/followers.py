@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
+from django.views.generic import DetailView
 from django.http import JsonResponse
 
 from webapp.models import Profile
 from django.contrib.sites.models import Site
 
 
-class FollowersView(ListView):
+class FollowersView(DetailView):
     """
     Provide a list of followers for a given profile.
 
@@ -22,16 +22,19 @@ class FollowersView(ListView):
     template_name = "activitypub/followers.html"
     model = Profile
 
+    def followers(self):
+        return self.get_object().actor.followed_by.all()
+
     def to_jsonld(self, *args, **kwargs):
         actor = self.get_object().actor
-        followers = actor.followers.all()
         base = f"https://{Site.objects.get_current().domain}"
+        followers = self.followers().values_list("actor", flat=True).order_by("-created")
         wrap = {
             "@context": "https://www.w3.org/ns/activitystreams",
             "id": f"https://{base}{actor.followers_url}",
             "type": "OrderedCollection",
-            "totalItems": len(followers),
-            "items": [f"{item.get_actor_url}" for item in followers],
+            "totalItems": len(self.followers),
+            "items": [f"{item.id}" for item in followers],
         }
         return wrap
 

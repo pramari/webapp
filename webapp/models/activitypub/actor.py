@@ -16,6 +16,7 @@ from webapp.validators import validate_iri
 from functools import cached_property
 from webapp.exceptions import RemoteActorError
 from django.contrib.sites.models import Site
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,18 @@ class Actor(models.Model):
 
         'https://example.com/actor/inbox'
 
+    The `Actor` object will provide required and some optional properties:
+
+    .. testcode::
+        actor.follows.all()
+        actor.followed_by.all()
+
+    Will return the `actors` that are `followed` by this `actor` and the
+    `actors` that are `following` this `actor`:
+
+    .. testoutput::
+        <QuerySet [<Actor: https://23.social/users/andreasofthings>, <Actor: https://23.social/users/christianrickert>]>
+        <QuerySet [<Actor: https://23.social/users/andreasofthings>]>
     """
 
     profile = models.ForeignKey(
@@ -122,12 +135,13 @@ class Actor(models.Model):
         "self",
         related_name="followed_by",
         symmetrical=False,
-        blank=True,  # , through="Follow"
+        blank=True,
+        through="Follow",
     )
 
-    flw = models.ManyToManyField(  # this is to prep/test migration of the above.
-        "self", related_name="flwng", symmetrical=False, blank=True, through="Follow"
-    )
+    # flw = models.ManyToManyField(  # this is to prep/test migration of the above.
+    #     "self", related_name="flwng", symmetrical=False, blank=True, through="Fllwng"
+    # )
 
     class Meta:
         verbose_name = _("Actor (Activity Streams 2.0)")
@@ -156,6 +170,7 @@ class Actor(models.Model):
         """
 
         # return self.ap_id
+        logger.error("The actorID property is deprecated. Use id instead.")
         view = reverse("actor-view", args=[str(self.profile.user)])
         return f"{view}"
 
@@ -292,20 +307,38 @@ class Actor(models.Model):
         )
 
 
-"""
+
 class Follow(models.Model):
-    actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
-    object = models.ForeignKey(Actor, on_delete=models.CASCADE)
-    id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="actor")
+    object = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="object")
+    accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+
+    def getID(self):
+        from django.contrib.sites.models import Site
+
+        base = f"https://{Site.objects.get_current().domain}"
+        return f"{base}/{self.id}"
+
+    def __str__(self):
+        return f"{self.actor} follows {self.object}"
+
+
+"""
+class Fllwng(models.Model):
+    # id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="actor")
+    object = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="object")
+    id = models.CharField(
+        max_length=255,
+        primary_key=True,
+        unique=True,
+        blank=False,
+        validators=[validate_iri],
+    )
     accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
 """
-
-
-class Fllwng(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-        validators=[validate_iri],
-    actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
-    object = models.ForeignKey(Actor, on_delete=models.CASCADE)
-    id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
-    accepted = models.URLField(blank=True, null=True, validators=[validate_iri])

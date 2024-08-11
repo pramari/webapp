@@ -5,13 +5,23 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
-            <h2>{{ object }}</h2>
+            <h2>{{ actor }}</h2>
             <div class="row">
                 <div class="col">
-                    Following: <a href="{% url "actor-following" object.slug %}">{{ object.actor.following.count }}</a>
+                    Following: <a href="{% url "actor-following" object.slug %}">{{ follows.count }}</a>
+                    <ul>
+                    {% for following in follows %}
+                    <li>{{ following }} </li>
+                    {% endfor %}
+                    </ul>
                 </div>
                 <div class="col">
-                    Followers: <a href="{% url "actor-followers" object.slug %}">{{ object.actor.followers.count }}</a>
+                    Followers: <a href="{% url "actor-followers" object.slug %}">{{ followers.count }}</a>
+                    <ul>
+                    {% for following in followers %}
+                    <li>{{ following }} </li>
+                    {% endfor %}
+                    </ul>
                 </div>
             </div>
             <div class="row">

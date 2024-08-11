@@ -70,9 +70,9 @@ class WebFingerView(View):
             # The user's profile URL
             # subject is the user's profile identified
             # "subject": f"acct:{profile.user.username}@{request.get_host()}",
-            "subject": f"acct:{profile.actor.actorID}",
+            "subject": f"acct:{profile.actor.id}",
             "aliases": [
-                f"https://{base}{profile.actor.actorID}",
+                f"{profile.actor.id}",
                 f"https://{request.get_host()}{profile.get_absolute_url}",
             ],
             "links": [
@@ -84,7 +84,7 @@ class WebFingerView(View):
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": f"https://{base}{profile.actor.actorID}",  # noqa: E501
+                    "href": f"{profile.actor.id}",  # noqa: E501
                 },
                 {
                     "rel": "http://ostatus.org/schema/1.0/subscribe",

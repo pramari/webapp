@@ -24,19 +24,19 @@ def action_decorator(f):
             action_object = Actor.objects.get(id=activity.object)
         except Actor.DoesNotExist:
             logger.error(f"Object not found: '{activity.object}'")
-            return JsonResponse({"error": "Actor f'{activity.object}' not found"}, status=404)
+            action_object = None
 
         action.send(
             sender=localactor, verb=activity.type, action_object=action_object, target=target
         )  # noqa: E501
 
-        return f(*args, **kwargs)
+        return f(target, activity, *args, **kwargs)
 
     return wrapper
 
 
 @action_decorator
-def create(self, target, message: dict) -> JsonResponse:
+def create(target: Actor, activity: ActivityObject) -> JsonResponse:
     """
     Create a new `:model:Note`.
 
@@ -72,9 +72,12 @@ def create(self, target, message: dict) -> JsonResponse:
     }  # noqa: E501
     """
 
-    logger.error(f"Create Object: {message}")
+    logger.error(f"Create Object: {activity.object}")
 
-    note = message.get("object")
+    note = activity.object
+    assert note is not None
+    assert isinstance(note, dict)
+
     if note.type == "Note":
         from webapp.models import Note
 
@@ -86,22 +89,33 @@ def create(self, target, message: dict) -> JsonResponse:
 
     return JsonResponse(
         {
-            "status": f"success: {message['actor']} {message['type']} {message['object']}"  # noqa: E501
+            "status": f"success: {activity.actor} {activity.type} {activity.object}"  # noqa: E501
         }  # noqa: E501
     )  # noqa: E501
 
 
 @action_decorator
-def accept(self, message: dict) -> JsonResponse:
+def accept(target: Actor, activity: ActivityObject) -> JsonResponse:
     """
-    Accept
+    Received an Accept.
+
+    Remember the accept-id in the database.
+    So we can later delete the follow request.
+
+    :param target: The target of the activity
+    :param activity: The :py:class:webapp.activity.Activityobject`
     """
+    from webapp.models.activitypub.actor import Fllwng
+
+    fllwng = Fllwng.objects.get(actor=activity.actor)
+    fllwng.accepted = activity.id  # remember the accept-id
+    fllwng.save()
 
     return JsonResponse({"status": "accepted."})
 
 
 @action_decorator
-def delete(self, message: dict) -> JsonResponse:
+def delete(target: Actor, activity: ActivityObject) -> JsonResponse:
     """
     Delete an activity.
     """
@@ -189,9 +203,9 @@ def follow(target: Actor, activity: ActivityObject):
     )  # noqa: E501, BLK100
 
     if settings.DEBUG:
-        acceptFollow(remoteActor.inbox, activity, action_id[0][1].id)
+        acceptFollow(remoteActor.get('inbox'), activity, action_id[0][1].id)
     else:
-        acceptFollow.delay(remoteActor.inbox, activity, action_id[0][1].id)
+        acceptFollow.delay(remoteActor.get('inbox'), activity, action_id[0][1].id)
 
     return JsonResponse(
         {

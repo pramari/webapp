@@ -12,7 +12,6 @@ from typing import Optional
 from decimal import Decimal
 from dataclasses import dataclass
 from dataclasses import field
-
 # from dataclasses import asdict
 # from dataclasses import is_dataclass
 

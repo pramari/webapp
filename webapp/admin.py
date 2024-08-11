@@ -23,6 +23,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
+
 # from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
@@ -30,6 +31,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from .forms import UserChangeForm, UserCreationForm
 from .models import Action, Actor, Note, Profile, User, Like
+from webapp.models.activitypub.actor import Follow
 from .tasks import generateProfileKeyPair
 
 try:
@@ -262,6 +264,12 @@ class LikeAdmin(admin.ModelAdmin):
 admin.site.register(Like, LikeAdmin)
 
 
+class FollowInline(admin.TabularInline):
+    model = Follow
+    fk_name = "actor"
+    list_display = ("object",)
+
+
 class ActorAdmin(admin.ModelAdmin):
     model = Actor
     list_display = (
@@ -269,6 +277,7 @@ class ActorAdmin(admin.ModelAdmin):
         "type",
         "profile",
     )
+    inlines = [FollowInline]
 
 
 admin.site.register(Actor, ActorAdmin)
@@ -286,7 +295,7 @@ class ActionAdmin(GenericAdminModelAdmin):
         "public",
     )
     # list_editable = ("activity_type",)
-    list_filter = ("timestamp", )  # "activity_type")
+    list_filter = ("timestamp",)  # "activity_type")
     # raw_id_fields = (
     #     "actor_content_type",
     #     "target_content_type",

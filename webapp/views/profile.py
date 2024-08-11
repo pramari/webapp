@@ -175,6 +175,18 @@ class ProfileDetailView(UserPassesTestMixin, DetailView):
         return False
 
 
+    def get_context_data(self, **kwargs):
+        """
+        Get context for this request.
+
+        Overriding super() implementation.
+        """
+        context = super().get_context_data(**kwargs)
+        actor = self.get_object().actor
+        context["follows"] = actor.follows.all()
+        context["followers"] = actor.followed_by.all()
+        return context
+
 class SearchView(ListView):
     """
     Search:
