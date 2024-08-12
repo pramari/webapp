@@ -242,7 +242,7 @@ class ProfileAdmin(admin.ModelAdmin):
         "user",
         "consent",
         "public",
-        "ap_id",
+        # "ap_id",
     )
 
 

@@ -45,9 +45,6 @@ class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     slug = models.SlugField(null=True, help_text=_("Slug"))
 
-    follows = models.ManyToManyField(
-        "self", related_name="followed_by", symmetrical=False, blank=True
-    )
 
     public = models.BooleanField(
         default=False, help_text=_("Make Profile Profile public?")
@@ -62,13 +59,6 @@ class Profile(models.Model):
         default=True, help_text=_("Use Gravatar profile image.")
     )
     bio = models.TextField(blank=True, help_text=_("Short Bio"))
-
-    ap_id = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text=_("ActivityPub ID"),
-        unique=True,
-    )  # noqa: E501
 
     public_key_pem = models.TextField(blank=True, help_text=_("Public Key"))
     private_key_pem = models.TextField(blank=True, help_text=_("Private Key"))
@@ -86,6 +76,19 @@ class Profile(models.Model):
         default="https://storage.cloud.google.com/media.pramari.de/user/default.png",  # noqa: E501
     )
 
+    ## The following is deprecated and has been moved to the Actor model
+
+    # follows = models.ManyToManyField(
+    #     "self", related_name="followed_by", symmetrical=False, blank=True
+    # )
+
+    # ap_id = models.CharField(
+    #    max_length=255,
+    #    blank=True,
+    #    help_text=_("ActivityPub ID"),
+    #    unique=True,
+    # )  # noqa: E501
+ 
     @property
     def imgurl(self):
         """
@@ -103,23 +106,21 @@ class Profile(models.Model):
         """
         size = 80
 
-        # Set your variables here
         if self.user.is_verified:  # noqa: no-member
             email = EmailAddress.objects.get(
                 user=self.user, verified=True, primary=True
             )
         else:
-            return "https://storage.cloud.google.com/media.pramari.de/user/default.png"  # noqa: E501
+            return "user/default.png"  # noqa: E501
 
         # construct the url
-        if self.gravatar is False:
-            return staticfiles_storage.url(self.img)
-        else:
+        if self.gravatar is True
             hashvalue = hashlib.md5(
                 str(email).lower().encode("utf-8")
             ).hexdigest()  # noqa: E501
             size = urllib.parse.urlencode({"d": email, "s": str(size)})
             return f"https://www.gravatar.com/avatar/{hashvalue}?{size}"
+        return staticfiles_storage.url(self.img)
 
     def __str__(self):
         """
@@ -138,8 +139,6 @@ class Profile(models.Model):
         """
         if not self.slug:
             self.slug = slugify(self.user.username)  # pylint: disable=E1101
-        if not self.ap_id:  # and self.user.is_verified:
-            self.ap_id = f"https://pramari.de/@{self.slug}"
         return super().save(*args, **kwargs)  # Call save()
 
     @property

@@ -42,7 +42,7 @@ class ProfileForm(forms.ModelForm):
             "dob",
             "img",
             "gravatar",
-            "follows",
+            # "follows",
         ]
 
 
