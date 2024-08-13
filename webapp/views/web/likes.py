@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import DeleteView
@@ -57,7 +58,10 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
             action_object=self.object,
         )
         actor = self.request.user.profile_set.get().actor
-        sendLike.delay(actor.id, form.cleaned_data["object"])
+        if settings.DEBUG:
+            sendLike(actor.id, form.cleaned_data["object"])
+        else:
+            sendLike.delay(actor.id, form.cleaned_data["object"])
         return super().form_valid(form)
 
 

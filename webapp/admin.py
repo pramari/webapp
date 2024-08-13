@@ -276,6 +276,7 @@ class ActorAdmin(admin.ModelAdmin):
         "id",
         "type",
         "profile",
+        "remote"
     )
     inlines = [FollowInline]
 

@@ -111,10 +111,13 @@ class Profile(models.Model):
                 user=self.user, verified=True, primary=True
             )
         else:
+            """
+            No Image for unverified users
+            """
             return "user/default.png"  # noqa: E501
 
         # construct the url
-        if self.gravatar is True
+        if self.gravatar:
             hashvalue = hashlib.md5(
                 str(email).lower().encode("utf-8")
             ).hexdigest()  # noqa: E501

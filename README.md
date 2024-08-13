@@ -10,3 +10,8 @@
 ## Fediverse Following
 
 ## Fediverse Followers
+
+### Build the package
+```
+python3 -m build --wheel
+``` 

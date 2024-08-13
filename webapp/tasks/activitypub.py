@@ -146,7 +146,7 @@ def requestFollow(localID: str, remoteID: str) -> bool:
 
     localActor = Actor.objects.get(id=localID)
     remoteActor = getRemoteActor(remoteID)
-    remoteActorObject = Actor.objects.get(id=remoteActor.get('id'))
+    remoteActorObject = Actor.objects.get(id=remoteActor.get("id"))
 
     activity_id = action.send(
         sender=localActor, verb="Follow", target=remoteActorObject
@@ -158,7 +158,6 @@ def requestFollow(localID: str, remoteID: str) -> bool:
     print("Type: ", type(localActor))
     print("Actor Following: ", localActor.follows)
     print("Type: ", type(localActor.follows))
-
 
     message = json.dumps(
         {
@@ -172,7 +171,7 @@ def requestFollow(localID: str, remoteID: str) -> bool:
     localActor.follows.add(remoteActorObject)  # remember we follow this actor
 
     signed = signedRequest(  # noqa: F841,E501
-        "POST", remoteActor.get('inbox'), message, f"{localActor.id}#main-key"
+        "POST", remoteActor.get("inbox"), message, f"{localActor.id}#main-key"
     )  # noqa: F841,E501
     return True
 
@@ -204,6 +203,12 @@ def acceptFollow(inbox: str, activity: ActivityObject, accept_id: str) -> bool:
     )
     logger.error(f"acceptFollow to {activity.actor}")
     logger.error(f"with message: {message=}")
+
+    # remember we accepted this follow
+    from webapp.models.activitypub.actor import Follow
+    follow = Follow.objects.get(actor=activity.actor)
+    follow.accepted = accept_id
+    follow.save()
 
     signed = signedRequest(  # noqa: F841,E501
         "POST",

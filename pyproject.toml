@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-reproducible = false
+reproducible = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["webapp/"]
@@ -11,7 +11,7 @@ packages = ["webapp/"]
 
 [project]
 name = "pramari-webapp"
-version = "1.1.23"
+version = "1.1.24"
 authors = [
   { name="Andreas Neumeier", email="andreas@neumeier.org" },
 ]
@@ -44,13 +44,10 @@ classifiers = [
 "Homepage" = "https://www.pramari.de"
 "Bug Tracker" = "https://github.com/pramari/npc/issues"
 
-# [tool.pytest.ini_options]
-# addopts = "" #--cov --cov-report html --cov-report term-missing --cov-fail-under 95"
-
 [tool.tox]
+min_version = 4.0
 legacy_tox_ini = """
     [tox]
-    min_version = 4.0
     isolated_build = True
     env_list =
         py312
@@ -58,12 +55,11 @@ legacy_tox_ini = """
 
     [testenv]
     setenv =
-        PYTHONPATH = ".";{toxinidir}:{toxinidir}
         DJANGO_SETTINGS_MODULE=tests.settings
+        PYTHONPATH = ".";{toxinidir}:{toxinidir}
     
     deps =
         pytest
-        # behave
         coverage
         ruff
 
@@ -71,25 +67,69 @@ legacy_tox_ini = """
         ruff check webapp
         coverage run --source webapp tests/manage.py test --settings=tests.settings
         coverage xml
-        # behave
-        # echo "success"
-     
-    [testenv:lint]
-    deps = flake8
-    commands = flake8 webapp
-
-    [testenv:pep8]
-    show-source = True
-    commands = {envbindir}/flake8 --max-line-length=80 --exclude=.tox,docs,sample_app/tests/settings.py,sample_app/__init__.py,sample_app/migrations sample_app
-    # Flake8 only needed when linting.
-    # Do not care about other dependencies, it's just for linting.
-    deps = flake8
-    changedir = {toxinidir}
 """
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
-
 python_files = ["test_*.py"]
 
 [tool.coverage.run]
 source = ["webapp"]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+

@@ -23,7 +23,7 @@ class CacheMixin(object):
         )
 
 
-class JsonLDMixin(object):
+class RequireContentTypeMixinMixin(object):
     """
     A mixin that returns a JSON-LD response if the request
     specifies 'application/activity+json' in the Accept header.
@@ -32,10 +32,20 @@ class JsonLDMixin(object):
 
     to_jsonld() is a method that should be implemented by the class.
 
+    :param content_type: The content type to check for in the Accept header. Defaults to 'application/activity+json'.
 
     Example usage:
-        class
+        class SomeView(JsonLDMixin, View):
+            content_type = "application/activity+json"
+            def to_jsonld(self, request, *args, **kwargs):
+                return {
+                    "@context": "https://www.w3.org/ns/activitystreams",
+                    "type": "Note",
+                    "content": "This is a note",
+                }
     """
+
+    content_type = "application/activity+json"
 
     def to_jsonld(self, *args, **kwargs):
         raise NotImplementedError()

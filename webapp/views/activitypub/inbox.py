@@ -10,7 +10,6 @@ See::
 """
 
 
-import json
 import logging
 
 from django.http import JsonResponse
@@ -84,8 +83,9 @@ class InboxView(DetailView):
             raise ParseUTF8Error(message)
 
         try:
-            activity = json.loads(body)
-            activity = ActivityObject(activity)
+            import json
+            message = json.loads(body)
+            activity = ActivityObject(message)
         except ValueError as e:
             message = f"InboxView: Received invalid JSON {e}"
             logger.error(message)

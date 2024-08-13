@@ -1,6 +1,6 @@
 from pathlib import Path
 SITE_ID = 1
-DEBUG = False
+DEBUG = True
 SECRET_KEY = "fake-key"
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_URLCONF = "tests.urls"

@@ -18,16 +18,21 @@ def action_decorator(f):
             localactor = Actor.objects.get(id=activity.actor)
         except Actor.DoesNotExist:
             logger.error(f"Actor not found: '{activity.actor}'")
-            return JsonResponse({"error": "Actor f'{activity.actor}' not found"}, status=404)
+            return JsonResponse(
+                {"error": "Actor f'{activity.actor}' not found"}, status=404
+            )
 
         try:
             action_object = Actor.objects.get(id=activity.object)
         except Actor.DoesNotExist:
-            logger.error(f"Object not found: '{activity.object}'")
+            logger.error(f"{activity.type}: Object not found: '{activity.object}'")
             action_object = None
 
         action.send(
-            sender=localactor, verb=activity.type, action_object=action_object, target=target
+            sender=localactor,
+            verb=activity.type,
+            action_object=action_object,
+            target=target,
         )  # noqa: E501
 
         return f(target, activity, *args, **kwargs)
@@ -105,11 +110,11 @@ def accept(target: Actor, activity: ActivityObject) -> JsonResponse:
     :param target: The target of the activity
     :param activity: The :py:class:webapp.activity.Activityobject`
     """
-    from webapp.models.activitypub.actor import Fllwng
+    from webapp.models.activitypub.actor import Follow
 
-    fllwng = Fllwng.objects.get(actor=activity.actor)
-    fllwng.accepted = activity.id  # remember the accept-id
-    fllwng.save()
+    follow = Follow.objects.get(actor=activity.actor)
+    follow.accepted = activity.id  # remember the accept-id
+    follow.save()
 
     return JsonResponse({"status": "accepted."})
 
@@ -127,6 +132,14 @@ def delete(target: Actor, activity: ActivityObject) -> JsonResponse:
 def undo(target: Actor, activity: ActivityObject):
     """
     Undo an activity.
+
+    Object: (example)
+        {
+            'id': 'https://23.social/b271295c-7a1b-4da8-ae58-927fea32bb60',
+            'type': 'Follow',
+            'actor': 'https://23.social/users/andreasofthings',
+            'object': 'https://pramari.de/@andreas'
+        }
     """
     logger.error(f"Activity Object: {activity}")
 
@@ -137,22 +150,18 @@ def undo(target: Actor, activity: ActivityObject):
         return JsonResponse({"status": "missing object"})
 
     if (
-        not activity.actor
-        and activity.type.lower() != "follow"  # noqa: E501
+        not activity.actor and activity.object.get('type').lower() != "follow"  # noqa: E501
     ):  # noqa: E501
-        return JsonResponse({"status": "invalid object"})
+        return JsonResponse({"status": "invalid object/unsupported activity"})
 
+
+    from webapp.models.activitypub.actor import Follow
     try:
-        followers = (  # noqa: F841, E501
-            Actor.objects.filter(id=activity.object)
-            .get()
-            .followers  # noqa: E501
-        )
-    except Actor.DoesNotExist:
-        return JsonResponse({"status": "no followers"})
-
+        follow = Follow.objects.get(accepted=activity.object.get('id'))
+    except Follow.DoesNotExist:
+        return JsonResponse({"status": "follow not found"})
+    follow.delete()
     logger.error(f"{activity.actor} has undone {activity.object}")
-    # followers.delete()
 
     return JsonResponse({"status": "undone"})
 
@@ -186,7 +195,7 @@ def follow(target: Actor, activity: ActivityObject):
     remoteActor = getRemoteActor(activity.actor)
     remoteActorObject = Actor.objects.get(id=remoteActor.get("id"))
     localActorObject = Actor.objects.get(id=activity.object)
-    remoteActorObject.follows.add(localActorObject) 
+    remoteActorObject.follows.add(localActorObject)
 
     # Step 2:
     # Confirm the follow request to message.actor
@@ -203,9 +212,9 @@ def follow(target: Actor, activity: ActivityObject):
     )  # noqa: E501, BLK100
 
     if settings.DEBUG:
-        acceptFollow(remoteActor.get('inbox'), activity, action_id[0][1].id)
+        acceptFollow(remoteActor.get("inbox"), activity, action_id[0][1].id)
     else:
-        acceptFollow.delay(remoteActor.get('inbox'), activity, action_id[0][1].id)
+        acceptFollow.delay(remoteActor.get("inbox"), activity, action_id[0][1].id)
 
     return JsonResponse(
         {
