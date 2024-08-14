@@ -58,6 +58,7 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
             action_object=self.object,
         )
         actor = self.request.user.profile_set.get().actor
+        print("DEBUG: ", settings.DEBUG)
         if settings.DEBUG:
             sendLike(actor.id, form.cleaned_data["object"])
         else:

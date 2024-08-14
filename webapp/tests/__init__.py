@@ -9,10 +9,10 @@ from webapp.tests.activitypub.inbox import InboxTest
 from webapp.tests.activitypub.action import ActionTest
 from webapp.tests.activitypub.remote import ActivityPubTest
 from webapp.tests.activitypub.activityobject import ActivityObjectTest
-from webapp.tests.following import FollowingTest
-from webapp.tests.outbox import OutboxTest
-from webapp.tests.webfinger import WebfingerTests
-from webapp.tests.actor import ActorTestCase
+from webapp.tests.test_following import FollowingTest
+from webapp.tests.test_outbox import OutboxTest
+from webapp.tests.test_webfinger import WebfingerTests
+from webapp.tests.test_actor import ActorTestCase
 # from webapp.tests.signature import SignatureTest
 
 from webapp.tests.web import WebLikeTest

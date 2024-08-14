@@ -44,34 +44,15 @@ classifiers = [
 "Homepage" = "https://www.pramari.de"
 "Bug Tracker" = "https://github.com/pramari/npc/issues"
 
-[tool.tox]
-min_version = 4.0
-legacy_tox_ini = """
-    [tox]
-    isolated_build = True
-    env_list =
-        py312
-        type
 
-    [testenv]
-    setenv =
-        DJANGO_SETTINGS_MODULE=tests.settings
-        PYTHONPATH = ".";{toxinidir}:{toxinidir}
-    
-    deps =
-        pytest
-        coverage
-        ruff
-
-    commands =
-        ruff check webapp
-        coverage run --source webapp tests/manage.py test --settings=tests.settings
-        coverage xml
-"""
+[tool.pytest]
+DJANGO_SETTINGS_MODULE = "tests.settings"
 
 [tool.pytest.ini_options]
+python_files = "tests.py test_*.py"
+# python_files = ["test_*.py", "tests.py"]
 DJANGO_SETTINGS_MODULE = "tests.settings"
-python_files = ["test_*.py"]
+
 
 [tool.coverage.run]
 source = ["webapp"]
@@ -133,3 +114,30 @@ line-ending = "auto"
 docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
+[tool.tox]
+min_version = 4.0
+legacy_tox_ini = """
+    [tox]
+    isolated_build = True
+    env_list =
+        py312
+        type
+
+    [testenv]
+    setenv =
+        DJANGO_SETTINGS_MODULE=tests.settings
+        PYTHONPATH = ".";{toxinidir}:{toxinidir}
+    
+    deps =
+        coverage
+        pytest
+        pytest-django
+        pytest-cov
+        ruff
+
+    commands =
+        ruff check webapp
+        pytest webapp
+        # coverage run --source webapp tests/manage.py test --settings=tests.settings
+        # coverage xml
+"""

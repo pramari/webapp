@@ -68,6 +68,12 @@ class Actor(models.Model):
         `actor` has `liked`. The `liked` property is *OPTIONAL* for `Actor`
         objects.
 
+        - `follows` - a django `ManyToManyField` relationshio to `self` that 
+        stores any `actors` that this `actor` is `follows`.
+
+        - `followed_by` - a django `ManyToManyField` relationshio to `self` that
+        stores any `actors` that are `following` this `actor`.
+
 
     .. seealso::
         The definition of W3C ActivityPub `Actor Objects <https://www.w3.org/TR/activitypub/#actor-objects>`_
@@ -84,32 +90,33 @@ class Actor(models.Model):
     .. doctest::
 
         Actor.objects.create(id='https://example.com/actor')
+        Actor.objects.create(id='https://example.com/other')
         actor = Actor.objects.get(id='https://example.com/actor')
+        other = Actor.objects.get(id='https://example.com/other')
 
     The `Actor` object will provide required and some optional properties:
 
     .. testcode::
 
-        actor.inbox
+        actor.id
 
     This will produce the full url for the `inbox` of the actor:
 
     .. testoutput::
 
-        'https://example.com/actor/inbox'
+        'https://example.com/actor'
 
     The `Actor` object will provide required and some optional properties:
 
     .. testcode::
+        actor.follows.add(other)
         actor.follows.all()
-        actor.followed_by.all()
 
-    Will return the `actors` that are `followed` by this `actor` and the
-    `actors` that are `following` this `actor`:
+    This will add the `other` actor to the `follows` of the `actor`:
 
     .. testoutput::
-        <QuerySet [<Actor: https://23.social/users/andreasofthings>, <Actor: https://23.social/users/christianrickert>]>
-        <QuerySet [<Actor: https://23.social/users/andreasofthings>]>
+
+        <QuerySet [<Actor: https://example.com/other>]>
     """
 
     profile = models.ForeignKey(

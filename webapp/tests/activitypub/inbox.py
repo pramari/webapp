@@ -63,7 +63,7 @@ class InboxTest(TestCase):
             It's unclear where the error is.
         """
 
-        from webapp.tests.messages import w3c_activity
+        from webapp.tests.rename_messages import w3c_activity
 
         for message in w3c_activity['follow']:
             result = self.client.post(
@@ -100,7 +100,7 @@ class InboxTest(TestCase):
             from ActivityPub and others.
         """
         from webapp.exceptions import ParseActivityError
-        from webapp.tests.messages import follow
+        from webapp.tests.rename_messages import follow
 
         data = json.dumps(follow)
         self.client.post(

@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from webapp.models import Profile
 from webapp.signature import Signature, SignatureChecker, signedRequest
-from webapp.tests.messages import follow
+from webapp.tests.rename_messages import follow
 
 testsignature = {
     "signature": 'keyId="https://23.social/users/andreasofthings#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest content-type",signature="e5Vj4XBt9B/TJSI4iJPDW3NtAXtOM8Z6y0j72uglfSi/R1xVwUvGcgu/r0h5yaf8e5weBZcuQ7t4ztMJfQGhol2weRWqFiC5vN1SkJTnen669sX0z6JPR/9FV9piEeSLCGHdW1wscR0c1XIQNciciPB8RrgouEQxmOxPCvlXFxqQeAVRH82d5UObSU9XQOx9/j8et/lCPegQuDM00l6qmhAAwqX7UnVDrNUJgN3eYcJpOMGfGNeymdZwf3j8/CAdQGgQPfzuNmDHvy4Wo79BZV4ud9mkVquEAh7RagfwIQRUtM/mI2i2qGrXwnpjwhOgxJkjoG7Fc18qvzuT3nQfQg=="',  # noqa: E501
@@ -65,8 +65,8 @@ class SignatureTest(TestCase):
         Test whether a request can be signed.
         """
 
-        user = Profile.objects.get(user=self.user)
-        key_id = user.get_key_id
+        profile = Profile.objects.get(user=self.user)
+        key_id = profile.actor.keyID
 
         ses, request = signedRequest(
             "GET", "https://pramari.de/signature", follow, key_id

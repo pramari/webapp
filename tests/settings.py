@@ -23,7 +23,6 @@ LOGGING_CONFIG = []
 STATIC_URL = "/"
 MEDIA_URL = "/media/"
 INSTALLED_APPS = [
-    "webapp",
     "django.contrib.contenttypes",
     "django.contrib.sites",
     "django.contrib.sessions",
@@ -33,6 +32,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "oauth2_provider",
+    "webapp",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
