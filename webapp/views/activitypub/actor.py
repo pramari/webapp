@@ -31,7 +31,9 @@ class ActorView(DetailView):
 
     .. seealso::
         `W3C Actor Objects <https://www.w3.org/TR/activitypub/#actor-objects>`_
-        :py:mod:webapp.urls.activitypub
+
+    .. seealso::
+        :py:mod:`webapp.urls.activitypub`
 
     """
 
@@ -68,6 +70,11 @@ class ActorView(DetailView):
             "followers": followers,
             "following": following,
             "liked": liked,
+            "url": f"{base}{self.get_object().get_absolute_url}",
+            "manuallyApprovesFollowers": False,
+            "discoverable": False,
+            "indexable": False,
+            "published": self.get_object().user.date_joined.isoformat(),
             "publicKey": {
                 "id": f"{actor.keyID}",
                 "owner": actorid,

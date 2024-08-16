@@ -51,3 +51,5 @@ DATABASES = {
         "NAME": ":memory:",
     }
 }
+
+BLOCKED_SERVERS = ['example.com', 'example.onion', 'blocked']

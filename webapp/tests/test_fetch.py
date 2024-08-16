@@ -6,6 +6,8 @@ from webapp.tasks.activitypub import Fetch
 class ActivityPubTest(TestCase):
     """
     Tests related to ActivityPub Protocol, i.e. fetching remote activities.
+
+    .. note:: This test requires internet connection to fetch remote activities.
     """
 
     def setUp(self):

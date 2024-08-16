@@ -25,9 +25,6 @@ def is_valid(url: str) -> bool:
     import urllib.parse
     from django.conf import settings
 
-    if settings.DEBUG:  # pragma: no cover
-        return True
-
     parsed = urllib.parse.urlparse(url)
 
     if parsed.scheme not in ["https"]:

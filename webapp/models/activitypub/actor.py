@@ -205,6 +205,10 @@ class Actor(models.Model):
     def keyID(self) -> str:
         """
         The :py:class:Actor main key-id.
+
+        .. todo::
+            Implement a mechanism to keep other keys
+            than the main key; and to rotate keys.
         """
         if not self.remote:
             return f"{self.id}#main-key"

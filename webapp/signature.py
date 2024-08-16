@@ -11,6 +11,7 @@ https://github.com/HelgeKrueger/bovine/blob/4ba2a83d1b4104ebffaaca357fbc9c225ffb
 https://github.com/christianp/django-activitypub-bot/blob/main/bot/send_signed_message.py
 """
 
+import json
 import base64
 import hashlib
 import logging
@@ -56,9 +57,19 @@ def getPrivateKey(key_id: str) -> str:
     """
     from webapp.models import Profile
 
-    actor_id, key = key_id.split("#")  # noqa: E841
+    try:
+        if len(key_id.split("#")) == 2:
+            actor_id, key = key_id.split("#")
+        elif len(key_id.split("#")) == 1:
+            actor_id = key_id
+    except ValueError:
+        RuntimeError(f"Could not split key_id {key_id}")
 
-    return Profile.objects.get(ap_id=actor_id).private_key_pem
+    from .validators import uri_validator
+
+    assert uri_validator(actor_id)
+
+    return Profile.objects.get(actor__id=actor_id).private_key_pem
 
 
 def signedRequest(
@@ -85,6 +96,9 @@ def signedRequest(
     """
     from webapp.signature import HttpSignature
     from urllib.parse import urlparse
+
+    assert isinstance(message, dict)
+    message = json.dumps(message)
 
     private_key = getPrivateKey(key_id=key_id)
     headers = {} if headers is None else headers
@@ -122,7 +136,14 @@ def signedRequest(
         }
     )  # noqa: E501
 
-    response = requests.post(url, data=message, headers=headers)
+    match method:
+        case "POST":
+            response = requests.post(url, data=message, headers=headers)
+        case "GET":
+            assert message == ""
+            response = requests.post(url, headers=headers)
+        case _:
+            raise ValueError(f"Unsupported method {method}")
     logger.debug(f"message: {message}")
     logger.debug(f"headers: {headers}")
     return response
@@ -325,7 +346,8 @@ class SignatureChecker:
             signature_fields = parsed_signature.fields()
 
             if (
-                "(request-target)" not in signature_fields or "date" not in signature_fields  # noqa: E501,BLK100
+                "(request-target)" not in signature_fields
+                or "date" not in signature_fields  # noqa: E501,BLK100
             ):
                 logger.error("Required field not present in signature")
                 return None
@@ -349,7 +371,9 @@ class SignatureChecker:
                 else:
                     http_signature.with_field(field, request.headers[field])
 
-            public_key = self.key_retriever(parsed_signature.key_id).get('publicKey')[  # noqa: E501
+            public_key = self.key_retriever(parsed_signature.key_id).get(
+                "publicKey"
+            )[  # noqa: E501
                 "publicKeyPem"
             ]  # noqa: E501
 

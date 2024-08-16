@@ -47,12 +47,13 @@ classifiers = [
 
 [tool.pytest]
 DJANGO_SETTINGS_MODULE = "tests.settings"
+django_debug_mode = true
 
 [tool.pytest.ini_options]
 python_files = "tests.py test_*.py"
 # python_files = ["test_*.py", "tests.py"]
 DJANGO_SETTINGS_MODULE = "tests.settings"
-
+django_debug_mode = true
 
 [tool.coverage.run]
 source = ["webapp"]

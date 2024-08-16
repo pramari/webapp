@@ -83,7 +83,7 @@ def create(target: Actor, activity: ActivityObject) -> JsonResponse:
     assert note is not None
     assert isinstance(note, dict)
 
-    if note.type == "Note":
+    if note.get('type') == "Note":
         from webapp.models import Note
 
         localNote = Note.objects.create(  # noqa: F841
