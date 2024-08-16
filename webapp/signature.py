@@ -140,7 +140,7 @@ def signedRequest(
         case "POST":
             response = requests.post(url, data=message, headers=headers)
         case "GET":
-            assert message == ""
+            assert message == "{}"
             response = requests.post(url, headers=headers)
         case _:
             raise ValueError(f"Unsupported method {method}")
