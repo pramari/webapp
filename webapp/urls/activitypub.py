@@ -17,13 +17,18 @@ from django.urls import path
 from webapp.views.activitypub import (
     NodeInfoView,
     VersionView,
+    TimelineView,
+    StreamingView,
+)
+
+from webapp.views.activitypub import (
     WebFingerView,
     ActorView,
     InboxView,
     OutboxView,
     FollowersView,
     FollowingView,
-    LikedView
+    LikedView,
 )
 
 from webapp.views.activitypub.activity import (
@@ -39,6 +44,8 @@ urlpatterns = [
     path(".well-known/nodeinfo", NodeInfoView.as_view(), name="nodeinfo"),
     path(".well-known/webfinger", WebFingerView.as_view(), name="webfinger"),
     path("api/v1/version", VersionView.as_view(), name="version"),
+    path("api/v1/timeline", TimelineView.as_view(), name="timeline"),
+    path("api/v1/streaming", StreamingView.as_view(), name="streaming"),
     path(
         r"@<slug:slug>",
         ActorView.as_view(),

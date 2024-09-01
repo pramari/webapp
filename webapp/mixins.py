@@ -8,6 +8,14 @@ from django.http import JsonResponse  # , HttpResponseRedirect
 # from django.urls import reverse
 
 
+class JsonLDIDMixin(object):
+    def wrappedID(self):
+        from django.contrib.sites.models import Site
+        host = Site.objects.get_current().domain
+        id = f"{host}{self.get_absolute_url()}"
+        return {"@id": id}
+
+
 class CacheMixin(object):
     cache_timeout = 60
 

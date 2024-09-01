@@ -41,10 +41,10 @@ def digest_sha256(content: str) -> str:
     Create a sha-256 digest of the content string.
     """
     if isinstance(content, str):
-        content = content.encode("utf-8")
+        content_buffer = content.encode("utf-8")
 
     digest = base64.standard_b64encode(
-        hashlib.sha256(content).digest()
+        hashlib.sha256(content_buffer).digest()
     ).decode(  # noqa: E501
         "utf-8"
     )  # noqa: E501
@@ -73,8 +73,8 @@ def getPrivateKey(key_id: str) -> str:
 
 
 def signedRequest(
-    method: method, url: url, message: dict, key_id: str, headers: dict = None
-) -> str:  # noqa: E501
+    method: method, url: url, message: dict, key_id: str, headers: dict = {}
+) -> requests.PreparedRequest:  # noqa: E501
     """
     Wrapper around requests.method to sign a request with
     a private key for the fediverse
@@ -98,7 +98,7 @@ def signedRequest(
     from urllib.parse import urlparse
 
     assert isinstance(message, dict)
-    message = json.dumps(message)
+    message_string = json.dumps(message)
 
     private_key = getPrivateKey(key_id=key_id)
     headers = {} if headers is None else headers
@@ -107,7 +107,7 @@ def signedRequest(
     target = urlparse(url).path  # noqa F841
     logger.debug(f"host: {host} of {url}")
 
-    digest = digest_sha256(message)
+    digest = digest_sha256(message_string)
     logger.debug(f"digest: {digest}")
 
     date = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
@@ -138,15 +138,13 @@ def signedRequest(
 
     match method:
         case "POST":
-            response = requests.post(url, data=message, headers=headers)
+            request = requests.Request('POST', url, data=message, headers=headers).prepare()
         case "GET":
-            assert message == "{}"
-            response = requests.post(url, headers=headers)
+            assert message == {}
+            request = requests.Request('GET', url, headers=headers).prepare()
         case _:
             raise ValueError(f"Unsupported method {method}")
-    logger.debug(f"message: {message}")
-    logger.debug(f"headers: {headers}")
-    return response
+    return request
 
 
 def did_key_to_public_key(did):
@@ -350,16 +348,16 @@ class SignatureChecker:
                 or "date" not in signature_fields  # noqa: E501,BLK100
             ):
                 logger.error("Required field not present in signature")
-                return None
+                return "Required field not present in signature"
 
             if digest is not None and "digest" not in signature_fields:
                 logger.error("Digest not present, but computable")
-                return None
+                return "Digest not present, but computable"
 
             http_date = parse_gmt(request.headers["date"])
             if not check_max_offset_now(http_date):
                 logger.error(f"Found too old date {request.headers['date']}")
-                return None
+                return f"Found too old date {request.headers['date']}"
 
             for field in signature_fields:
                 if field == "(request-target)":
@@ -381,7 +379,7 @@ class SignatureChecker:
                 logger.error(
                     f"Could'nt retrieve key for {parsed_signature.key_id}"  # noqa: E501
                 )
-                return None
+                return f"Could'nt retrieve key for {parsed_signature.key_id}"
 
             if http_signature.verify(public_key, parsed_signature.signature):
                 return parsed_signature.key_id

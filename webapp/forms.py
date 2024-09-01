@@ -41,8 +41,8 @@ class ProfileForm(forms.ModelForm):
             "consent",
             "dob",
             "img",
+            "bio",
             "gravatar",
-            # "follows",
         ]
 
 

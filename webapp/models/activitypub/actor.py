@@ -68,7 +68,7 @@ class Actor(models.Model):
         `actor` has `liked`. The `liked` property is *OPTIONAL* for `Actor`
         objects.
 
-        - `follows` - a django `ManyToManyField` relationshio to `self` that 
+        - `follows` - a django `ManyToManyField` relationshio to `self` that
         stores any `actors` that this `actor` is `follows`.
 
         - `followed_by` - a django `ManyToManyField` relationshio to `self` that
@@ -119,7 +119,11 @@ class Actor(models.Model):
         <QuerySet [<Actor: https://example.com/other>]>
     """
 
-    profile = models.ForeignKey(
+    # profile = models.ForeignKey(
+    #    Profile, on_delete=models.CASCADE, blank=True, null=True
+    # )
+
+    profile = models.OneToOneField(
         Profile, on_delete=models.CASCADE, blank=True, null=True
     )
 
@@ -318,7 +322,6 @@ class Actor(models.Model):
         )
 
 
-
 class Follow(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="actor")
@@ -326,7 +329,6 @@ class Follow(models.Model):
     accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
 
     def getID(self):
         from django.contrib.sites.models import Site
@@ -336,20 +338,3 @@ class Follow(models.Model):
 
     def __str__(self):
         return f"{self.actor} follows {self.object}"
-
-
-"""
-class Fllwng(models.Model):
-    # id = models.CharField(max_length=255, primary_key=True, unique=True, blank=False, validators=[validate_iri])
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="actor")
-    object = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name="object")
-    id = models.CharField(
-        max_length=255,
-        primary_key=True,
-        unique=True,
-        blank=False,
-        validators=[validate_iri],
-    )
-    accepted = models.URLField(blank=True, null=True, validators=[validate_iri])
-"""

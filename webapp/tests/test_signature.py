@@ -70,19 +70,23 @@ class SignatureTest(TestCase):
 
         Blank Message
         """
+        import requests
 
         profile = Profile.objects.get(user=self.user)
         key_id = profile.actor.keyID
         message = {}
-        response = signedRequest(
+
+        request = signedRequest(
             "GET", "https://pramari.de/signature", message, key_id
         )  # noqa: E501
+
+        session = requests.Session()
+        response = session.send(request)
 
         logger.error("Signed request")
         logger.error(key_id)
         logger.error(self.user)
         logger.error(profile.actor)
-        logger.error(response.text)
 
         self.assertEqual(response.text, key_id)
 
@@ -98,12 +102,12 @@ class SignatureTest(TestCase):
 
         request = signedRequest(
             "POST",
-            "https://pramari.de/accounts/andreas/inbox",
+            "https://pramari.de/@andreas/inbox",
             follow,
             key_id,
         )  # noqa: E501
         signature = Signature.from_signature_header(  # noqa: E501
-            request["signature"]
+            request.headers["signature"]
         )  # noqa: E501
         self.assertEqual(isinstance(signature, Signature), True)
 

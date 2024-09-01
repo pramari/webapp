@@ -189,20 +189,19 @@ def acceptFollow(inbox: str, activity: ActivityObject, accept_id: str) -> bool:
 
     base = Site.objects.get_current().domain
 
-    message = json.dumps(
-        {
-            "@context": "https://www.w3.org/ns/activitystreams",
-            "type": "Accept",
-            "id": f"https://{base}/{accept_id}",
-            "actor": activity.object,
-            "object": activity.toDict(),
-        }
-    )
+    message = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Accept",
+        "id": f"https://{base}/{accept_id}",
+        "actor": activity.object,
+        "object": activity.toDict(),
+    }
     logger.error(f"acceptFollow to {activity.actor}")
     logger.error(f"with message: {message=}")
 
     # remember we accepted this follow
     from webapp.models.activitypub.actor import Follow
+
     follow = Follow.objects.get(actor=activity.actor)
     follow.accepted = accept_id
     follow.save()

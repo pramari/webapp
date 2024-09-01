@@ -42,7 +42,8 @@ class Profile(models.Model):
     """
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     slug = models.SlugField(null=True, help_text=_("Slug"))
 
 

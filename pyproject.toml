@@ -58,6 +58,12 @@ django_debug_mode = true
 [tool.coverage.run]
 source = ["webapp"]
 
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "tests.settings"
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -135,8 +141,11 @@ legacy_tox_ini = """
         pytest-django
         pytest-cov
         ruff
+        mypy
+        django-stubs[compatible-mypy]
 
     commands =
+        mypy --install-types webapp/signature.py
         ruff check webapp
         pytest webapp
         # coverage run --source webapp tests/manage.py test --settings=tests.settings

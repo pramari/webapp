@@ -244,6 +244,7 @@ class ProfileAdmin(admin.ModelAdmin):
         "public",
         # "ap_id",
     )
+    prepopulated_fields = {"slug": ["user",]}
 
 
 admin.site.register(Profile, ProfileAdmin)
@@ -251,6 +252,10 @@ admin.site.register(Profile, ProfileAdmin)
 
 class NoteAdmin(admin.ModelAdmin):
     model = Note
+    list_display = (
+        "__str__",
+        "published",
+    )
 
 
 admin.site.register(Note, NoteAdmin)
@@ -331,7 +336,7 @@ class EmailAddressInline(admin.TabularInline):
     model = EmailAddress
 
 
-class ProfileInline(admin.StackedInline):
+class ProfileInline(admin.TabularInline):
     model = Profile
 
 
@@ -385,8 +390,6 @@ class UserAdmin(admin.ModelAdmin):
         "is_staff",
         "is_active",
         "is_verified",
-        "public",
-        "consent",
     )
 
     inlines = [ProfileInline, EmailAddressInline, SocialAccountInline]

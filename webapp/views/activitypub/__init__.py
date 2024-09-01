@@ -19,8 +19,18 @@ based on the ActivityStreams 2.0 data format.
     `W3C ActivityStreams 2.0 <https://www.w3.org/TR/activitystreams-core/>`_
 """
 
+# System
 from .nodeinfo import NodeInfoView, VersionView
+from .timelines import TimelineView
+from .streaming import StreamingView
+
+__all__ = ["NodeInfoView", "VersionView", "TimelineView", "StreamingView"]
+
+
+# WebFinger
 from .webfinger import WebFingerView
+
+# ActivityPub
 from .actor import ActorView
 from .inbox import InboxView
 from .outbox import OutboxView
@@ -28,14 +38,12 @@ from .followers import FollowersView
 from .following import FollowingView
 from .liked import LikedView
 
-__all__ = [
-    "NodeInfoView",
-    "VersionView",
+__all__ += [
     "WebFingerView",
     "ActorView",
     "InboxView",
     "OutboxView",
     "FollowersView",
     "FollowingView",
-    "LikedView"
+    "LikedView",
 ]

@@ -32,11 +32,9 @@ class InboxView(DetailView):
     """
     .. py:class:: webapp.views.InboxView
 
-    The inbox is discovered through the inbox property of an 
-    :py:class:webapp.models.activitypub.Actor's profile. The 
+    The inbox is discovered through the inbox property of an
+    :py:class:webapp.models.activitypub.Actor's profile. The
     inbox **MUST** be an `OrderedCollection`.
-
-    
 
     .. seealso::
         `ActivityPub Inbox <https://www.w3.org/TR/activitypub/#inbox>_`
@@ -84,6 +82,7 @@ class InboxView(DetailView):
 
         try:
             import json
+
             message = json.loads(body)
             activity = ActivityObject(message)
         except ValueError as e:
@@ -148,16 +147,16 @@ class InboxView(DetailView):
         """
         Return a 200 for GET requests.
 
-        Not sure this is necessary, but 
+        Not sure this is necessary, but
         :py:meth:`webapp.tests.inbox.InboxTest.test_user_inbox` tests it.
         """
         from urllib.parse import urlparse
+
         actor = self.get_object().actor
         assert request.method == "GET"
         logger.error(f"GET request: {request.path}")
         logger.error(f"Actor: {actor.inbox}")
         assert request.path == urlparse(actor.inbox).path
-
 
         if request.user.is_authenticated and request.user == actor.profile.user:
             return JsonResponse({"status": f"{actor.inbox} ok"}, status=200)

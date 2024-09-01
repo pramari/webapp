@@ -42,7 +42,7 @@ class ActorView(DetailView):
 
     def to_jsonld(self, *args, **kwargs):
         base = f"https://{Site.objects.get_current().domain}"
-        actor = self.get_object().actor_set.get()
+        actor = self.get_object().actor
 
         # assert f"{base}/@{slug}" == profile.actor.id
 

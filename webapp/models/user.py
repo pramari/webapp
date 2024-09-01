@@ -1,6 +1,5 @@
 import logging
 from django.contrib.auth.models import AbstractUser  # type: ignore
-from django.db import models
 from allauth.account.models import EmailAddress
 
 logger = logging.getLogger(__name__)
@@ -41,8 +40,8 @@ class User(AbstractUser):
         )
         return queryset.count() > 0
 
-    public = models.BooleanField(default=False)
-    consent = models.BooleanField(default=False)
+    # public = models.BooleanField(default=False)  # -> Profile
+    # consent = models.BooleanField(default=False) # -> Profile
 
     @property
     def services(self) -> list[str]:
