@@ -361,7 +361,8 @@ class SignatureChecker:
 
             for field in signature_fields:
                 if field == "(request-target)":
-                    method = request.method.lower()
+                    m = request.method or ""
+                    method = "" if m is None else m.lower()
                     # parsed_url = urlparse(request.url)
                     # path = parsed_url.path
                     path = request.path

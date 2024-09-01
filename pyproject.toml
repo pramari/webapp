@@ -8,7 +8,6 @@ reproducible = true
 [tool.hatch.build.targets.wheel]
 packages = ["webapp/"]
 
-
 [project]
 name = "pramari-webapp"
 version = "1.1.24"
@@ -60,6 +59,7 @@ source = ["webapp"]
 
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
 
 [tool.django-stubs]
 django_settings_module = "tests.settings"

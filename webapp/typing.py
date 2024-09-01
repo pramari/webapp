@@ -3,12 +3,12 @@ Cheat Sheet
 https://www.pythonsheets.com/notes/python-typing.html
 """
 
-import re
+# import re
 
 from typing import Any
-from typing import Pattern, Set  # Dict, Optional, Set
+from typing import Set # , Pattern  # Dict, Optional, Set
 
-url: Pattern = re.compile("(https?)://([^/\r\n]+)(/[^\r\n]*)?")
-method: Set[str] = {"GET", "POST"}
+url = str
+method = Set[str] # : {"GET", "POST"}
 
 activityobject = dict[str, Any]

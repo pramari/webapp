@@ -21,7 +21,7 @@ class InboxTest(TestCase):
         )
         if created:
             self.user.save()
-        self.slug = self.user.profile_set.get().slug
+        self.slug = self.user.profile.slug
         self.follower = User.objects.create(username="follower")
         self.followed = User.objects.create(username="followed")
         if created:

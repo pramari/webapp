@@ -30,12 +30,12 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
     # success_url = "/thanks/"
 
     def get_initial(self):
-        actor = self.request.user.profile_set.get().actor
+        actor = self.request.user.profile.actor
         return {"actor": actor}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["slug"] = self.request.user.profile_set.get().slug
+        context["slug"] = self.request.user.profile.slug
         return context
 
     def form_valid(self, form):
@@ -53,11 +53,11 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
         self.object = form.save()
 
         action.send(
-            sender=self.request.user.profile_set.get().actor,
+            sender=self.request.user.profile.actor,
             verb="like",
             action_object=self.object,
         )
-        actor = self.request.user.profile_set.get().actor
+        actor = self.request.user.profile.actor
         print("DEBUG: ", settings.DEBUG)
         if settings.DEBUG:
             sendLike(actor.id, form.cleaned_data["object"])
@@ -72,7 +72,7 @@ class LikeDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["slug"] = self.request.user.profile_set.get().slug
+        context["slug"] = self.request.user.profile.slug
         return context
 
 
@@ -95,7 +95,7 @@ class LikeDeleteView(LoginRequiredMixin, DeleteView):
         .. seealso:: `ActivityPub Undo <https://www.w3.org/TR/activitystreams-vocabulary/#dfn-undo>`_  # noqa: E501
         """
         action.send(
-            sender=self.request.user.profile_set.get().actor,
+            sender=self.request.user.profile.actor,
             verb="undo",
             action_object=self.object,
         )

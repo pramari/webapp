@@ -40,11 +40,15 @@ class ActorTestCase(TestCase):
         self.assertEqual(result["Content-Type"], "application/activity+json")
 
     def test_serialization(self):
+        """
+        Test the actor serialization.
+        """
         from webapp.models import Actor
 
         user = get_user_model().objects.get(username=self.username)
-        actor = Actor.objects.get(id=user.profile_set.get().actor.id)
+        actor = Actor.objects.get(id=user.profile.actor.id)
         from webapp.serializers.actor import ActorSerializer
 
         serialized = ActorSerializer(actor)
-        self.assertEqual(serialized.data["id"], user.profile_set.get().actor.id)
+        print(serialized.data)
+        self.assertEqual(serialized.data["id"], user.profile.actor.id)

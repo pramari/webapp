@@ -14,11 +14,17 @@ class ActivityPubTest(TestCase):
         """
         Setup test.
         """
-
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.username = "testuser"
         self.client = Client()
+        self.user = User.objects.create_user(
+            username=self.username, password="12345", email="")
+        self.actorid = self.user.profile.actor.id
 
     def test_actvity_fetch(self):
-        self.assertTrue(Fetch("https://pramari.de/@andreas"))
+        actor = Fetch(f"{self.actorid}")
+        self.assertTrue(actor)
 
     def test_actvity_fetch_blocked(self):
         with self.assertRaises(ValueError):
@@ -38,6 +44,6 @@ class ActivityPubTest(TestCase):
         """
         from webapp.tasks.activitypub import getRemoteActor
 
-        result = getRemoteActor("https://pramari.de/@andreas")
+        result = getRemoteActor(f"{self.actorid}")
 
-        self.assertEqual(result.get("id"), "https://pramari.de/@andreas")  # noqa: E501
+        self.assertEqual(result.get("id"), f"{self.actorid}")  # noqa: E501

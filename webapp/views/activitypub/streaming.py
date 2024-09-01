@@ -5,4 +5,4 @@ from rest_framework import status
 
 class StreamingView(APIView):
     def get(self, request):
-        return Response("Hello, world!")
+        return Response("Hello, world!", status=status.HTTP_200_OK)
