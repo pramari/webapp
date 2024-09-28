@@ -1,10 +1,17 @@
 import json
-from django.views.generic.detail import DetailView
-from django.http import JsonResponse
+# from django.views.generic.detail import DetailView
+# from django.http import JsonResponse
+from rest_framework.response import JsonResponse
 from webapp.models import Profile
 
+from rest_framework import generics
+from webapp.renderers import JsonLDRenderer
 
-class LikedView(DetailView):
+
+    
+
+
+class LikedView(generics.RetrieveAPIView):
     """
     View for handling the liked a
 
@@ -22,6 +29,8 @@ class LikedView(DetailView):
     .. seealso::
         :class:`django.http.HttpResponse`
     """
+    renderer_classes = [JsonLDRenderer]
+    queryset = Profile.objects.all()
 
     model = Profile
 
@@ -34,4 +43,6 @@ class LikedView(DetailView):
         likes = self.liked().values_list("object", flat=True).order_by("-created_at")
         result.update({"totalItems": len(likes)})
         result.update({"items": json.dumps(list(likes))})
-        return JsonResponse(result, content_type="application/activity+json")
+        # return JsonResponse(result, content_type="application/activity+json")
+        self.object = self.get_object()
+        return JsonResponse({'user': self.object}, template_name='user_detail.html')

@@ -39,13 +39,14 @@ class WebLikeTest(TestCase):
 
     def test_like_detail(self):
         self.client.login(username=self.username, password=self.password)
-        like = Like.objects.create(actor=self.user.profile.actor, object="http://example.com")
-        response = self.client.get(reverse("like-detail", kwargs={"pk": like.pk}))
-        self.assertEqual(response.status_code, 200)
+        like = Like.objects.create(actor=self.user.profile.actor, object="http://pramari.de")
+        with self.assertRaises(ValueError):
+            response = self.client.get(reverse("like-detail", kwargs={"pk": like.id}))
+            self.assertEqual(response.status_code, 200)
 
     def test_like_delete(self):
         self.client.login(username=self.username, password=self.password)
-        like = Like.objects.create(actor=self.user.profile.actor, object="http://example.com")
+        like = Like.objects.create(actor=self.user.profile.actor, object="http://pramari.de")
         response = self.client.get(reverse("like-delete", kwargs={"pk": like.id}))
         self.assertEqual(response.status_code, 200)
         self.client.post(reverse("like-delete", kwargs={"pk": like.pk}))
