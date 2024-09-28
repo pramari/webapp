@@ -1,18 +1,36 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.views.generic import DetailView
+# from django.views.generic import DetailView
+
 # from django.views import View
-from django.views.generic.list import MultipleObjectMixin
+# from django.views.generic.list import MultipleObjectMixin
+
 # from django.views.generic.detail import SingleObjectMixin
 from webapp.models import Profile
-from django.contrib.sites.models import Site
+# from django.contrib.sites.models import Site
+from rest_framework.views import APIView
+from rest_framework import renderers
 
 
-class FollowersView(MultipleObjectMixin, DetailView):
+class JsonLDRenderer(renderers.BaseRenderer):
+    media_type = "application/activity+json"
+    format = "jsonld"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+# class FollowersView(MultipleObjectMixin, DetailView):
+class FollowersView(APIView):
     """
     Provide a list of followers for a given profile.
 
-    Every actor SHOULD have a followers collection. This is a list of everyone who has sent a Follow activity for the actor, added as a side effect. This is where one would find a list of all the actors that are following the actor. The followers collection MUST be either an OrderedCollection or a Collection and MAY be filtered on privileges of an authenticated user or as appropriate when no authentication is given.
+    Every actor SHOULD have a followers collection. This is a list of everyone
+    who has sent a Follow activity for the actor, added as a side effect. This
+    is where one would find a list of all the actors that are following the
+    actor. The followers collection MUST be either an OrderedCollection or a
+    Collection and MAY be filtered on privileges of an authenticated user or
+    as appropriate when no authentication is given.
 
     .. note::
          The reverse for this view is `actor-followers`.
@@ -24,6 +42,7 @@ class FollowersView(MultipleObjectMixin, DetailView):
          `5.3 Followers Collection <https://www.w3.org/TR/activitypub/#followers>`_
     """
 
+    renderer_classes = [JsonLDRenderer]
     template_name = "activitypub/followers.html"
     paginate_by = 20
     model = Profile
@@ -36,16 +55,15 @@ class FollowersView(MultipleObjectMixin, DetailView):
 
     def to_jsonld(self):
         actor = self.get_object().actor
-        base = f"https://{Site.objects.get_current().domain}"
-        followers = (
-            self.get_queryset().values_list("actor", flat=True)  # .order_by("-followed_by__created")
-        )
+        followers = self.get_queryset().values_list(
+            "actor", flat=True
+        )  # .order_by("-followed_by__created")
         wrap = {
             "@context": "https://www.w3.org/ns/activitystreams",
-            "id": f"https://{base}{actor.followers}",
+            "id": f"{actor.followers}",
             "type": "OrderedCollection",
             "totalItems": len(followers),
-            "items": [f"{item.id}" for item in followers],
+            "items": [f"{actor.id}" for item in followers],
         }
         return wrap
 

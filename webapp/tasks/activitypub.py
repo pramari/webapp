@@ -21,6 +21,10 @@ def is_valid(url: str) -> bool:
     Implements basic SSRF protection.
     Check if a remote object is valid
     Check if the URL is blocked
+
+    :param url: str: The URL to check
+    :return: bool: True if the URL is valid
+    :raises ValueError: If the URL is invalid
     """
     import urllib.parse
     from django.conf import settings
@@ -31,20 +35,20 @@ def is_valid(url: str) -> bool:
         """
         Don't support HTTP
         """
-        return False
+        raise ValueError(f"Unsupported scheme {parsed.scheme}")
 
     for blocked_hostname in settings.BLOCKED_SERVERS:  # noqa: E501
         if parsed.hostname == blocked_hostname or parsed.hostname.endswith(
             f".{blocked_hostname}"
         ):
-            return False
+            raise ValueError(f"Blocked hostname {parsed.hostname}")
 
     if not parsed.hostname or parsed.hostname.lower() in ["localhost"]:
-        return False
+        raise ValueError(f"Invalid hostname {parsed.hostname}")
 
     if parsed.hostname.endswith(".onion"):
         logger.warning(f"{url} is an onion service")
-        return False
+        raise ValueError(f"Unsupported onion service {parsed.hostname}")
 
     try:
         ip_address = socket.getaddrinfo(
@@ -54,17 +58,17 @@ def is_valid(url: str) -> bool:
         logger.debug(f"{ip_address=}")
     except socket.gaierror:  # [Errno -2] Name or service not known
         logger.info(f"rejecting not found invalid URL {url}")
-        return False
+        raise ValueError(f"rejecting not found invalid URL {url}")
 
     try:
         ip = ipaddress.ip_address(ip_address)
     except socket.gaierror:  # [Errno -2] Name or service not known
         logger.info(f"rejecting invalid IP {ip_address}")
-        return False
+        raise ValueError(f"rejecting invalid IP {ip_address}")
 
     if ip.is_private:
         logger.info(f"rejecting private URL {url} -> {ip_address}")
-        return False
+        raise ValueError(f"rejecting private URL {url} -> {ip_address}")
 
     return True
 

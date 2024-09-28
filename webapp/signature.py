@@ -390,4 +390,4 @@ class SignatureChecker:
             logger.error(request.headers)
             for log_line in traceback.format_exc().splitlines():
                 logger.error(log_line)
-            return None
+            return e

@@ -165,7 +165,7 @@ class Actor(models.Model):
         """
         return self.id
 
-    @property
+    @cached_property
     def actorID(self):
         """
         Return the URL of the actor.
@@ -218,7 +218,7 @@ class Actor(models.Model):
             return f"{self.id}#main-key"
         raise RemoteActorError("Remote actors do not have a key-id.")
 
-    @property
+    @cached_property
     def inbox(self):
         """
         :py:attr:inbox returns a link to an `OrderedCollection`
@@ -237,13 +237,13 @@ class Actor(models.Model):
         """
         if not self.remote:
             base = f"https://{Site.objects.get_current().domain}"
-            return f"{base}%s" % reverse(
+            return f"{base}" + reverse(
                 "actor-inbox",
                 args=[self.profile.slug],
             )
         raise RemoteActorError("Remote actors do not have a local inbox.")
 
-    @property
+    @cached_property
     def outbox(self):
         """
         :py:attr:outbox returns a link to an `OrderedCollection`
@@ -256,10 +256,13 @@ class Actor(models.Model):
         .. seealso::
             :py:class:`webapp.views.outbox.OutboxView`
         """
-        return reverse(
-            "actor-outbox",
-            args=[self.profile.slug],
-        )
+        if not self.remote:
+            base = f"https://{Site.objects.get_current().domain}"
+            return f"{base}%s" % reverse(
+                "actor-outbox",
+                args=[self.profile.slug],
+            )
+        raise RemoteActorError("Remote actors do not have a local outbox.")
 
     @property
     def followers(self):
@@ -279,10 +282,13 @@ class Actor(models.Model):
 
 
         """
-        return reverse(
-            "actor-followers",
-            args=[self.profile.slug],
-        )
+        if not self.remote:
+            base = f"https://{Site.objects.get_current().domain}"
+            return f"{base}%s" % reverse(
+                "actor-followers",
+                args=[self.profile.slug],
+            )
+        raise RemoteActorError("Remote actors do not have a local follower.")
 
     @property
     def following(self):
@@ -298,10 +304,12 @@ class Actor(models.Model):
             :py:class:`webapp.views.following.FollowingView`
 
         """
-        return reverse(
-            "actor-following",
-            args=[self.profile.slug],
-        )
+        if not self.remote:
+            base = f"https://{Site.objects.get_current().domain}"
+            return f"{base}%s" % reverse(
+                "actor-following",
+                args=[self.profile.slug],
+            )
 
     @property
     def liked(self):
@@ -316,10 +324,12 @@ class Actor(models.Model):
         :: rtype: str
 
         """
-        return reverse(
-            "actor-liked",
-            args=[self.profile.slug],
-        )
+        if not self.remote:
+            base = f"https://{Site.objects.get_current().domain}"
+            return f"{base}%s" % reverse(
+                "actor-liked",
+                args=[self.profile.slug],
+            )
 
 
 class Follow(models.Model):

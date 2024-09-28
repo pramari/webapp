@@ -38,8 +38,8 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "is_verified",
             # "dob",
-            "public",
-            "consent",
+            # "profile__public",
+            # "consent",
             "services",
         )
 

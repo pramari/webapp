@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import DetailView
-from django.contrib.sites.models import Site
+# from django.contrib.sites.models import Site
 import logging
 
 from webapp.models import Profile  # Profile is hosting Actor
@@ -41,44 +41,32 @@ class ActorView(DetailView):
     model = Profile
 
     def to_jsonld(self, *args, **kwargs):
-        base = f"https://{Site.objects.get_current().domain}"
         actor = self.get_object().actor
-
-        # assert f"{base}/@{slug}" == profile.actor.id
-
-        actorid = f"{actor.id}"
-        username = f"{actor.profile.user}"  # pylint: disable=E1101
-        inbox = f"{actor.inbox}"
-        outbox = f"{base}{actor.outbox}"  # noqa: F841
-        followers = f"{base}{actor.followers}"  # noqa: F841
-        following = f"{base}{actor.following}"  # noqa: F841
-        liked = f"{base}{actor.liked}"  # noqa: F841
-        publicKey = f"{actor.publicKey}"
 
         jsonld = {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
                 "https://w3id.org/security/v1",
             ],
-            "id": actorid,
+            "id": actor.id,
             "type": "Person",
-            "name": username,
-            "preferredUsername": username,
+            "name": actor.profile.user.username,
+            "preferredUsername": actor.profile.user.username,
             "summary": actor.profile.bio,
-            "inbox": inbox,
-            "outbox": outbox,
-            "followers": followers,
-            "following": following,
-            "liked": liked,
-            "url": f"{base}{self.get_object().get_absolute_url}",
+            "inbox": actor.inbox,
+            "outbox": actor.outbox,
+            "followers": actor.followers,
+            "following": actor.following,
+            "liked": actor.liked,
+            "url": self.get_object().get_absolute_url,
             "manuallyApprovesFollowers": False,
             "discoverable": False,
             "indexable": False,
-            "published": self.get_object().user.date_joined.isoformat(),
+            "published": actor.profile.user.date_joined.isoformat(),
             "publicKey": {
-                "id": f"{actor.keyID}",
-                "owner": actorid,
-                "publicKeyPem": publicKey,
+                "id": actor.keyID,
+                "owner": actor.id,
+                "publicKeyPem": actor.profile.public_key_pem,
             },
             "image": {  # background image
                 "type": "Image",
@@ -92,6 +80,7 @@ class ActorView(DetailView):
             },  # noqa: E501
         }
         from webapp.activity import canonicalize
+
         return canonicalize(jsonld)
 
     def get(self, request, *args, **kwargs):  # pylint: disable=W0613

@@ -27,7 +27,6 @@ class LikedView(DetailView):
 
     def liked(self):
         result = self.get_object().actor.like_set.all()
-        print("Likes: ", result)
         return result
 
     def get(self, request, *args, **kwargs):

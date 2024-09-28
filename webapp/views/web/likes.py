@@ -6,12 +6,23 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from webapp.models import Like
 from django import forms
+from django.db import models
 import logging
 from webapp.tasks.activitypub import sendLike
 from webapp.signals import action
 from webapp.models import Profile
 
 logger = logging.getLogger(__name__)
+
+
+def urlfields_assume_https(db_field, **kwargs):
+    """
+    ModelForm.Meta.formfield_callback function to
+    assume HTTPS for scheme-less domains in URLFields.
+    """
+    if isinstance(db_field, models.URLField):
+        kwargs["assume_scheme"] = "https"
+    return db_field.formfield(**kwargs)
 
 
 class LikesForm(forms.ModelForm):
@@ -21,6 +32,7 @@ class LikesForm(forms.ModelForm):
         widgets = {
             "object": forms.URLInput(attrs={"class": "form-control"}),
         }
+        formfield_callback = urlfields_assume_https
 
 
 class LikeCreateView(LoginRequiredMixin, CreateView):

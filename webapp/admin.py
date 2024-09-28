@@ -371,7 +371,6 @@ class UserAdmin(admin.ModelAdmin):
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
-        (_("Profile Information"), {"fields": ("public", "consent")}),
     )
     add_fieldsets = (
         (

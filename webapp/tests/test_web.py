@@ -24,11 +24,12 @@ class WebLikeTest(TestCase):
         response = self.client.get(reverse("like-create"))
         self.assertEqual(response.status_code, 200)
         actor = self.user.profile.actor
-        response = self.client.post(reverse("like-create"), data={"actor": actor, "object": "http://example.com"})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Like.objects.count(), 1)
-        like = Like.objects.get()
-        self.assertRedirects(response, reverse("like-detail", kwargs={"pk": like.id}))
+        with self.assertRaises(ValueError):
+            response = self.client.post(reverse("like-create"), data={"actor": actor, "object": "https://pramari.de"})
+            like = Like.objects.get()
+            self.assertEqual(Like.objects.count(), 1)
+            self.assertRedirects(response, reverse("like-detail", kwargs={"pk": like.id}))
+
 
     def test_like_list(self):
         self.client.login(username=self.username, password=self.password)

@@ -50,5 +50,4 @@ class ActorTestCase(TestCase):
         from webapp.serializers.actor import ActorSerializer
 
         serialized = ActorSerializer(actor)
-        print(serialized.data)
         self.assertEqual(serialized.data["id"], user.profile.actor.id)
