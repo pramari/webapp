@@ -1,3 +1,14 @@
+"""renderers.py
+
+    .. seealso:: https://www.w3.org/ns/activitystreams
+    
+    .. seealso::
+    https://www.django-rest-framework.org/api-guide/renderers/#custom-renderers
+
+    Returns:
+        _type_: _description_
+"""
+
 from rest_framework import renderers
 
 class JsonLDRenderer(renderers.BaseRenderer):
