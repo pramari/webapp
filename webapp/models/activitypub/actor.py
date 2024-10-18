@@ -68,10 +68,10 @@ class Actor(models.Model):
         `actor` has `liked`. The `liked` property is *OPTIONAL* for `Actor`
         objects.
 
-        - `follows` - a django `ManyToManyField` relationshio to `self` that
+        - `follows` - a django `ManyToManyField` relationship to `self` that
         stores any `actors` that this `actor` is `follows`.
 
-        - `followed_by` - a django `ManyToManyField` relationshio to `self` that
+        - `followed_by` - a django `ManyToManyField` relationship to `self` that
         stores any `actors` that are `following` this `actor`.
 
 
@@ -163,7 +163,7 @@ class Actor(models.Model):
         """
         Return the string representation of the object.
         """
-        return self.id
+        return str(self.id)
 
     @cached_property
     def actorID(self):

@@ -5,8 +5,9 @@ from allauth.account.models import EmailAddress
 logger = logging.getLogger(__name__)
 
 try:
+    pass
     # from allauth.socialaccount.models import SocialToken, SocialApp,
-    from allauth.socialaccount.models import SocialAccount  # type
+    # from allauth.socialaccount.models import SocialAccount  # type
 except ImportError:
     logger.error("Cannot import SocialToken")
 
@@ -52,18 +53,10 @@ class User(AbstractUser):
 
         .. todo:: Implement this method working.
         """
-        accounts = []
-        try:
-            accounts = SocialAccount.objects.filter(
-                user=self.request.user
-            )  # pylint: disable=E1101,E501
-        except SocialAccount.DoesNotExist:
-            accounts = [
-                "none",
-            ]
+        accounts = self.socialaccount_set.all()
         logger.error(type(accounts))
         logger.error(accounts)
-        return ["A"]  # accounts
+        return [str(account) for account in accounts]  # accounts
 
     @property
     def get_absolute_url(self):

@@ -154,8 +154,6 @@ class InboxView(DetailView):
 
         actor = self.get_object().actor
         assert request.method == "GET"
-        logger.error(f"GET request: {request.path}")
-        logger.error(f"Actor: {actor.inbox}")
         assert request.path == urlparse(actor.inbox).path
 
         if request.user.is_authenticated and request.user == actor.profile.user:

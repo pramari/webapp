@@ -28,10 +28,10 @@ __date__ = "2024-07-17"
 __author__ = "Andreas Neumeier"
 
 contenttype = (
-    "application/json+ld",
-    "activity/json",
-    "application/activity+json",
     "application/ld+json",
+    "application/json+ld",
+    "application/activity+json",
+    "activity/json",
 )
 
 default_app_config = "webapp.apps.WebAppConfig"

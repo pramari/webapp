@@ -5,13 +5,16 @@ from django.urls import reverse
 
 from webapp.models import Like
 
+
 class WebLikeTest(TestCase):
     def setUp(self):
         User = get_user_model()
         self.client = Client()
         self.username = "andreas"
         self.password = "password"
-        self.user = User.objects.create_user(username=self.username, password=self.password)  # noqa
+        self.user = User.objects.create_user(
+            username=self.username, password=self.password
+        )  # noqa
 
     def test_like_create_anonymous(self):
         response = self.client.get(reverse("like-create"))
@@ -24,12 +27,13 @@ class WebLikeTest(TestCase):
         response = self.client.get(reverse("like-create"))
         self.assertEqual(response.status_code, 200)
         actor = self.user.profile.actor
-        with self.assertRaises(ValueError):
-            response = self.client.post(reverse("like-create"), data={"actor": actor, "object": "https://pramari.de"})
-            like = Like.objects.get()
-            self.assertEqual(Like.objects.count(), 1)
-            self.assertRedirects(response, reverse("like-detail", kwargs={"pk": like.id}))
-
+        response = self.client.post(
+            reverse("like-create"),
+            data={"actor": actor, "object": "https://pramari.de"},
+        )
+        like = Like.objects.get()
+        self.assertEqual(Like.objects.count(), 1)
+        self.assertRedirects(response, reverse("like-detail", kwargs={"pk": like.id}))
 
     def test_like_list(self):
         self.client.login(username=self.username, password=self.password)
@@ -39,14 +43,17 @@ class WebLikeTest(TestCase):
 
     def test_like_detail(self):
         self.client.login(username=self.username, password=self.password)
-        like = Like.objects.create(actor=self.user.profile.actor, object="http://pramari.de")
-        with self.assertRaises(ValueError):
-            response = self.client.get(reverse("like-detail", kwargs={"pk": like.id}))
-            self.assertEqual(response.status_code, 200)
+        like = Like.objects.create(
+            actor=self.user.profile.actor, object="http://pramari.de"
+        )
+        response = self.client.get(reverse("like-detail", kwargs={"pk": like.id}))
+        self.assertEqual(response.status_code, 200)
 
     def test_like_delete(self):
         self.client.login(username=self.username, password=self.password)
-        like = Like.objects.create(actor=self.user.profile.actor, object="http://pramari.de")
+        like = Like.objects.create(
+            actor=self.user.profile.actor, object="http://pramari.de"
+        )
         response = self.client.get(reverse("like-delete", kwargs={"pk": like.id}))
         self.assertEqual(response.status_code, 200)
         self.client.post(reverse("like-delete", kwargs={"pk": like.pk}))

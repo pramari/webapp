@@ -1,14 +1,14 @@
-from django.http import JsonResponse, HttpResponseRedirect
-from django.views.generic import DetailView
-# from django.contrib.sites.models import Site
 import logging
 
+from rest_framework import generics
+from rest_framework.response import Response
 from webapp.models import Profile  # Profile is hosting Actor
+from webapp.serializers.actor import ActorSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class ActorView(DetailView):
+class ActorView(generics.GenericAPIView):
     """
     Return the actor object for a given user.
     User is identified by the slug.
@@ -38,64 +38,24 @@ class ActorView(DetailView):
     """
 
     redirect_to = "profile-detail"
+    serializer_class = ActorSerializer
+    queryset = Profile.objects.all()  # todo: local profiles, approved profiles
+    lookup_field = "slug"
     model = Profile
+    template_name = "activitypub/actor.html"
 
-    def to_jsonld(self, *args, **kwargs):
-        actor = self.get_object().actor
+    def get_object(self):
+        """
+        Search for the profile, return the actor.
+        """
+        return self.queryset.get(slug=self.kwargs["slug"]).actor
 
-        jsonld = {
-            "@context": [
-                "https://www.w3.org/ns/activitystreams",
-                "https://w3id.org/security/v1",
-            ],
-            "id": actor.id,
-            "type": "Person",
-            "name": actor.profile.user.username,
-            "preferredUsername": actor.profile.user.username,
-            "summary": actor.profile.bio,
-            "inbox": actor.inbox,
-            "outbox": actor.outbox,
-            "followers": actor.followers,
-            "following": actor.following,
-            "liked": actor.liked,
-            "url": self.get_object().get_absolute_url,
-            "manuallyApprovesFollowers": False,
-            "discoverable": False,
-            "indexable": False,
-            "published": actor.profile.user.date_joined.isoformat(),
-            "publicKey": {
-                "id": actor.keyID,
-                "owner": actor.id,
-                "publicKeyPem": actor.profile.public_key_pem,
-            },
-            "image": {  # background image
-                "type": "Image",
-                "mediaType": "image/jpeg",
-                "url": actor.profile.imgurl,
-            },  # noqa: E501
-            "icon": {
-                "type": "Image",
-                "mediaType": "image/png",
-                "url": actor.profile.imgurl,
-            },  # noqa: E501
-        }
-        from webapp.activity import canonicalize
-
-        return canonicalize(jsonld)
-
-    def get(self, request, *args, **kwargs):  # pylint: disable=W0613
-        if (
-            "Accept" in request.headers
-            and "application/activity+json"
-            in request.headers.get("Accept")  # noqa: E501
-        ):
-            return JsonResponse(
-                self.to_jsonld(request, *args, **kwargs),
-                content_type="application/activity+json",
-            )
-        from django.urls import reverse
-
-        return HttpResponseRedirect(
-            reverse(self.redirect_to, kwargs={"slug": self.kwargs["slug"]})
+    def get(self, request, *args, **kwargs):
+        logger.debug(
+            "ActorView.get(): acceppted media types: %s", request.accepted_media_type
         )
-        # return super().get(request, *args, **kwargs)
+        if request.accepted_renderer.format == "html":
+            data = {"actor": self.get_object()}
+            return Response(data, template_name=self.template_name)
+        actor = self.serializer_class(instance=self.get_object()).data
+        return Response(actor)

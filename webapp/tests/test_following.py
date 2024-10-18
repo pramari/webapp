@@ -4,6 +4,14 @@ from django.urls import reverse
 
 User = get_user_model()
 
+accept_html = "text/html"
+accept_json = "application/json"
+accept_ld = "application/ld+json"
+accept_jsonld_profile = (
+    'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+)
+accept_mastodon = "iapplication/activity, application/ld"
+
 
 class FollowersTest(TestCase):
     def setUp(self):
@@ -20,19 +28,18 @@ class FollowersTest(TestCase):
         self.user.profile.actor.follows.add(self.follower.profile.actor)
         self.user.profile.actor.followed_by.add(self.followed.profile.actor)
 
-    def test_followers_json(self):
+    def test_followers_ld(self):
         """
         Test `/accounts/user/followers`.
         Nothing more than a simple GET request.
         """
         result = self.client.get(
             reverse("actor-followers", kwargs={"slug": "user"}),
-            headers={"Accept": "application/activity+json"},
+            HTTP_ACCEPT=accept_ld,
         )  # noqa: E501
-
+        self.assertEqual(result["Content-Type"], accept_ld)
         self.assertEqual(result.status_code, 200)
-        self.assertEqual(result["Content-Type"], "application/activity+json")
-        print(result.json())
+
 
 class FollowingTest(TestCase):
     def setUp(self):
@@ -51,10 +58,11 @@ class FollowingTest(TestCase):
         Nothing more than a simple GET request.
         """
         result = self.client.get(
-            reverse("actor-following", kwargs={"slug": "user"})
+            reverse("actor-following", kwargs={"slug": "user"}),
+            headers={"Accept": "text/html"},
         )  # noqa: E501
 
-        self.assertEqual(result.status_code, 406)
+        self.assertEqual(result.status_code, 200)
         self.assertEqual(result["Content-Type"], "text/html; charset=utf-8")
 
     def test_following_activity_json(self):
@@ -64,8 +72,8 @@ class FollowingTest(TestCase):
         """
         result = self.client.get(
             reverse("actor-following", kwargs={"slug": "user"}),
-            headers={"Accept": "application/activity+json"},
+            HTTP_ACCEPT=accept_ld,
         )  # noqa: E501
 
         self.assertEqual(result.status_code, 200)
-        self.assertEqual(result["Content-Type"], "application/activity+json")
+        self.assertEqual(result["Content-Type"], accept_ld)

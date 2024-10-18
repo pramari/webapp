@@ -70,7 +70,6 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
             action_object=self.object,
         )
         actor = self.request.user.profile.actor
-        print("DEBUG: ", settings.DEBUG)
         if settings.DEBUG:
             sendLike(actor.id, form.cleaned_data["object"])
         else:
@@ -121,7 +120,6 @@ class LikeListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-
         slug = self.kwargs.get("slug")
         actor = Profile.objects.get(slug=slug).actor
         return Like.objects.all().order_by("-created_at").filter(actor=actor)

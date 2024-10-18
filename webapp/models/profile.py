@@ -46,7 +46,6 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     slug = models.SlugField(null=True, help_text=_("Slug"))
 
-
     public = models.BooleanField(
         default=False, help_text=_("Make Profile Profile public?")
     )
@@ -89,7 +88,7 @@ class Profile(models.Model):
     #    help_text=_("ActivityPub ID"),
     #    unique=True,
     # )  # noqa: E501
- 
+
     @property
     def imgurl(self):
         """

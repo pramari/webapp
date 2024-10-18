@@ -138,10 +138,12 @@ def signedRequest(
 
     match method:
         case "POST":
-            request = requests.Request('POST', url, data=message, headers=headers).prepare()
+            request = requests.Request(
+                "POST", url, data=message, headers=headers
+            ).prepare()
         case "GET":
             assert message == {}
-            request = requests.Request('GET', url, headers=headers).prepare()
+            request = requests.Request("GET", url, headers=headers).prepare()
         case _:
             raise ValueError(f"Unsupported method {method}")
     return request
@@ -386,8 +388,8 @@ class SignatureChecker:
                 return parsed_signature.key_id
 
         except Exception as e:
-            logger.error(str(e))
-            logger.error(request.headers)
+            logger.debug(str(e))
+            logger.debug(request.headers)
             for log_line in traceback.format_exc().splitlines():
-                logger.error(log_line)
+                logger.debug(log_line)
             return e

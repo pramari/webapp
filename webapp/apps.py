@@ -39,26 +39,21 @@ class WebAppConfig(AppConfig):
         email_removed.connect(signalLogger)  # , sender=EmailAddress)
 
         from django.conf import settings
+
         settings = settings._wrapped.__dict__
-        settings.setdefault('BLOCKED_SERVERS', [])
-        settings.setdefault('FETCH_RELATIONS', False)
+        settings.setdefault("BLOCKED_SERVERS", [])
+        settings.setdefault("FETCH_RELATIONS", False)
 
         # Activity signals
 
         User = get_user_model()
 
         post_save.connect(createUserProfile, sender=User)
-        logger.error("Connected signal `createUserProfile` to `post_save`")
 
         try:
             registry.register(Actor)
-            logger.error("Successfully registered 'Actor'")
             registry.register(Note)
-            logger.error("Successfully registered 'Note'")
             registry.register(Like)
-            logger.error("Successfully registered 'Like'")
-            # registry.register(Profile)
-            # logger.error("Successfully registered 'Profile'")
         except ImportError as e:
             logger.error(f"Model for 'Actor' not installed {e}")
         except Exception as e:

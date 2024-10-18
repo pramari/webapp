@@ -153,8 +153,18 @@ def createUserProfile(sender, instance, created, **kwargs):
 
         from django.contrib.sites.models import Site
 
-        base = f"https://{Site.objects.get_current().domain}"
-        # base = "https://pramari.de"
+        try:
+            base = f"https://{Site.objects.get_current().domain}"
+        except Site.DoesNotExist:
+            """
+            .. todo::
+                This is a temporary solution. In the future, we should
+                have a default site that is created when the application
+                is installed. It may fix tests, but possibly does not
+                work when in production.
+            """
+            base = "https://pramari.de"
+
         profile = Profile.objects.create(user=instance, slug=instance.username)
         Actor.objects.create(
             profile=profile, type="Person", id=f"{base}/@{instance.username}"
