@@ -385,6 +385,7 @@ class UserAdmin(admin.ModelAdmin):
         "username",
         "first_name",
         "last_name",
+        "date_joined",
         "is_superuser",
         "is_staff",
         "is_active",

@@ -67,11 +67,6 @@ class WebAppBaseRenderer(renderers.BaseRenderer):
     """
     WebAppBaseRenderer
 
-    Args:
-        renderers (WebAppBaseRenderer): Renders JSON-LD data
-
-    Returns:
-        JsonLD: Added Context to JSON-LD data
     """
 
     encoder_class = encoders.JSONEncoder  # inherited from JSONRenderer
@@ -104,8 +99,6 @@ class WebAppBaseRenderer(renderers.BaseRenderer):
         else:
             separators = INDENT_SEPARATORS
 
-        data["@context"] = "https://www.w3.org/ns/activitystreams"
-
         ret = json.dumps(
             data,
             cls=self.encoder_class,
@@ -123,7 +116,8 @@ class WebAppBaseRenderer(renderers.BaseRenderer):
 
 
 class JsonLDRenderer(WebAppBaseRenderer):
-    """JsonLDRenderer
+    """
+    JsonLDRenderer
 
     Args:
         renderers (JsonLDRenderer): Renders JSON-LD data
@@ -132,16 +126,25 @@ class JsonLDRenderer(WebAppBaseRenderer):
         JsonLD: Added Context to JSON-LD data
     """
 
-    accepted_media_type = 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'  # this may be to overspecific
-    media_type = (
-        "application/ld+json"  # +json; profile="https://www.w3.org/ns/activitystreams"'
+    accepted_media_type = (
+        'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
     )
-    format = "ld"  # override format
+    media_type = "application/ld+json"
+    format = "ld"
 
-    """
-    """
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        data["@context"] = "https://www.w3.org/ns/activitystreams"
+        return super().render(data, accepted_media_type, renderer_context)
 
 
 class ActivityRenderer(WebAppBaseRenderer):
+    accepted_media_type = (
+        'application/activity+json; profile="https://www.w3.org/ns/activitystreams"'
+    )
     media_type = "application/activity+json"
     format = "activity"
+
+
+class JrdRenderer(WebAppBaseRenderer):
+    media_type = "application/jrd+json"
+    format = "jrd"

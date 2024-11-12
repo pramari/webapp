@@ -17,15 +17,13 @@ class ActorView(generics.GenericAPIView):
 
     Example urlconf:
         ```
-        path(
-        r'@<slug:slug>',
-        ActorView.as_view(),
-        name='actor-view')
+        path(r'@<slug:slug>', ActorView.as_view(), name='actor-view')
         ```
 
-    If the request header contains 'application/activity+json',
-    the response will be in Activity Streams 2.0 JSON-LD format.
-    Otherwise, the response will redirect the client to the `profile-page`.
+    If the request header contains 'application/ld+json' or 
+    'application/activity+json', the response will be in Activity Streams 2.0 
+    JSON-LD format.
+    Otherwise, the response will be in json or html.
 
     The actor object is a JSON-LD object that represents the user.
 
@@ -37,7 +35,6 @@ class ActorView(generics.GenericAPIView):
 
     """
 
-    redirect_to = "profile-detail"
     serializer_class = ActorSerializer
     queryset = Profile.objects.all()  # todo: local profiles, approved profiles
     lookup_field = "slug"
