@@ -12,6 +12,7 @@ Inbox : post
 Outbox <|-- Actor: publish
 Outbox : Collection[] activities
 Likes <|-- Actor: like
+``` 
 
 ## Fediverse Actor
 
