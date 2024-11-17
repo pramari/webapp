@@ -1,6 +1,10 @@
 # webapp
 
 ```mermaid
+  info
+```
+
+```mermaid
 classDiagram
 Actor <|-- Inbox: receive
 Actor : Inbox
