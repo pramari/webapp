@@ -1,5 +1,17 @@
 # webapp
 
+```mermaid
+classDiagram
+Actor <|-- Inbox: receive
+Actor : Inbox
+Actor : Outbox
+Actor : Followers
+Actor : Follows
+Inbox : get
+Inbox : post
+Outbox <|-- Actor: publish
+Outbox : Collection[] activities
+Likes <|-- Actor: like
 
 ## Fediverse Actor
 
