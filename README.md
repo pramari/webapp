@@ -1,5 +1,30 @@
 # webapp
 
+```mermaid
+  info
+```
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
+
+```mermaid
+classDiagram
+Actor <|-- Inbox: receive
+Actor : Inbox
+Actor : Outbox
+Actor : Followers
+Actor : Follows
+Inbox : get
+Inbox : post
+Outbox <|-- Actor: publish
+Outbox : Collection[] activities
+Likes <|-- Actor: like
+``` 
 
 ## Fediverse Actor
 
