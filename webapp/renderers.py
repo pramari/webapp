@@ -37,9 +37,9 @@ class WebappContentNegotiation(DefaultContentNegotiation):
     """
 
     def select_parser(self, request, parsers):
-        logger.error("WebappContentNegotiation.select_parser")
-        logger.error("request: " + str(request))
-        logger.error("parsers: " + str(parsers))
+        logger.debug("WebappContentNegotiation.select_parser")
+        logger.debug("request: " + str(request))
+        logger.debug("parsers: " + str(parsers))
         return super().select_parser(request, parsers)
 
     def select_renderer(self, request, renderers, format_suffix):
@@ -54,7 +54,7 @@ class WebappContentNegotiation(DefaultContentNegotiation):
                 media_types: \t{str([renderer.media_type for renderer in renderers])}\n
                 format_suffix: \t{str(format_suffix)}\n
                 """
-            logger.error(errormessage)
+            logger.debug(errormessage)
             raise NotAcceptable(errormessage)
         return selected_renderer
 

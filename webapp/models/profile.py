@@ -10,7 +10,11 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.core.exceptions import ObjectDoesNotExist
 
-from webapp.models import User
+# from webapp.models import User
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +45,6 @@ class Profile(models.Model):
     Also: ActivityPub Profile
     """
 
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     slug = models.SlugField(null=True, help_text=_("Slug"))
 

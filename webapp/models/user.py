@@ -51,12 +51,12 @@ class User(AbstractUser):
 
         :return: List of strings.
 
-        .. todo:: Implement this method working.
         """
-        accounts = self.socialaccount_set.all()
-        logger.error(type(accounts))
-        logger.error(accounts)
-        return [str(account) for account in accounts]  # accounts
+        try:
+            accounts = self.socialaccount_set.all()
+        except self.socialaccount_set.model.DoesNotExist:
+            return []
+        return [f"{account.provider}" for account in accounts]  # accounts
 
     @property
     def get_absolute_url(self):

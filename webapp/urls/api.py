@@ -77,23 +77,6 @@ class UserDetails(views.APIView):
         return response.Response(UserSerializer(userinfo).data)
 
 
-class EventView(views.APIView):
-    """ """
-
-    queryset = get_user_model().objects.all()
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, bundle=None, format=None):  # pylint: disable=R0201
-        from rest_framework import status
-
-        """POST method."""
-        try:
-            logger.error("POST")
-            logger.error("Type: %s", request.data)
-            [logger.error(item) for item in request.data.items()]
-        except TypeError as e:
-            raise e
-        return response.Response("OK!", status=status.HTTP_200_OK)
 
 
 router = routers.DefaultRouter()
@@ -101,7 +84,6 @@ router.register(r"user", UserViewSet, basename="user")
 
 urlpatterns = [
     path(r"api/userinfo/", UserDetails.as_view()),
-    path(r"api/mail/", EventView.as_view()),
     path(r"api/", include(router.urls)),
     path("pubsub/push/", BudgetView.as_view()),
 ]

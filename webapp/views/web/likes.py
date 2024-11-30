@@ -73,7 +73,8 @@ class LikeCreateView(LoginRequiredMixin, CreateView):
         if settings.DEBUG:
             sendLike(actor.id, form.cleaned_data["object"])
         else:
-            sendLike.delay(actor.id, form.cleaned_data["object"])
+            # this should be a celery task
+            sendLike(actor.id, form.cleaned_data["object"])
         return super().form_valid(form)
 
 

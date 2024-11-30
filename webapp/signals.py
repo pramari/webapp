@@ -165,7 +165,10 @@ def createUserProfile(sender, instance, created, **kwargs):
             """
             base = "https://pramari.de"
 
+        assert isinstance(instance, User)
+
         profile = Profile.objects.create(user=instance, slug=instance.username)
+
         Actor.objects.create(
             profile=profile, type="Person", id=f"{base}/@{instance.username}"
         )

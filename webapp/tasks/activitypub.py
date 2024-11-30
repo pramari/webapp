@@ -238,7 +238,11 @@ def sendLike(localActor: str, object: str) -> bool:
     if not isinstance(object, str):
         raise ValueError("object must be a string")
 
-    fetched = Fetch(object)
+    try:
+        fetched = Fetch(object)
+    except ValueError:
+        logger.error(f"Object returned invalid: {object}")
+        return False
     remote = fetched.get("attributedTo")
     actor_inbox = Fetch(remote).get("inbox")
     """
