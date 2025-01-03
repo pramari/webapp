@@ -16,7 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
 from django.utils import timezone
 from webapp.registry import check
-
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,22 @@ def signalLogger(request, **kwargs):
     """
     logger.error(request)
     logger.error(kwargs)
+
+
+def emailConfirmed(request, emailaddress, **kwargs):
+    """ """
+    from allauth.account.models import EmailAddress
+    email = EmailAddress.objects.get(email=emailaddress)
+    from django.contrib.auth.models import Group
+    confirmed, created = Group.objects.get_or_create(name ='confirmed email')
+    email.user.groups.add(confirmed)
+
+def checkEmailVerified(sender, request, **kwargs):
+    verified = request.user.emailaddress_set.filter(verified=True).exists()
+    if not verified:
+        from django.contrib import messages
+        messages.error(_("Please verify your email!"))
+        return False
 
 
 def signalHandler(*args, **kwargs):

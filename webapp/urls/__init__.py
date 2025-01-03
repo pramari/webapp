@@ -19,7 +19,6 @@ from django.views.decorators.cache import cache_page  # , never_cache
 
 from webapp.views import (
     StatusView,
-    HomeView,
     AccountView,
     ProfileView,
     ProfileDetailView,
@@ -35,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 
 urlpatterns = [
-    path(r"", HomeView.as_view(), name="home"),
     path(
         r"status/", cache_page(60)(StatusView.as_view()), name="status"
     ),  # Project Status, Could be a template view

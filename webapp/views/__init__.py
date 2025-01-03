@@ -6,7 +6,6 @@ __name__ = "webapp.views"
 __author__ = "Andreas Neumeier"
 
 from .profile import (
-    HomeView,
     StatusView,
     AccountView,
     ProfileView,
@@ -36,7 +35,6 @@ from .activitypub.activity import (
 from .signature import SignatureView
 
 __all__ = [
-    "HomeView",
     "StatusView",
     "AccountView",
     "ProfileView",

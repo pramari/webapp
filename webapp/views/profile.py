@@ -10,13 +10,12 @@ These are generic to UserProfiles and all other Applications.
 
 import logging
 from django.views.generic import TemplateView, ListView, DetailView
-from django.views.generic.edit import UpdateView, FormView
+from django.views.generic.edit import UpdateView
 from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth import get_user_model
-from django import forms
 
 from django.views.generic.edit import ModelFormMixin, ProcessFormView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
@@ -32,39 +31,6 @@ from ..forms import ProfileForm
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-
-class ContactForm(forms.Form):
-    email = forms.EmailField()
-    consent = forms.BooleanField()
-
-    def send_email(self):
-        # send email using the self.cleaned_data dictionary
-        pass
-
-
-class HomeView(FormView):
-    """
-    Display the `Project Homepage`.
-
-    Static Pages, does not change often.
-
-    However, includes a dynamic header that displays account information.
-    """
-
-    template_name = "home.html"
-    form_class = ContactForm
-
-    def get_context(self, request):
-        """
-        get context for this request.
-        """
-        context = super().get_context(request)  # pylint: disable=E1101
-        # context["blogpages"] = homepages  # add whatever you need here
-        return context
-
-    def form_valid(self, form):
-        form.send_email()
-        return super().form_valid(form)
 
 
 class StatusView(LoginRequiredMixin, TemplateView):
@@ -133,11 +99,14 @@ class ProfileView(
         Overriding super() implementation.
         """
         pk = self.request.user.pk  # noqa: F841
-        try:
-            return super().get_object(*args, **kwargs)
-        except AttributeError as error:
-            logger.error(error)
-            return self.model.objects.get(pk=self.request.user.pk)  # noqa
+        return User.objects.get(pk=pk).profile
+        """
+            try:
+                return super().get_object(*args, **kwargs)
+            except AttributeError as error:
+                logger.error(error)
+                return self.model.objects.get(pk=self.request.user.pk)  # noqa
+        """
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
