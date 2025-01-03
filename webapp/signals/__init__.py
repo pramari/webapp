@@ -18,6 +18,18 @@ from django.utils import timezone
 from webapp.registry import check
 from django.utils.translation import gettext as _
 
+from .linkedin import postToLinkedIn
+
+__all__ = [
+    "action",
+    "User",
+    "signalLogger",
+    "signalHandler",
+    "createUserProfile",
+    "postToLinkedIn",
+]
+
+
 logger = logging.getLogger(__name__)
 
 action = Signal()
@@ -44,15 +56,19 @@ def signalLogger(request, **kwargs):
 def emailConfirmed(request, emailaddress, **kwargs):
     """ """
     from allauth.account.models import EmailAddress
+
     email = EmailAddress.objects.get(email=emailaddress)
     from django.contrib.auth.models import Group
-    confirmed, created = Group.objects.get_or_create(name ='confirmed email')
+
+    confirmed, created = Group.objects.get_or_create(name="confirmed email")
     email.user.groups.add(confirmed)
+
 
 def checkEmailVerified(sender, request, **kwargs):
     verified = request.user.emailaddress_set.filter(verified=True).exists()
     if not verified:
         from django.contrib import messages
+
         messages.error(_("Please verify your email!"))
         return False
 
