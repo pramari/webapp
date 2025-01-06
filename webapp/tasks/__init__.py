@@ -1,6 +1,5 @@
 import logging
 
-from typing import List
 from typing import Tuple
 
 from celery import shared_task
@@ -114,87 +113,3 @@ def generateProfileKeyPair(
         user.save()
         user.profile.save()
     return True
-
-
-@shared_task
-def getGoogleContact(
-    accessToken: SocialToken,
-    googleApp: SocialApp,
-    resourceName: str = "people/me",
-    googleContact: int = 0,
-) -> List:
-    from google.oauth2.credentials import Credentials
-    from django.utils.timezone import make_naive, is_aware
-    from googleapiclient.discovery import build
-
-    expires_at = accessToken.expires_at
-    if is_aware(accessToken.expires_at):
-        """
-        .. todo:
-            this is a hack. it converts `expires_at` to the default
-            timezone set in `settings.py` for the project.
-            However, it should rather use the timezone in which Google
-            issued this token. This **MAY** be contained in `access_token`.
-
-            Actually, it seems to be the other way round...
-        """
-        expires_at = make_naive(accessToken.expires_at)
-
-    creds = Credentials(
-        token=accessToken.token,
-        refresh_token=accessToken.token_secret,
-        expiry=expires_at,  # make_aware to default timezone above
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=googleApp.client_id,  # replace with yours
-        client_secret=googleApp.secret,
-    )
-
-    personFields = [
-        "addresses",
-        "ageRanges",
-        "biographies",
-        "birthdays",
-        "calendarUrls",
-        "clientData",
-        "coverPhotos",
-        "emailAddresses",
-        "events",
-        "externalIds",
-        "genders",
-        "imClients",
-        "interests",
-        "locales",
-        "locations",
-        "memberships",
-        "metadata",
-        "miscKeywords",
-        "names",
-        "nicknames",
-        "occupations",
-        "organizations",
-        "phoneNumbers",
-        "photos",
-        "relations",
-        "sipAddresses",
-        "skills",
-        "urls",
-        "userDefined",
-    ]
-
-    service = build("people", version="v1", credentials=creds)
-    people = service.people()  # pylint: disable=no-member  # E1101
-    connections = people.connections()
-    contacts = connections.list(
-        resourceName=resourceName,
-        personFields=",".join(personFields),
-    )
-    result = contacts.execute()
-
-    return result.get("connections", [])
-
-
-"""
-@shared_task
-def updateGoogleContact(contact: dict):
-"""
-""" """

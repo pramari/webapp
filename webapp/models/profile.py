@@ -57,6 +57,9 @@ class Profile(models.Model):
     dob = models.DateField(
         blank=True, null=True, help_text=_("Date of Birth (DOB)")
     )  # noqa: E501
+
+    publish_to_linkedin = models.BooleanField(default=False)
+
     gravatar = models.BooleanField(
         default=True, help_text=_("Use Gravatar profile image.")
     )

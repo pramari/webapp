@@ -53,6 +53,12 @@ def signalLogger(request, **kwargs):
     logger.error(kwargs)
 
 
+def send_to_social(request, **kwargs):
+    """
+    Send a message to a channel.
+    """
+
+
 def emailConfirmed(request, emailaddress, **kwargs):
     """ """
     from allauth.account.models import EmailAddress
@@ -181,7 +187,7 @@ def createUserProfile(sender, instance, created, **kwargs):
     leverage `Django Signals` for this purpose.
     """
     if created:  # not user.profile:
-        from .models import Profile, Actor
+        from webapp.models import Profile, Actor
 
         from django.contrib.sites.models import Site
 
