@@ -25,9 +25,9 @@ from webapp.views import (
     SearchView,
 )
 
-from webapp.urls.activitypub import urlpatterns as activitypub_urlpatterns
-from webapp.urls.web import urlpatterns as web_urlpatterns
-from webapp.urls.api import urlpatterns as api_urlpatterns
+from webapp.activitypub.urls import urlpatterns as activitypub_urlpatterns
+# from webapp.urls.web import urlpatterns as web_urlpatterns
+# from webapp.urls.api import urlpatterns as api_urlpatterns
 
 
 logger = logging.getLogger(__name__)
@@ -56,5 +56,3 @@ urlpatterns += [
 ]
 
 urlpatterns += activitypub_urlpatterns
-urlpatterns += web_urlpatterns
-urlpatterns += api_urlpatterns

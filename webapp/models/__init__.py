@@ -13,21 +13,11 @@ may be the right home for an `Usermodel` in the future.
 import logging
 
 from webapp.models.user import User
-from webapp.models.activitypub.actor import Actor
 from webapp.models.profile import Profile
-from webapp.models.activitypub import Action, Note, Like
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
     "User",
     "Profile",
-    "Action",
-    "Note",
-    "Like",
-    "Actor",
 ]
-
-
-"""
-"""

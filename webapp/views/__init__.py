@@ -13,25 +13,6 @@ from .profile import (
     SearchView,
 )
 
-from .activitypub.webfinger import WebFingerView
-from .activitypub.actor import ActorView
-from .activitypub.inbox import InboxView
-from .activitypub.outbox import OutboxView
-from .activitypub.followers import FollowersView
-from .activitypub.following import FollowingView
-
-
-from .activitypub import (
-    NodeInfoView,
-    VersionView,
-    # FollowView,
-)
-
-from .activitypub.activity import (
-    NoteView,
-    ActionView,
-)
-
 from .signature import SignatureView
 
 __all__ = [
@@ -46,7 +27,6 @@ __all__ += [
     "NodeInfoView",
     "VersionView",
     "WebFingerView",
-    "ActorView",
     "InboxView",
     "OutboxView",
     "FollowView",

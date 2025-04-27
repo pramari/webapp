@@ -58,6 +58,13 @@ class User(AbstractUser):
             return []
         return [f"{account.provider}" for account in accounts]  # accounts
 
+    def accessToken(self, service: str) -> str | None:
+        try:
+            token = self.socialaccount_set.first().socialtoken_set.first()
+            return token.token
+        except self.socialaccount_set.model.DoesNotExist:
+            return None
+
     @property
     def get_absolute_url(self):
         """

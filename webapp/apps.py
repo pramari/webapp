@@ -28,14 +28,10 @@ class WebAppConfig(AppConfig):
         # pylint: disable=C0415,C0103
         from django.db.models.signals import post_save
 
-        from webapp import registry
-        from webapp.models import Actor, Like, Note  # , Profile
         from webapp.signals import (
-            action,
             createUserProfile,
             emailConfirmed,
             checkEmailVerified,
-            signalHandler,
             signalLogger,
         )
 
@@ -46,27 +42,10 @@ class WebAppConfig(AppConfig):
 
         user_logged_in.connect(checkEmailVerified)
 
-        from django.conf import settings
-
-        settings = settings._wrapped.__dict__
-        settings.setdefault("BLOCKED_SERVERS", [])
-        settings.setdefault("FETCH_RELATIONS", False)
-
         # Activity signals
 
         User = get_user_model()
 
         post_save.connect(createUserProfile, sender=User)
-
-        try:
-            registry.register(Actor)
-            registry.register(Note)
-            registry.register(Like)
-        except ImportError as e:
-            logger.error(f"Model for 'Actor' not installed {e}")
-        except Exception as e:
-            logger.error(f"Cannot register `Actor` for Activities. {e}")
-
-        action.connect(signalHandler, dispatch_uid="activitypub")
 
         logger.info("WebApp ready.")

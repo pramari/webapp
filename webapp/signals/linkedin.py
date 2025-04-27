@@ -8,7 +8,17 @@ from django.contrib.auth import get_user_model
 from webapp.tasks import getAppAndAccessToken
 
 
-def postToLinkedIn(linkedInID: str, shareText: str, contentUrl: str, accessToken: str):
+async def postToLinkedIn(sender, **kwargs):
+    """
+    linkedInID: str, shareText: str, contentUrl: str, accessToken: str, **kwargs):
+    """
+
+    linkedInID = kwargs.get("linkedInID")
+    shareText = kwargs.get("shareText")
+    contentUrl = kwargs.get("contentUrl")
+    accessToken = kwargs.get("accessToken")
+
+
     api_url = "https://api.linkedin.com/v2/ugcPosts"
 
     headers = {
@@ -48,6 +58,8 @@ def postToLinkedIn(linkedInID: str, shareText: str, contentUrl: str, accessToken
         print(
             f"Post creation failed with status code {response.status_code}: {response.text}"
         )
+
+    return response
 
 
 def send_to_channel(sender, instance, channel: str, **kwargs):

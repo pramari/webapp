@@ -315,9 +315,9 @@ class SignatureChecker:
     """
 
     def __init__(self):
-        from webapp.tasks.activitypub import getRemoteActor
+        from webapp.activitypub.tasks import fetchRemoteActor
 
-        self.key_retriever = getRemoteActor
+        self.key_retriever = fetchRemoteActor
 
     def validate(self, request: HttpRequest, digest=None):
         if "signature" not in request.headers:

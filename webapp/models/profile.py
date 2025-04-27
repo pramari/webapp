@@ -78,7 +78,7 @@ class Profile(models.Model):
 
     img = models.ImageField(
         upload_to="mediafiles/user/",
-        default="https://storage.cloud.google.com/media.pramari.de/user/default.png",  # noqa: E501
+        default="/user/default.png",  # noqa: E501
     )
 
     ## The following is deprecated and has been moved to the Actor model
