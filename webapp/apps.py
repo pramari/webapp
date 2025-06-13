@@ -35,17 +35,12 @@ class WebAppConfig(AppConfig):
             signalLogger,
         )
 
+        User = get_user_model()
         email_added.connect(signalLogger)  # , sender=EmailAddress)
         email_removed.connect(signalLogger)  # , sender=EmailAddress)
-
         email_confirmed.connect(emailConfirmed)
-
         user_logged_in.connect(checkEmailVerified)
 
         # Activity signals
-
-        User = get_user_model()
-
         post_save.connect(createUserProfile, sender=User)
-
         logger.info("WebApp ready.")

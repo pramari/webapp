@@ -58,14 +58,19 @@ class ActorSerializer(serializers.ModelSerializer):
     def get_url(self, actor):
         return (actor.id,)
 
+    def get_preferred_username(self, actor):
+        return actor.profile.user.username
+
     url = serializers.SerializerMethodField("get_url")
     public_key = serializers.SerializerMethodField("get_public_key")
+    preferred_username = serializers.SerializerMethodField("get_preferred_username")
 
     class Meta:
         model = Actor
         fields = [
             "id",
             "type",
+            "preferred_username",
             "inbox",
             "outbox",
             "followers",

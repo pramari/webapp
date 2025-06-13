@@ -61,16 +61,27 @@
                 {% endif %}
                 {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
                 <a class="btn btn-sm btn-secondary btn-block" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+                
                 {% get_providers as socialaccount_providers %}
-                {% if socialaccount_providers == "Google" %}
-                    <p> {% blocktrans with site.name as site_name %} Please sign in with one of your existing third party accounts.  {% endblocktrans %} </p>
-                    <p> {% blocktrans with site.name as site_name %} Or, <a href="{{ signup_url }}">sign up</a> for a {{ site_name }} account and sign in below:{% endblocktrans %} </p>
-                    <div class="socialaccount_ballot">
-                        <ul class="socialaccount_providers">
-                            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-                        </ul>
+                {% if socialaccount_providers %}
+                    <hr class="my-4">
+                    <p class="text-muted mb-3">{% trans "Or sign in with:" %}</p>
+                    <div class="d-grid gap-2">
+                        {% for provider in socialaccount_providers %}
+                            {% if provider.id == "google" %}
+                                <a class="btn btn-outline-danger btn-sm" href="{% provider_login_url provider.id %}">
+                                    <i class="bi bi-google me-2"></i>{% trans "Sign in with Google" %}
+                                </a>
+                            {% elif provider.id == "linkedin" %}
+                                <a class="btn btn-outline-primary btn-sm" href="{% provider_login_url provider.id %}">
+                                    <i class="bi bi-linkedin me-2"></i>{% trans "Sign in with LinkedIn" %}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                    {% include "socialaccount/snippets/login_extra.html" %}
+                    <p class="text-muted mt-3 small">
+                        {% trans "Don't have an account?" %} <a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a> {% trans "for a" %} {{ site.name }} {% trans "account." %}
+                    </p>
                 {% endif %}
                 <p class="mt-5 mb-3 text-muted">&copy; 2007–2025 <a href="/pages/imprint">pramari.de</a></p>
             </form>

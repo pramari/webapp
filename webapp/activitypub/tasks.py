@@ -7,6 +7,7 @@ import socket
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from webapp.activitypub.activity import ActivityObject
+from webapp.activitypub.signature import signedRequest
 
 # from taktivitypub.actor import Actor
 # from taktivitypub import Follow
@@ -230,8 +231,6 @@ def sendLike(localActor: str, object: str) -> bool:
         - Add tests
         - Implement
     """
-    from webapp.signature import signedRequest
-    from webapp.tasks.activitypub import Fetch
 
     if not isinstance(localActor, str):
         raise ValueError("localActor must be a string")

@@ -20,8 +20,8 @@ from django.views.decorators.csrf import csrf_exempt
 from webapp.models import Profile
 from webapp.activitypub.models import Actor
 from webapp.activitypub.activity import ActivityObject
-from webapp.activitypub.activities import follow, undo, create, delete, accept
-from webapp.signature import SignatureChecker
+from webapp.activitypub.activities import follow, undo, create, delete, accept, like
+from webapp.activitypub.signature import SignatureChecker
 
 from ...exceptions import ParseError  # noqa: E501
 from ...exceptions import ParseJSONError, ParseUTF8Error
@@ -126,6 +126,8 @@ class InboxView(DetailView):
         logger.debug(f"Activity Object: {activity}")
 
         match activity.type.lower():
+            case "like":
+                result = like(target=target.actor, activity=activity)
             case "follow":
                 result = follow(target=target.actor, activity=activity)
             case "undo":

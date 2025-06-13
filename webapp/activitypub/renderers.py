@@ -152,7 +152,8 @@ class ActivityRenderer(renderers.BaseRenderer):
 
     accepted_media_type = (
         'application/json',
-        'application/activity+json; profile="https://www.w3.org/ns/activitystreams"'
+        'application/activity+json',
+        'application/activity+json; profile="https://www.w3.org/ns/activitystreams"',
     )
     # media_type = [
     #    'application/activity+json',
@@ -194,8 +195,8 @@ class ActivityRenderer(renderers.BaseRenderer):
             separators = INDENT_SEPARATORS
 
         # Make sure data includes the ActivityPub context if it doesn't already
-        # if isinstance(data, dict) and '@context' not in data:
-        #     data = {**data, '@context': 'https://www.w3.org/ns/activitystreams'}
+        if isinstance(data, dict) and '@context' not in data:
+            data = {**data, '@context': 'https://www.w3.org/ns/activitystreams'}
 
         ret = json.dumps(
             data,

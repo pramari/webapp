@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def default_document_loader(url: str, options: dict = {}):
-    from webapp.schema import schemas
+    from webapp.activitypub.schema import schemas
     from urllib.parse import urlparse
 
     parsedurl = urlparse(url)

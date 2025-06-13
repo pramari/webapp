@@ -1,10 +1,11 @@
 import json
 
 from django.contrib import admin
-from .models import Actor, Follow
+from .models import Follow
 from .models import Note
 from .models import Action
 from .models import Like
+from .models import Actor
 
 from django.conf import settings
 from django.utils.encoding import force_str as force_text  # Django >= 4.0
@@ -19,7 +20,7 @@ from django.contrib.admin.options import (
     StackedInline as GenericStackedInline,
     TabularInline as GenericTabularInline,
 )
-from django.urls import path as url
+from django.urls import path
 from functools import update_wrapper
 from django.http import Http404
 
@@ -113,13 +114,13 @@ class BaseGenericModelAdmin(object):
             return update_wrapper(wrapper, view)
 
         custom_urls = [
-            url(
-                r"^obj-data/$",
+            path(
+                r"obj-data/",
                 wrap(self.generic_lookup),
                 name="admin_genericadmin_obj_lookup",
             ),
-            url(
-                r"^genericadmin-init/$",
+            path(
+                r"genericadmin-init/",
                 wrap(self.genericadmin_js_init),
                 name="admin_genericadmin_init",
             ),

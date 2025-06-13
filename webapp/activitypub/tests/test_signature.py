@@ -5,7 +5,10 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from webapp.models import Profile
-from webapp.signature import Signature, signedRequest
+from webapp.activitypub.signature import Signature
+from webapp.activitypub.signature import signedRequest
+from webapp.activitypub.signature import SignatureChecker
+from webapp.activitypub.signature import HttpSignature
 from webapp.tests.rename_messages import follow
 
 
@@ -140,8 +143,6 @@ class SignatureTest(TestCase):
         not-expired signature is parsed from **testhttpsignature.
         """
         from django.test import RequestFactory
-        from webapp.signature import signedRequest
-        from webapp.signature import SignatureChecker
 
         request = RequestFactory().get(
             "/users/andreasofthings", **testhttpsignature
@@ -165,8 +166,6 @@ class SignatureTest(TestCase):
         )
 
     def test_http_signature(self):
-        from webapp.signature import HttpSignature
-
         public_key, private_key = self._generate_public_private_key()
 
         http_signature = HttpSignature().with_field("name", "value")

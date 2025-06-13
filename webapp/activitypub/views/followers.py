@@ -59,4 +59,4 @@ class FollowersView(generics.RetrieveAPIView):
         )  # .order_by("-created")
         result.update({"totalItems": len(followed_by)})
         result.update({"items": json.dumps(list(followed_by), cls=UUIDEncoder)})
-        return Response(result)
+        return Response(result, template_name="activitypub/followers.html")

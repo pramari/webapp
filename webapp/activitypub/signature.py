@@ -35,6 +35,78 @@ from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
 
+class HttpSignature:
+    def __init__(self):
+        self.fields = []
+
+    def build_message(self):
+        return "\n".join(f"{name}: {value}" for name, value in self.fields)
+
+    def build_signature(self, key_id, private_key):
+        message = self.build_message()
+
+        signature_string = sign_message(private_key, message)
+        # headers = "(request-target) " + " ".join(
+        #    name for name, _ in self.fields
+        # )  # noqa: E501
+
+        headers = " ".join(name for name, _ in self.fields)
+
+        signature_parts = [
+            f'keyId="{key_id}"',
+            'algorithm="rsa-sha256"',  # todo: other algorithm support
+            f'headers="{headers}"',
+            f'signature="{signature_string}"',
+        ]
+
+        return ",".join(signature_parts)
+
+    def verify(self, public_key, signature):
+        message = self.build_message()
+        public_key_loaded = load_pem_public_key(public_key.encode("utf-8"))
+
+        try:
+            public_key_loaded.verify(
+                base64.standard_b64decode(signature),
+                message.encode("utf-8"),
+                padding.PKCS1v15(),
+                hashes.SHA256(),
+            )
+        except InvalidSignature:
+            logger.warning("Could not verify signature")
+            return False
+        return True
+        # return verify_signature(public_key, message, signature)
+
+    def with_field(self, field_name, field_value):
+        self.fields.append((field_name, field_value))
+        return self
+
+    """
+    def ed25519_sign(self, private_encoded):
+        private_bytes = multicodec.unwrap(multibase.decode(private_encoded))[1]
+        private_key = (  # noqa: BLK100
+            ed25519.Ed25519PrivateKey.from_private_bytes(  # noqa: E501
+                private_bytes
+            )
+        )
+
+        message = self.build_message()
+
+        return multibase.encode(
+            private_key.sign(message.encode("utf-8")), "base58btc"
+        )
+
+    def ed25519_verify(self, didkey, signature):
+        public_key = did_key_to_public_key(didkey)
+
+        signature = multibase.decode(signature)
+
+        message = self.build_message().encode("utf-8")
+
+        return public_key.verify(signature, message)
+    """
+
 
 def digest_sha256(content: str) -> str:
     """
@@ -94,7 +166,6 @@ def signedRequest(
     Example:
 
     """
-    from webapp.signature import HttpSignature
     from urllib.parse import urlparse
 
     assert isinstance(message, dict)
@@ -231,78 +302,6 @@ class Signature(object):
         except Exception:
             logger.error(f"failed to parse signature {header}")
 
-
-class HttpSignature:
-    def __init__(self):
-        self.fields = []
-
-    def build_message(self):
-        return "\n".join(f"{name}: {value}" for name, value in self.fields)
-
-    def build_signature(self, key_id, private_key):
-        message = self.build_message()
-
-        signature_string = sign_message(private_key, message)
-        # headers = "(request-target) " + " ".join(
-        #    name for name, _ in self.fields
-        # )  # noqa: E501
-
-        headers = " ".join(name for name, _ in self.fields)
-
-        signature_parts = [
-            f'keyId="{key_id}"',
-            'algorithm="rsa-sha256"',  # todo: other algorithm support
-            f'headers="{headers}"',
-            f'signature="{signature_string}"',
-        ]
-
-        return ",".join(signature_parts)
-
-    def verify(self, public_key, signature):
-        message = self.build_message()
-        public_key_loaded = load_pem_public_key(public_key.encode("utf-8"))
-
-        try:
-            public_key_loaded.verify(
-                base64.standard_b64decode(signature),
-                message.encode("utf-8"),
-                padding.PKCS1v15(),
-                hashes.SHA256(),
-            )
-        except InvalidSignature:
-            logger.warning("Could not verify signature")
-            return False
-        return True
-        # return verify_signature(public_key, message, signature)
-
-    def with_field(self, field_name, field_value):
-        self.fields.append((field_name, field_value))
-        return self
-
-    """
-    def ed25519_sign(self, private_encoded):
-        private_bytes = multicodec.unwrap(multibase.decode(private_encoded))[1]
-        private_key = (  # noqa: BLK100
-            ed25519.Ed25519PrivateKey.from_private_bytes(  # noqa: E501
-                private_bytes
-            )
-        )
-
-        message = self.build_message()
-
-        return multibase.encode(
-            private_key.sign(message.encode("utf-8")), "base58btc"
-        )
-
-    def ed25519_verify(self, didkey, signature):
-        public_key = did_key_to_public_key(didkey)
-
-        signature = multibase.decode(signature)
-
-        message = self.build_message().encode("utf-8")
-
-        return public_key.verify(signature, message)
-    """
 
 
 class SignatureChecker:

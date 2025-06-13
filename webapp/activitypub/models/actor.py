@@ -8,15 +8,17 @@ Activitypub models for `Angry Planet Cloud`.
 
 """
 import logging
-from django.db import models
-from webapp.models.profile import Profile
-from django.utils.translation import gettext_lazy as _
-from django.urls import reverse
-from webapp.validators import validate_iri
-from functools import cached_property
-from webapp.exceptions import RemoteActorError
-from django.contrib.sites.models import Site
 import uuid
+from functools import cached_property
+
+from django.contrib.sites.models import Site
+from django.db import models
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
+from webapp.activitypub.validators import validate_iri
+from webapp.exceptions import RemoteActorError
+from webapp.models.profile import Profile
 
 logger = logging.getLogger(__name__)
 

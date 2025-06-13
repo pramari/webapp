@@ -9,6 +9,9 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db.models.base import ModelBase
 from django.core.exceptions import ImproperlyConfigured
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class RegistrationError(Exception):
     pass
@@ -18,7 +21,7 @@ def setup_generic_relations(model_class):
     """
     Set up GenericRelations for actionable models.
     """
-    Action = apps.get_model("webapp.activitypub", "action")
+    Action = apps.get_model("activitypub", "action")
 
     if Action is None:
         raise RegistrationError(
@@ -39,7 +42,7 @@ def setup_generic_relations(model_class):
             "object_id_field": "%s_object_id" % field,
             related_attr_name: attr_value,
         }
-        rel = GenericRelation("webapp.activitypub.Action", **kwargs)
+        rel = GenericRelation("activitypub.Action", **kwargs)
         rel.contribute_to_class(model_class, attr)
         relations[field] = rel
 
@@ -115,11 +118,16 @@ class ActorRegistry(dict):
         Register one or more models with the registry.
         """
         for class_or_label in model_classes_or_labels:
+            logger.error("trying to register %s" % class_or_label)
             model_class = self._validate(class_or_label)
-            if model_class not in self:
-                self[model_class] = setup_generic_relations(model_class)
+            logger.error("Got model_class %s" % model_class)
 
-    def unregister(self, *model_classes_or_labels):
+            if model_class not in self:
+                logger.error("not in self: %s" % model_class)
+                self[model_class] = setup_generic_relations(model_class)
+                logger.error("Successfully registered: %s" % model_class)
+
+    def unregister(self,*model_classes_or_labels):
         for class_or_label in model_classes_or_labels:
             model_class = self._validate(class_or_label)
             if model_class in self:
@@ -134,8 +142,14 @@ class ActorRegistry(dict):
         if model_class not in self:
             raise ImproperlyConfigured(
                 f"The model {model_class.__name__} is not registered."
-                "Please use webapp.registry to register it."
+                "Please use webapp.activitypub.registry to register it."
+                "Registered are the following models:"
+                f"{', '.join([model.__name__ for model in self])}"
             )
+        logger.error("Successfully registered %s", model_class.__name__)
+
+
+
 
 
 registry = ActorRegistry()

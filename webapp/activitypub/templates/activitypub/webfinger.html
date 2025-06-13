@@ -1,28 +1,39 @@
-{ 
-    "subject": f"acct:{actor.profile.user}@{base}", 
+{
+    "subject": "{{ resource }}",
     "aliases": [
-                f"{actor.id}",
-                f"https://{base}{actor.profile.get_absolute_url}",
-            ],
-            "links": [
-                {
-                    "rel": "http://webfinger.net/rel/profile-page",
-                    "type": "text/html",
-                    "href": f"https://{base}{actor.profile.get_absolute_url}",  # noqa: E501
-                },
-                {
-                    "rel": "self",
-                    "type": "application/activity+json",
-                    "href": f"{actor.id}",  # noqa: E501
-                },
-                {
-                    "rel": "http://ostatus.org/schema/1.0/subscribe",
-                    "template": "https://pramari.de/authorize_interaction?uri={uri}",  # noqa: E501
-                },
-                {
-                    "rel": "http://webfinger.net/rel/avatar",
-                    "type": "image/jpeg",
-                    "href": actor.profile.imgurl,
-                },
-            ],
-            }
+        "{{ actor_ap_id_url }}",
+        "{{ actor_html_url }}"
+    ],
+    "links": [
+        {
+            "rel": "http://webfinger.net/rel/profile-page",
+            "type": "text/html",
+            "href": "{{ actor_html_url }}"
+        },
+        {
+            "rel": "self",
+            "type": "application/activity+json",
+            "href": "{{ actor_ap_id_url }}"
+        }
+        {% if actor_avatar_url %},
+        {
+            "rel": "http://webfinger.net/rel/avatar",
+            "type": "{{ actor_avatar_media_type | default:'image/jpeg' }}",
+            "href": "{{ actor_avatar_url }}"
+        }
+        {% endif %}
+        {#
+        If you need to include other links, like the ostatus subscribe link,
+        you'll need to ensure the view passes the necessary context variables.
+        For example:
+        {% if ostatus_subscribe_template %}
+        ,
+        {
+            "rel": "http://ostatus.org/schema/1.0/subscribe",
+            "template": "{{ ostatus_subscribe_template }}"
+        }
+        {% endif %}
+        Make sure to handle the leading comma correctly if this is not the last item.
+        #}
+    ]
+}

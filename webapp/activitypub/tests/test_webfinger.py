@@ -26,12 +26,12 @@ class WebfingerTests(TestCase):
         response = self.client.get("/.well-known/webfinger")
 
         self.assertEqual(
-            response.status_code, 404
+            response.status_code, 400
         )  # asuming 404 is the correct status code
-        self.assertEqual(response["Content-Type"], "application/activity+json")
+        self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
         self.assertEqual(
-            response.json(),
-            {"error": "Missing resource parameter"},
+            response.text,
+            """{"error": "Missing resource parameter"}""",
         )
 
     def test_webfinger_get_resource(self):

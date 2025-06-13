@@ -1,23 +1,69 @@
-{% extends "socialaccount/base.html" %}
+{% load static %}
 {% load i18n %}
-{% block head_title %}
-    {% trans "Sign In" %}
-{% endblock %}
-{% block content %}
-    {% if process == "connect" %}
-        <h1>{% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}</h1>
-        <p>
-            {% blocktrans with provider.name as provider %}You are about to connect a new third party account from {{ provider }}.{% endblocktrans %}
-        </p>
-    {% else %}
-        <h1>{% blocktrans with provider.name as provider %}Sign In Via {{ provider }}{% endblocktrans %}</h1>
-        <p>
-            {% blocktrans with provider.name as provider %}You are about to sign in using a third party account from {{ provider }}.{% endblocktrans %}
-        </p>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">{% trans "Continue" %}</button>
-    </form>
-{% endblock %}
-{% block login %}{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="Andreas">
+        <title>Pramari - {% trans "Sign In" %}</title>
+        <!-- Bootstrap core CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <!-- Custom styles for this template -->
+        <link href="{% static "account/login.css" %}" rel="stylesheet">
+        <meta name="theme-color" content="#563d7c">
+    </head>
+    <body class="text-center">
+        <main class="form-signin w-100 m-auto">
+            {% for message in messages %}
+                <div class="alert d-flex align-items-center alert-{{ message.level_tag }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>{{ message.level_tag }}</strong> - {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+            <form class="form-signin" method="post">
+                {% if provider.id == "google" %}
+                    <i class="bi bi-google" style="font-size: 4rem; color: #db4437"></i>
+                {% elif provider.id == "linkedin" %}
+                    <i class="bi bi-linkedin" style="font-size: 4rem; color: #0077b5"></i>
+                {% else %}
+                    <i class="bi bi-shield-check" style="font-size: 4rem; color: cornflowerblue"></i>
+                {% endif %}
+                
+                {% if process == "connect" %}
+                    <h1 class="h3 mb-4 fw-normal">{% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}</h1>
+                    <p class="text-muted mb-4">
+                        {% blocktrans with provider.name as provider %}You are about to connect a new third party account from {{ provider }}.{% endblocktrans %}
+                    </p>
+                {% else %}
+                    <h1 class="h3 mb-4 fw-normal">{% blocktrans with provider.name as provider %}Sign In Via {{ provider }}{% endblocktrans %}</h1>
+                    <p class="text-muted mb-4">
+                        {% blocktrans with provider.name as provider %}You are about to sign in using a third party account from {{ provider }}.{% endblocktrans %}
+                    </p>
+                {% endif %}
+                
+                {% csrf_token %}
+                
+                {% if process == "connect" %}
+                    <button class="btn btn-lg btn-primary w-100 mb-3" type="submit">
+                        <i class="bi bi-link-45deg me-2"></i>{% trans "Connect Account" %}
+                    </button>
+                {% else %}
+                    <button class="btn btn-lg btn-primary w-100 mb-3" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>{% trans "Continue" %}
+                    </button>
+                {% endif %}
+                
+                <a class="btn btn-sm btn-secondary btn-block" href="{% url 'account_login' %}">{% trans "Back to Login" %}</a>
+                
+                <p class="mt-5 mb-3 text-muted">&copy; 2007–2025 <a href="/pages/imprint">pramari.de</a></p>
+            </form>
+        </main>
+    </body>
+</html>

@@ -127,6 +127,13 @@ def delete(target: Actor, activity: ActivityObject) -> JsonResponse:
 
     return JsonResponse({"status": "cannot delete"})
 
+@action_decorator
+def like(target: Actor, activity: ActivityObject) -> JsonResponse:
+    """
+    Like an activity.
+    """
+
+    return JsonResponse({"status": "cannot like"})
 
 @action_decorator
 def undo(target: Actor, activity: ActivityObject):

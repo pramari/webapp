@@ -5,7 +5,7 @@ import django.utils.timezone
 import uuid
 import webapp.activitypub.models.action
 import webapp.activitypub.models.actor
-import webapp.validators
+import webapp.activitypub.validators
 from django.db import migrations, models
 
 
@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         serialize=False,
                         unique=True,
-                        validators=[webapp.validators.validate_iri],
+                        validators=[webapp.activitypub.validators.validate_iri],
                     ),
                 ),
                 (
@@ -146,7 +146,7 @@ class Migration(migrations.Migration):
                     models.URLField(
                         blank=True,
                         null=True,
-                        validators=[webapp.validators.validate_iri],
+                        validators=[webapp.activitypub.validators.validate_iri],
                     ),
                 ),
                 ("created", models.DateTimeField(auto_now_add=True)),
@@ -193,7 +193,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "object",
-                    models.URLField(validators=[webapp.validators.validate_iri]),
+                    models.URLField(validators=[webapp.activitypub.validators.validate_iri]),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
