@@ -37,11 +37,13 @@ class NodeInfoView(View):
         """
         Response to GET Requests.
         """
+        nodename = Site.objects.get_current().name
+        version = reverse("version")
         r = {
             "links": [
                 {
                     "rel": "http://nodeinfo.diaspora.software/ns/schema/2.0",
-                    "href": reverse("version"),
+                    "href": f"https://{nodename}{version}"
                 }
             ]
         }

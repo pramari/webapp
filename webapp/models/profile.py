@@ -158,7 +158,7 @@ class Profile(models.Model):
         return reverse("profile-detail", args=[str(self.slug)])
 
     @property
-    def actor(self):
+    def old_actor(self):
         """
         return the actual actor object
         """

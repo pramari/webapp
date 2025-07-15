@@ -60,6 +60,8 @@ ACTIVITY_TYPES = {
     "update": _("Update"),
     "view": _("View"),
 }
+
+
 schemas = {
     "unknown": {
         "contentType": "application/ld+json",

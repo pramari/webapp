@@ -34,12 +34,18 @@ class ActionTest(TestCase):
         self.assertEqual(Action.objects.count(), 1)
 
     def test_actor_model(self):
+        """
+        Test finding an actor.
+        """
         from webapp.activitypub.models import Action, Actor
 
         p = Actor.objects.get(id=self.id)
         Action.objects.actor(p)
 
     def test_action_serializer(self):
+        """
+        Test action serializer.
+        """
         from webapp.activitypub.models import Action
         from webapp.activitypub.serializers.action import ActionSerializer
         a = Action.objects.all()  # noqa: F841

@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 import urllib.parse
 
 
-def uri_validator(x):
+def validate_uri(x):
     try:
         result = urllib.parse.urlparse(x)
         return all([result.scheme, result.netloc])

@@ -22,12 +22,47 @@ class OutboxTest(TestCase):
         profile = Profile.objects.get(user=user)
         self.assertTrue(isinstance(profile, Profile))
 
-    def test_outbox(self):
+    def test_outbox_html(self):
         """
         Test whether the outbox is reachable.
+
+        .. todo::
+            Implement test_outbox_content with `reverse`.
         """
         result = self.client.get(
-            "/accounts/andreas/outbox",
+            "/@andreas/outbox",
+            headers={"Accept": "text/html"},
+        )
+        logger.debug(f"result: {result.content}")
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.content_type, "text/html")
+
+    def test_outbox_activity(self):
+        """
+        Test whether the outbox is reachable.
+
+        .. todo::
+            Implement test_outbox_content with `reverse`.
+        """
+        result = self.client.get(
+            "/@andreas/outbox",
+            accept="application/ld+json; profile=https://www.w3.org/ns/activitystreams"
+        )
+        logger.debug(f"result: {result.content}")
+        self.assertEqual(result.status_code, 200)
+        self.assertIn(result.content_type, "application/activity+json")
+        self.assertContains(result, "OrderedCollection")
+
+    def test_outbox_page_one(self):
+        """
+        Test whether the outbox is reachable.
+
+        .. todo::
+            Implement test_outbox_content with `reverse`.
+        """
+        result = self.client.get(
+            "/@andreas/outbox?page1",
+            accept="application/ld+json; profile=https://www.w3.org/ns/activitystreams"
         )
         logger.debug(f"result: {result.content}")
         self.assertEqual(result.status_code, 200)
@@ -49,7 +84,7 @@ class OutboxTest(TestCase):
         u = User.objects.get(username="andreas")
         Signal().send(sender=Note, instance=n, actor=u, verb="Create")
         result = self.client.get(
-            "/accounts/andreas/outbox",
+            "/@andreas/outbox",
         )
         logger.debug(f"result: {result.content}")
         self.assertEqual(result.status_code, 200)

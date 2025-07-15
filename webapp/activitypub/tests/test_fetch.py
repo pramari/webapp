@@ -25,7 +25,7 @@ class ActivityPubTest(TestCase):
 
     def test_actvity_fetch(self):
         """
-        test Fetch function, that will get any fediverse activity.
+        Fetch function, that will get any fediverse activity.
 
         .. todo:: This test requires internet connection.
             It also requires a valid actor id.
@@ -37,7 +37,7 @@ class ActivityPubTest(TestCase):
 
     def test_activity_actor_remote(self):
         """
-        test getRemoteActor helper function
+        Test getRemoteActor helper function
         that will get remote actor from fediverse.
 
         .. todo:: This test requires internet connection.
@@ -49,14 +49,22 @@ class ActivityPubTest(TestCase):
         # self.assertEqual(result.get("id"), f"{self.actorid}")  # noqa: E501
 
     def test_actvity_fetch_blocked(self):
+        """
+        Test Fetch with blocked domain.
+        """
         with self.assertRaises(ValueError):
             result = Fetch("https://blocked")  # noqa: F841
 
     def test_actvity_fetch_invalid(self):
+        """
+        Test Fetch with invalid domain.
+        """
         with self.assertRaises(ValueError):
             result = Fetch("example")  # noqa: F841
 
     def test_actvity_fetch_onion(self):
+        """
+        Test Fetch with onion domain.
+        """
         with self.assertRaises(ValueError):
             activity = Fetch("http://example.onion")  # noqa: F841
-

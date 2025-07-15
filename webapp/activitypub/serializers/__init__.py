@@ -7,8 +7,10 @@ serializers.py.
 
 from .note import NoteSerializer
 from .actor import ActorSerializer
+from .action import ActionSerializer
 
 __all__ = [
     "ActorSerializer",
+    "ActionSerializer",
     "NoteSerializer",
 ]

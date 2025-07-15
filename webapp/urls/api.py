@@ -62,7 +62,6 @@ class UserDetails(views.APIView):
 
     def get(self, request, *args, **kwargs):
         userinfo = User.objects.get(pk=self.request.user.pk)
-        # logger.error(UserSerializer(userinfo).data)
         return response.Response(UserSerializer(userinfo).data)
 """
 

@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
 
+from allauth.socialaccount.models import SocialToken, SocialApp
+from webapp.tasks import getGoogleContact
 
 class Command(BaseCommand):
     help = "get all contacts for "
@@ -14,8 +16,6 @@ class Command(BaseCommand):
         """
 
     def handle(self, *args, **options):
-        from allauth.socialaccount.models import SocialToken, SocialApp
-        from webapp.tasks import getGoogleContact
 
         accessToken = SocialToken.objects.filter(  # pylint: disable=no-member
             account__user=1, account__provider="google"  # hardcoded

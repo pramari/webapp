@@ -1,66 +1,48 @@
-from django.views.generic.detail import DetailView
+from webapp.activitypub.models import Actor
+from webapp.activitypub.renderers import JsonLDRenderer, ActivityRenderer
+from webapp.activitypub.serializers.actor import ActorSerializer
+from webapp.activitypub.parsers import ActivityParser
+from rest_framework import parsers
+from django.http import Http404
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
-from webapp import contenttype
+from rest_framework import permissions
+from rest_framework.views import APIView
+from rest_framework.renderers import TemplateHTMLRenderer
 
-from webapp.activitypub.models import Note, Action
+class ActivityBaseView(APIView):
+    model = Actor
+    queryset = Actor.objects.all()
+    permission_classes = [permissions.AllowAny]
+    lookup_field = "slug"
+    serializer_class = ActorSerializer
+    template_name = None
+    parser_classes = [
+        parsers.JSONParser,
+        parsers.FormParser,
+        parsers.MultiPartParser,
+        ActivityParser
+        # parsers.FileUploadParser,
+    ]
+    renderer_classes = [
+        JsonLDRenderer,
+        ActivityRenderer,
+        TemplateHTMLRenderer,
+    ]
 
+    def get_object(self):
+        try:
+            return self.queryset.get(profile__slug=self.kwargs["slug"])
+        except Actor.DoesNotExist:
+            raise Http404("Actor not found")
 
-class ActionView(DetailView):
-    """
-    Boilerplate for ActivityPub Actions view.
-
-    "who did what to whom"
-
-    .. seealso::
-        :py:mod:webapp.urls.activitypub
-        `/action/<uuid:uuid>/`
-    """
-
-    model = Action
-    template_name = "activitypub/action.html"
-
-
-class NoteView(DetailView):
-    """
-    Boilerplate for ActivityPub Note view.
-
-    A Note is a short written work, typically
-    less than a single paragraph in length.
-
-    This view will return a json-ld representation
-    of the note if requested.
-
-    .. seealso::
-        :py:mod:webapp.urls.activitypub
-        `/action/<uuid:uuid>/`
-
-    """
-
-    model = Note
-    template_name = "activitypub/note.html"
-
-    def json_ld(self, request):
-        from django.http import JsonResponse
-
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
         """
-        Return a json-ld representation of the note.
-        """
-        json_ld = {
-            "@context": "https://www.w3.org/ns/activitystreams",
-            "type": "Note",
-            "id": self.get_object().get_absolute_url(),
-            "content": self.get_object().content,
-            "published": self.get_object().published.isoformat(),
-            "attributedTo": self.get_object().author.get_absolute_url(),
-        }
+        Process the incoming message.
 
-        return JsonResponse(json_ld, content_type="application/ld+json")
-
-    def dispatch(self, request, *args, **kwargs):
+        No CSRF token required for incoming activities.
         """
-        Make the view return json_ld if requested.
-        """
-        if request.META.get("HTTP_ACCEPT") in contenttype:
-            return self.json_ld(request)
-        return super().dispatch(request, *args, **kwargs)
+        return super().dispatch(*args, **kwargs)

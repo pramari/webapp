@@ -27,7 +27,7 @@ class Command(BaseCommand):
         for fediverseid in options["fediverseid"]:
             self.stdout.write(f"Following {fediverseid}...")
             # follow somebody
-            from webapp.tasks.activitypub import requestFollow
+            from webapp.activitypub.tasks import requestFollow
 
             requestFollow("https://pramari.de/@andreas", fediverseid)
             self.stdout.write(self.style.SUCCESS("Successfully followed!"))

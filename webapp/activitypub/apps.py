@@ -24,6 +24,7 @@ class ActivitypubConfig(AppConfig):
         logger.error("Successfully working with ActivityPub")
 
         post_save.connect(createActor, sender=Profile)
+        action.connect(signalHandler, dispatch_uid="activitypub")
 
         settings = settings._wrapped.__dict__
         settings.setdefault("BLOCKED_SERVERS", [])
@@ -48,5 +49,4 @@ class ActivitypubConfig(AppConfig):
         except ValueError as e:
             logger.error(f"Fucking fix this error: {e}")
 
-        action.connect(signalHandler, dispatch_uid="activitypub")
         logger.info("WebApp ready.")

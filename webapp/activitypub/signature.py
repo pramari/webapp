@@ -32,6 +32,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 from webapp.typing import url, method
 from django.http import HttpRequest
+from .validators import validate_uri
 
 logger = logging.getLogger(__name__)
 
@@ -137,9 +138,8 @@ def getPrivateKey(key_id: str) -> str:
     except ValueError:
         RuntimeError(f"Could not split key_id {key_id}")
 
-    from .validators import uri_validator
 
-    assert uri_validator(actor_id)
+    assert validate_uri(actor_id)
 
     return Profile.objects.get(actor__id=actor_id).private_key_pem
 
@@ -301,7 +301,6 @@ class Signature(object):
             )
         except Exception:
             logger.error(f"failed to parse signature {header}")
-
 
 
 class SignatureChecker:

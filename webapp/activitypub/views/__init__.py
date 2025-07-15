@@ -32,11 +32,13 @@ from .webfinger import WebFingerView
 
 # ActivityPub
 from .actor import ActorView
+from .action import ActionView
 from .inbox import InboxView
 from .outbox import OutboxView
 from .followers import FollowersView
 from .following import FollowingView
 from .liked import LikedView
+from .globalinbox import GlobalInboxView
 
 __all__ += [
     "WebFingerView",
@@ -48,8 +50,12 @@ __all__ = [
     "OutboxView",
     "FollowersView",
     "FollowingView",
+    "LikedView",
+]
+__all__ += [
+    "ActionView",
 ]
 
 __all__ += [
-    "LikedView",
+    "GlobalInboxView",
 ]

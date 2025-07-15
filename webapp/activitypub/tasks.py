@@ -1,13 +1,17 @@
-import json
-import logging
 import functools
 import ipaddress
+import json
+import logging
 import socket
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
+
 from webapp.activitypub.activity import ActivityObject
+from webapp.activitypub.models.actor import Actor
 from webapp.activitypub.signature import signedRequest
+
+from .validators import validate_uri
 
 # from taktivitypub.actor import Actor
 # from taktivitypub import Follow
@@ -28,6 +32,7 @@ def is_valid(url: str) -> bool:
     :raises ValueError: If the URL is invalid
     """
     import urllib.parse
+
     from django.conf import settings
 
     parsed = urllib.parse.urlparse(url)
@@ -79,6 +84,7 @@ def Fetch(url: str) -> dict:
     """
     Fetch a remote object
     """
+    logger.error(f"Fetching {url}")
     import django.core.exceptions
     from django.conf import settings
     from django.core.cache import cache
@@ -104,7 +110,7 @@ def Fetch(url: str) -> dict:
 
 
 @shared_task
-def fetchRemoteActor(id: str) -> dict:
+def fetchRemoteActor(id: str) -> Actor:
     """
     Task to get details for a remote actor
 
@@ -113,25 +119,33 @@ def fetchRemoteActor(id: str) -> dict:
         - Add error handling
         - Add tests
     """
-
     actor = Fetch(id)
-
-    """
-    .. todo::
-        - Add error handling
-        - Add tests
-    """
-
-    return actor
-
-    """
     return Actor(
         id=actor.get("id"),
         inbox=actor.get("inbox"),
         outbox=actor.get("outbox"),  # noqa: E501
         publicKey=actor.get("publicKey", ""),
-    )  # noqa: E501
+    )
+
+
+def signedFetchRemoteActor(id: str, localActor: Actor) -> Actor:
     """
+    .. todo::
+        - Add caching
+        - Add error handling
+        - Add tests
+    """
+    assert validate_uri(id)
+    actor = signedRequest(  # noqa: F841,E501
+        "GET", id, "", f"{localActor.id}#main-key"
+    )  # noqa:
+
+    return Actor(
+        id=actor.get("id"),
+        inbox=actor.get("inbox"),
+        outbox=actor.get("outbox"),  # noqa: E501
+        publicKey=actor.get("publicKey", ""),
+    )
 
 
 @shared_task
@@ -142,19 +156,25 @@ def requestFollow(localID: str, remoteID: str) -> bool:
     args:
         id: str: The id of the remote actor
     """
-    from webapp.models import Actor
-    from webapp.signature import signedRequest
+    from webapp.activitypub.models import Actor
+    from webapp.activitypub.signature import signedRequest
     from webapp.signals import action
 
     localActor = Actor.objects.get(id=localID)
+    """Query the local actor by ID."""
     remoteActor = fetchRemoteActor(remoteID)
-    remoteActorObject = Actor.objects.get(id=remoteActor.get("id"))
+    """Fetch the remote actor details from the remote instance."""
+    remoteActorObject, created = Actor.objects.get_or_create(id=remoteActor.get("id"))
+    """Get or create the remote actor object in the local database (as a 'remote' actor)."""
 
     activity_id = action.send(
         sender=localActor, verb="Follow", target=remoteActorObject
-    )[0][
-        1
-    ].id  # noqa: E501, BLK100
+    )
+    print(localActor)
+    print(remoteActorObject)
+    print(activity_id)
+    activity_id = activity_id[0][1].id  # noqa: E501, BLK100
+    """Store the 'Follow' action in the activity_stream through sending a signal. Get the activity ID."""
 
     print("Actor: ", localActor)
     print("Type: ", type(localActor))
@@ -189,8 +209,9 @@ def acceptFollow(inbox: str, activity: ActivityObject, accept_id: str) -> bool:
         "https://pramari.de/@andreas#main-key"
     )
     """
-    from webapp.signature import signedRequest
     from django.contrib.sites.models import Site
+
+    from webapp.signature import signedRequest
 
     base = Site.objects.get_current().domain
 
@@ -240,7 +261,7 @@ def sendLike(localActor: str, object: str) -> bool:
     try:
         fetched = Fetch(object)
     except ValueError:
-        logger.error(f"Object returned invalid: {object}")
+        logger.debug(f"Object returned invalid: {object}")
         return False
     remote = fetched.get("attributedTo")
     actor_inbox = Fetch(remote).get("inbox")

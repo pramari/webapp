@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+import logging
 
+logger = logging.getLogger(__name__)
 
 class WebfingerTests(TestCase):
     """
@@ -17,31 +19,32 @@ class WebfingerTests(TestCase):
         if created:
             user.save()
 
-    def test_webfinger_get_no_query(self):
+    def test_webfinger_get_no_query_parameter(self):
         """
         Test that a GET request to /.well-known/webfinger returns a 400
-        This will be the case if the resource query parameter is missing or
-        empty.
+
+        This will be the case if the resource query parameter is missing or empty.
         """
         response = self.client.get("/.well-known/webfinger")
 
         self.assertEqual(
             response.status_code, 400
         )  # asuming 404 is the correct status code
-        self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
+        self.assertEqual(response["Content-Type"], "application/jrd+json")
         self.assertEqual(
-            response.text,
-            """{"error": "Missing resource parameter"}""",
+            response.json(),
+            {"detail": "Missing resource parameter"}
         )
 
     def test_webfinger_get_resource(self):
         """
-        Test that a GET request to /.well-known/webfinger with a resource query
-        parameter returns a 200
+        Test that a GET request to /.well-known/webfinger with a resource query parameter returns a 200
         """
         response = self.client.get(
-            "/.well-known/webfinger?resource=acct:andreas@pramari.de"
+            "/.well-known/webfinger",
+            query_params={"resource": "acct:andreas@example.com"},
+            headers={"accept": "application/jrd+json"},
         )
-        self.assertEqual(response["Content-Type"], "application/activity+json")
+        self.assertEqual(response["Content-Type"], "application/jrd+json")
         self.assertEqual(type(response.json()), type({}))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)

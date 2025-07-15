@@ -28,7 +28,7 @@ dependencies = [
   "Pillow",
   "pyyaml",
   "celery",
-  "pyld",
+  "rdflib",
   "rfc3987",
   "PyJWT",
 ]

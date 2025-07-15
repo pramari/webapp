@@ -1,12 +1,9 @@
-import json
-from rest_framework import generics, renderers
 from rest_framework.response import Response
-from webapp.encoders import UUIDEncoder
-from webapp.models import Profile
-from webapp.activitypub.renderers import ActivityRenderer
+from webapp.activitypub.views.activity import ActivityBaseView
+from django.core.paginator import Paginator
+from django.http import Http404
 
-
-class FollowingView(generics.RetrieveAPIView):
+class FollowingView(ActivityBaseView):
     """
     Provide a list of who this profile is following.
 
@@ -27,25 +24,44 @@ class FollowingView(generics.RetrieveAPIView):
         `5.4 Following Collection <https://www.w3.org/TR/activitypub/#following>`_
     """
 
-    renderer_classes = [ActivityRenderer, renderers.JSONRenderer, renderers.TemplateHTMLRenderer]
-    queryset = Profile.objects.all()
-    lookup_field = "slug"
 
-    paginate_by = 20
-    model = Profile
     template_name = "activitypub/following.html"
 
-    def follows(self):
-        return self.get_object().actor.follows.all()
+    def get_queryset(self):
+       return self.get_object().follows.all()
 
     def get(self, request, *args, **kwargs):
-        result = {
-            "id": self.get_object().actor.following,
-            "type": "Collection",
-            "totalItems": 0,
-            "items": [],
+        page = request.GET.get("page", None)
+        paginator = Paginator(self.get_queryset(), 10)
+
+        if request.accepted_renderer.format == "html":
+            return Response({'object_list': self.get_queryset()}, template_name=self.template_name, content_type="text/html")
+
+        activity_result = {
+            "id": f"{self.get_object().following}",
+            "totalItems": self.get_queryset().count(),
+            "type": "OrderedCollection",
         }
-        follows = self.follows().values_list("id", flat=True)  # .order_by("-created")
-        result.update({"totalItems": len(follows)})
-        result.update({"items": json.dumps(list(follows), cls=UUIDEncoder)})
-        return Response(result)
+
+        if not page:
+            activity_result.update({"first": f"{self.get_object().following}?page=1"})
+            return Response(activity_result, content_type="application/activity+json")
+
+        try:
+            page = int(page)
+        except ValueError:
+            raise Http404("Page parameter must be a number")
+        if page > paginator.num_pages or page < 1:
+            raise Http404("Page not found")
+        activity_result.update({
+            "id": f"{self.get_object().following}?page={page}",
+            "type": "OrderedCollectionPage",
+            "partOf": f"{self.get_object().following}"
+        })
+        if page > 1:
+            activity_result.update({"prev": f"{self.get_object().following}?page={int(page) - 1}"})
+        if page < paginator.num_pages:
+            activity_result.update({"next": f"{self.get_object().following}?page={int(page) + 1}"})
+        activity_result.update({"orderedItems": [f"{item.id}" for item in self.get_queryset()]})
+
+        return Response(activity_result, content_type="application/activity+json")

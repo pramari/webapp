@@ -47,14 +47,12 @@ class Actor(models.Model):
     the following properties:
 
 
-        - `actorID` -  A unique `URL` for the `Actor`. The `id` property is *REQUIRED*
+    - `actorID` -  A unique `URL` for the `Actor`. The `id` property is *REQUIRED*
         for `Actor` objects.
-
-        - `inbox` - A link to an `OrderedCollection` of `Activities` that this
+    - `inbox` - A link to an `OrderedCollection` of `Activities` that this
         `Actor` has received, typically from clients. The `inbox` property is
         *REQUIRED* for `Actor` objects.
-
-        - `outbox` - A link to an `OrderedCollection` of `Activities` that this
+    - `outbox` - A link to an `OrderedCollection` of `Activities` that this
         `Actor` has published, such as `Posts`, `Comments`, etc. The `outbox`
         property is *REQUIRED* for `Actor` objects.
 
@@ -137,6 +135,24 @@ class Actor(models.Model):
         validators=[validate_iri],
     )  # noqa: E501
 
+    preferredUsername = models.CharField(
+        max_length=255,
+        help_text=_("The preferred username of the actor."),
+    )
+
+    bio = models.TextField(help_text=_("Short Bio"))
+
+    public_key_pem = models.TextField(help_text=_("Public Key"))
+    private_key_pem = models.TextField(help_text=_("Private Key"))
+
+    img = models.ImageField(
+        upload_to="mediafiles/user/",
+        default="/user/default.png",  # noqa: E501
+    )
+    gravatar = models.BooleanField(
+        default=True, help_text=_("Use Gravatar profile image.")
+    )
+
     type = models.CharField(
         max_length=255, default="Person", choices=get_actor_types
     )  # noqa: E501
@@ -150,6 +166,16 @@ class Actor(models.Model):
         symmetrical=False,
         blank=True,
         through="Follow",
+    )
+
+    discoverable = models.BooleanField(
+        default=True,
+        help_text=_("Is this actor discoverable by other actors?"),
+    )
+
+    manuallyApprovesFollowers = models.BooleanField(
+        default=False,
+        help_text=_("Does this actor manually approve followers?"),
     )
 
     # flw = models.ManyToManyField(  # this is to prep/test migration of the above.
@@ -186,6 +212,13 @@ class Actor(models.Model):
         logger.error("The actorID property is deprecated. Use id instead.")
         view = reverse("actor-view", args=[str(self.profile.user)])
         return f"{view}"
+
+    def get_absolute_url(self):
+        """
+        Return the absolute URL of this actor.
+        Activity Streams 2.0
+        """
+        return reverse("actor-view", kwargs={'slug': str(self.profile.user)})
 
     @cached_property
     def remote(self):

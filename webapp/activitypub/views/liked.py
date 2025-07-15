@@ -1,15 +1,9 @@
 import json
 
-# from django.views.generic.detail import DetailView
-# from django.http import JsonResponse
 from rest_framework.response import Response
-from webapp.models import Profile
+from webapp.activitypub.views.activity import ActivityBaseView
 
-from rest_framework import generics
-from webapp.activitypub.renderers import ActivityRenderer
-
-
-class LikedView(generics.RetrieveAPIView):
+class LikedView(ActivityBaseView):
     """
     View for handling the objects an actor liked.
 
@@ -27,18 +21,15 @@ class LikedView(generics.RetrieveAPIView):
         `ActivityPub Liked <https://www.w3.org/TR/activitypub/#liked>`_
     """
 
-    renderer_classes = [ActivityRenderer]
-    queryset = Profile.objects.all()
-    lookup_field = "slug"
-    model = Profile
+    template_name = "activitypub/liked.html"
 
     def liked(self):
-        result = self.get_object().actor.like_set.all()
+        result = self.get_object().like_set.all()
         return result
 
     def get(self, request, *args, **kwargs):
         result = {
-            "id": f"{self.get_object().actor.liked}",
+            "id": f"{self.get_object().liked}",
             "type": "Collection",
             "totalItems": 0,
             "items": [],
@@ -46,6 +37,6 @@ class LikedView(generics.RetrieveAPIView):
         likes = self.liked().values_list("object", flat=True).order_by("-created_at")
         result.update({"totalItems": len(likes)})
         result.update({"items": json.dumps(list(likes))})
-        # return JsonResponse(result, content_type="application/activity+json")
-        # self.object = self.get_object()
-        return Response(result)
+        if request.accepted_renderer.format == "html":
+            return Response(result, template_name=self.template_name, content_type="text/html")
+        return Response(result, content_type="application/activity+json")

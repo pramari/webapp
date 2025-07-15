@@ -717,7 +717,7 @@ class ToolTest(TestCase):
         result = response.json()["links"][0]["href"]
         base = f"https://{Site.objects.get_current().domain}"
         logger.debug(f"base: {base}")
-        self.assertEqual(result, "/api/v1/version")
+        self.assertEqual(result, "https://pramari.de/api/v1/version")
 
     def test_version(self):
         # Issue a GET request.

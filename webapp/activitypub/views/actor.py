@@ -1,14 +1,16 @@
 import logging
 
-from rest_framework import generics
-from rest_framework.response import Response
-from webapp.models import Profile  # Profile is hosting Actor
 from webapp.activitypub.serializers import ActorSerializer
+from rest_framework import status
+from rest_framework.response import Response
+
+from .activity import ActivityBaseView
 
 logger = logging.getLogger(__name__)
 
 
-class ActorView(generics.GenericAPIView):
+
+class ActorView(ActivityBaseView):
     """
     Return the actor object for a given user.
     User is identified by the slug.
@@ -35,24 +37,14 @@ class ActorView(generics.GenericAPIView):
 
     """
 
-    serializer_class = ActorSerializer
-    queryset = Profile.objects.all()  # todo: local profiles, approved profiles
-    lookup_field = "slug"
-    model = Profile
     template_name = "activitypub/actor.html"
-
-    def get_object(self):
-        """
-        Search for the profile, return the actor.
-        """
-        return self.queryset.get(slug=self.kwargs["slug"]).actor
+    serializer_class = ActorSerializer
 
     def get(self, request, *args, **kwargs):
-        logger.debug(
-            "ActorView.get(): acceppted media types: %s", request.accepted_media_type
-        )
+        object = self.get_object()
         if request.accepted_renderer.format == "html":
-            data = {"actor": self.get_object()}
-            return Response(data, template_name=self.template_name)
-        actor = self.serializer_class(instance=self.get_object()).data
-        return Response(actor)
+            data = {"object": object}
+            return Response(data, template_name=self.template_name, content_type="text/html")
+
+        data = self.serializer_class(instance=object).data
+        return Response(data, content_type='application/activity+json', status=status.HTTP_200_OK) # ; profile="https://www.w3.org/ns/activitystreams"')

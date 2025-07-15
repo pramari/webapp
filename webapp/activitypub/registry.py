@@ -118,14 +118,14 @@ class ActorRegistry(dict):
         Register one or more models with the registry.
         """
         for class_or_label in model_classes_or_labels:
-            logger.error("trying to register %s" % class_or_label)
+            logger.debug("trying to register %s" % class_or_label)
             model_class = self._validate(class_or_label)
-            logger.error("Got model_class %s" % model_class)
+            logger.debug("Got model_class %s" % model_class)
 
             if model_class not in self:
-                logger.error("not in self: %s" % model_class)
+                logger.debug("not in self: %s" % model_class)
                 self[model_class] = setup_generic_relations(model_class)
-                logger.error("Successfully registered: %s" % model_class)
+                logger.debug("Successfully registered: %s" % model_class)
 
     def unregister(self,*model_classes_or_labels):
         for class_or_label in model_classes_or_labels:
@@ -146,7 +146,7 @@ class ActorRegistry(dict):
                 "Registered are the following models:"
                 f"{', '.join([model.__name__ for model in self])}"
             )
-        logger.error("Successfully registered %s", model_class.__name__)
+        logger.debug("Successfully registered %s", model_class.__name__)
 
 
 

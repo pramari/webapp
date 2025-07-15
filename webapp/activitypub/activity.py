@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from dataclasses import field
 # from dataclasses import asdict
 # from dataclasses import is_dataclass
-
+from webapp.activitypub.models import Action
 logger = logging.getLogger(__name__)
 
 
@@ -77,7 +77,6 @@ def canonicalize(ld_data: dict) -> dict:
     jsonld.set_document_loader(default_document_loader)
     return jsonld.compact(jsonld.expand(ld_data), context)
 
-
 @dataclass
 class Location:
     """
@@ -127,7 +126,14 @@ class ActivityObject:
             k: v for k, v in self.__dict__.items() if not k.startswith("_")
         }  # noqa: E501
         return result
-        # return asdict(self)
+
+    def toAction(self) -> Action:
+        """
+        Convert the object to an Action.
+        """
+        from webapp.activitypub.models.action import Action
+
+        return Action(asdict(self))
 
     def _fromDict(self, incoming: dict) -> None:
         """
@@ -170,47 +176,3 @@ class ActivityObject:
     bcc: Optional[List[dict]] = field(default_factory=lambda: [])
     mediaType: Optional[str] = ""
     duration: Optional[str] = ""
-
-
-"""
-class ActivityMessage(object):
-    # https://www.w3.org/TR/activitystreams-vocabulary/
-
-    def __init__(self, message: dict = {}, *args, **kwargs) -> None:
-        if len(message) == 0:
-            raise ValueError("Empty incoming message")
-        match message:
-            case dict():
-                self._fromDict(incoming=message)
-            case str():
-                self._fromDict(incoming=json.loads(message))
-            case _:
-                raise ValueError("Invalid type for message")
-
-        super().__init__(*args, **kwargs)
-
-    def _fromDict(self, incoming: dict) -> None:
-        if not isinstance(incoming, dict):
-            raise ValueError("Invalid type for incoming")
-        try:
-            context = incoming.pop("@context", None)
-        except KeyError as e:
-            logger.error(f"Error: {e}")
-            logger.error(f"Missing @context in ActivityMessage: {incoming}")
-            raise
-        assert "https://www.w3.org/ns/activitystreams" in context
-        self.id = incoming.pop("id", None)
-
-        # assert id is not None
-        self.type = incoming.pop("type", None)  # noqa: F841
-        # assert self.type in ACTIVITY_TYPES.keys()
-
-        self.__dict__.update(incoming)
-
-    def json(self) -> dict:
-        return json.loads(self)
-"""
-
-"""
-https://git.sr.ht/~tsileo/microblog.pub/tree/v2/item/app/utils/url.py
-"""

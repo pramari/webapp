@@ -1,11 +1,9 @@
-from .models import Actor
-from .registry import check
-from webapp.models import Profile
-from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.apps import apps
 from django.dispatch import Signal
+from .models import Actor
+from .registry import check
 
 import logging
 
@@ -58,8 +56,8 @@ def signalHandler(*args, **kwargs):
         `Django Activity Streams <https://github.com/justquick/django-activity-stream/blob/main/actstream/actions.py>`_, from which this is heavily inspired.  # noqa: E501
 
     """  # noqa: E501
-
-    logger.debug("Entering signal handler")
+    print("Hello, world!")  # noqa: T201
+    logger.error("Entering signal handler")
     signal = kwargs.pop("signal", None)  # noqa: F841
     actor = kwargs.pop("sender")
     verb = kwargs.pop("verb")
@@ -71,6 +69,8 @@ def signalHandler(*args, **kwargs):
 
     actor_content_type = ContentType.objects.get_for_model(actor)
     actor_object_id = actor.pk
+
+    logger.error(f"Actor: {actor}, verb: {verb}, kwargs: {kwargs}")
 
     activity = apps.get_model("activitypub", "action")(
         actor_content_type=actor_content_type,
@@ -109,8 +109,9 @@ def signalHandler(*args, **kwargs):
 
 
 def createActor(sender, instance, created, **kwargs):
+    from webapp.models import Profile
+    from django.contrib.sites.models import Site
     if created:  # not user.profile:
-
         try:
             base = f"https://{Site.objects.get_current().domain}"
         except Site.DoesNotExist:

@@ -1,12 +1,11 @@
-from django.http import JsonResponse
-from django.views import View
+from webapp.activitypub.views.activity import ActivityBaseView
+from rest_framework import response, status
 from django.core.paginator import Paginator
-
-from webapp.models import Profile
 from webapp.activitypub.models import Action
+from webapp.activitypub.serializers import ActionSerializer
+from django.http import Http404
 
-
-class OutboxView(View):
+class OutboxView(ActivityBaseView):
     """
     5.1 Outbox
     The outbox is a list of all activities that an actor has published. The
@@ -18,43 +17,73 @@ class OutboxView(View):
     https://www.w3.org/TR/activitypub/#outbox
     """
 
+    template_name = "activitypub/outbox.html"
+
     def get(self, request, *args, **kwargs):
-        # Retrieve the activity stream of the authenticated user's actor
-        # ...
+        """
+        Retrieve the activity stream of the actor's `outbox`_.
 
-        slug = kwargs.get("slug")
+        .. _outbox: https://www.w3.org/TR/activitypub/#outbox
+
+        """
+
         page = request.GET.get("page", None)
+        actor = self.get_object()
 
-        try:
-            profile = Profile.objects.get(slug=slug)  # pylint: disable=E1101
-        except Profile.DoesNotExist:
-            return JsonResponse({"error": "Profile not found"}, status=404)
 
-        activity_list = Action.objects.filter(actor_object_id=profile.id)
+        activity_list = Action.objects.filter(actor_object_id=self.get_object().id)
         paginator = Paginator(activity_list, 10)
-        # from django.core import serializers
 
-        # Prepare the activity stream response
         activity_stream = {
-            "@context": "https://www.w3.org/ns/activitystreams",
-            "type": "OrderedCollection",
-            "totalItems": paginator.count,
-            "first": f"{profile.actor.outbox}?page=1",
-            "last": f"{profile.actor.outbox}?page={paginator.num_pages}",
+            "id": f"{actor.outbox}",
+            "totalItems": activity_list.count(),
         }
 
-        if page:
-            # Add the serialized activity list to the activity stream
-            data = {}  # serializers.serialize(
-            # "json",
-            # paginator.page(int(page)),
-            # fields=["id", "content", "published"],  # pylint: disable=E501
-            # )
-            activity_stream["type"] = "OrderedCollectionPage"
-            activity_stream[
-                "current"
-            ] = f"{profile.actor.outbox}?page={page}"  # pylint: disable=E501
-            activity_stream["orderedItems"] = data
+        if not page: # Ordered Collection
+            activity_stream.update({"type": "OrderedCollection"})
+            activity_stream.update({"first": f"{actor.outbox}?page=1"})
+        else:
+            try:
+                page = int(page)
+            except ValueError:
+                raise Http404("Page parameter must be a number")
+            if page > paginator.num_pages or page < 1:
+                raise Http404("Page not found")
+            activity_stream.update({"type": "OrderedCollectionPage"})
+            if page > 1:
+                activity_stream.update({"prev": f"{actor.outbox}?page={int(page) - 1}"})
+            if page < paginator.num_pages:
+                activity_stream.update({"next": f"{actor.outbox}?page={int(page) + 1}"})
+            activity_stream.update({"last": f"{actor.outbox}?page={paginator.num_pages}"})
+            activity_stream.update({"first": f"{actor.outbox}?page=1"})
+            activity_stream.update({"orderedItems": [ActionSerializer(item).data for item in activity_list]})
 
-        # Return the activity stream as a JSON response
-        return JsonResponse(activity_stream)
+        if "html" in request.accepted_renderer.format:
+            if not self.template_name:
+                raise Http404("Template not found")
+            data = {"object": activity_stream}
+            return response.Response(data, template_name=self.template_name, content_type="text/html")
+
+        return response.Response(activity_stream, content_type='application/activity+json', status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Create a new activity and add it to the actor's `outbox`_.
+
+        .. _outbox: https://www.w3.org/TR/activitypub/#outbox
+
+        .. todo::
+          - Implement ActivityPub outbox post method
+          - Validate incoming activity data
+          - Handle errors gracefully
+          - Implement permissions
+
+          -
+        .. seealso::
+          - :meth:`webapp.activitypub.views.outbox.OutboxView.get`
+        """
+        # actor = self.get_object()
+        # activity = Activity.objects.create(actor=actor, type="Create")
+        # activity.save()
+        # activity_response = activity.to_json()
+        return response.Response({}, content_type='application/activity+json', status=status.HTTP_201_CREATED)

@@ -30,10 +30,11 @@ from webapp.activitypub.views import (
     FollowersView,
     FollowingView,
     LikedView,
+    GlobalInboxView,
 )
 
-from webapp.activitypub.views.activity import (
-    NoteView,
+from webapp.activitypub.views import (
+#     NoteView,
     ActionView,
 )
 
@@ -47,6 +48,7 @@ urlpatterns = [
     path("api/v1/version", VersionView.as_view(), name="version"),
     path("api/v1/timeline", TimelineView.as_view(), name="timeline"),
     path("api/v1/streaming", StreamingView.as_view(), name="streaming"),
+    path("inbox", GlobalInboxView.as_view(), name="global-inbox"),
     path(
         r"@<slug:slug>",
         ActorView.as_view(),
@@ -58,30 +60,29 @@ urlpatterns = [
         name="actor-inbox",  # noqa: E501
     ),
     path(
-        r"accounts/<slug:slug>/outbox",
+        r"@<slug:slug>/outbox",
         OutboxView.as_view(),
         name="actor-outbox",  # noqa: E501
     ),
-    # path(r"follow/", FollowView.as_view(), name="profile-follow"),
     path(
-        r"accounts/<slug:slug>/followers",
+        r"@<slug:slug>/followers",
         FollowersView.as_view(),
         name="actor-followers",
     ),
     path(
-        r"accounts/<slug:slug>/following",
+        r"@<slug:slug>/following",
         FollowingView.as_view(),
         name="actor-following",
     ),
     path(
-        r"accounts/<slug:slug>/liked",
+        r"@<slug:slug>/liked",
         LikedView.as_view(),
         name="actor-liked",
     ),
 ]
 
 urlpatterns += [
-    path(r"note/<uuid:pk>", NoteView.as_view(), name="note-detail"),
+#     path(r"note/<uuid:pk>", NoteView.as_view(), name="note-detail"),
     path(r"action/<uuid:pk>", ActionView.as_view(), name="action_detail"),
 ]
 

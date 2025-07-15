@@ -39,19 +39,40 @@ class InboxTest(TestCase):
         response = self.client.get("/inbox/")
         self.assertEqual(response.status_code, 404)
 
-    def test_user_inbox_unauthenticated(self):
+    def test_get_inbox_unauthenticated_http(self):
         """
-        Test the user inbox view.
+        Test GETing user inbox view, unauthenticated, using no special content-type.
         .. :py:meth:webapp.tests.inbox.InboxTest.test_user_inbox
 
         .. todo::
-          - For authenticated users, this shall return an 
+          - For authenticated users, this shall return an
           `OrderedCollection` with HTPP status 200.
         """
         from django.urls import reverse
         response = self.client.get(reverse("actor-inbox", kwargs={'slug': self.username}))
         self.assertEqual(response.status_code, 404)
 
+    def redo_test_post_inbox_unsigned(self):
+        """
+        Test posting to user inbox, with an unsigned activity.
+
+        .. :py:meth:webapp.tests.inbox.InboxTest.test_post_inbox_unsigned
+
+        .. todo::
+
+        .. todo::
+           Implement this test case.
+
+        """
+        from django.urls import reverse
+        response = self.client.post(
+            reverse("actor-inbox", kwargs={'slug': self.username}),
+            data={'actor': 'https://example.com', 'type': 'EchoRequest', 'object': 'https://example.com'},
+            content_type="application/json",
+            accept="application/ld+json",
+        )
+        print(response)
+        self.assertEqual(response.status_code, 200)
 
     def test_follow_1(self):
         """
@@ -69,7 +90,7 @@ class InboxTest(TestCase):
             result = self.client.post(
                 f"/accounts/{self.slug}/inbox",
                 data=message,
-                content_type="application/json",
+                content_type="application/activity+json",
             )
             self.assertEqual(result.status_code, 404)
 
@@ -87,7 +108,7 @@ class InboxTest(TestCase):
         self.client.post(
             f"/accounts/{self.username}/inbox",
             data=message,
-            content_type="application/json",
+            content_type="application/activity+json",
         )
 
 

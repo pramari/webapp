@@ -1,3 +1,4 @@
-from .inbound import follow, accept, undo, create, delete, like
+from .inbound import undo, create, delete, like, echorequest
+from .follow import Accept, Follow
 
-__all__ = ["follow", "accept", "undo", "create", "delete", "like"]
+__all__ = ["Follow", "Accept", "undo", "create", "delete", "like", "echorequest"]
