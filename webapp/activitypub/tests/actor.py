@@ -1,4 +1,4 @@
-import sys
+context = {"as": "https://www.w3.org/ns/activitystreams#", }
 
 actor = {
     "@context": [
@@ -28,18 +28,38 @@ actor = {
 }
 
 
+orderedpage = {
+    # "@context": ["https://www.w3.org/ns/activitystreams"],
+    "id": "https://pramari.de/@andreas/following?page=1",
+    "orderedItems": [
+        "https://pramari.de/@andreas3",
+        "https://23.social/users/andreasofthings",
+    ],
+    "partOf": "https://pramari.de/@andreas/following",
+    "totalItems": 2,
+    "type": "OrderedCollectionPage",
+}
+
+
+outbox = {'id': 'https://example.com/@andreas/outbox', 'totalItems': 0, 'type': 'OrderedCollection', 'first': 'https://example.com/@andreas/outbox?page=1', '@context': ['https://www.w3.org/ns/activitystreams']}
+
+
 if __name__ == "__main__":
     import json
 
-    # print(json.dumps(actor, indent=2, ensure_ascii=False))
-    # from  pyld import jsonld
-    # expanded = jsonld.expand(actor)
-    # print(json.dumps(expanded, indent=2, ensure_ascii=False))
+    print(json.dumps(outbox, indent=2, ensure_ascii=False))
+    from  pyld import jsonld
+    expanded = jsonld.expand(outbox)
+    print(json.dumps(expanded, indent=2, ensure_ascii=False))
+    compacted = jsonld.compact(outbox, context)
+    print(json.dumps(compacted, indent=2, ensure_ascii=False))
+
+    import sys
+    sys.exit(0)
     from rdflib import Graph
-    import io
 
     g = Graph()
-    g.parse(io.StringIO(json.dumps(actor)), format="json-ld")
+    g.parse(data=orderedpage, format="json-ld", context=context)
 
     print(g)
     # Loop through each triple in the graph (subj, pred, obj)
@@ -49,5 +69,7 @@ if __name__ == "__main__":
         if (subj, pred, obj) not in g:
             raise Exception("It better be!")
 
-    turtle_data = g.serialize(format="json-ld", auto_compact=True).encode("utf-8")
+    turtle_data = g.serialize( format="json-ld", context=context, auto_compact=True,).encode("utf-8")
+    print(json.dumps(json.loads(turtle_data), indent=2, ensure_ascii=False))
+    turtle_data = g.serialize( format="json-ld", auto_compact=True,).encode("utf-8")
     print(json.dumps(json.loads(turtle_data), indent=2, ensure_ascii=False))

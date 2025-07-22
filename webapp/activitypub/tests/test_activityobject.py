@@ -17,6 +17,7 @@ class ActivityObjectTest(TestCase):
         for verb, messages in w3c_activity.items():
             for message in messages:
                 self.activity[verb] = ActivityObject(message)  # noqa: F841
+                print(f"{self.activity[verb]}")
                 self.assertIsInstance(self.activity[verb], ActivityObject)
 
     def test_activity_object_to_message(self):

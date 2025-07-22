@@ -133,7 +133,8 @@ class ActivityObject:
         """
         from webapp.activitypub.models.action import Action
 
-        return Action(asdict(self))
+        # return Action(asdict(self))  # dataclass function
+        return Action(**self.toDict())
 
     def _fromDict(self, incoming: dict) -> None:
         """

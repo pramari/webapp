@@ -8,7 +8,6 @@
     Returns:
         _type_: _description_
 """
-
 import logging
 from rest_framework import renderers
 
@@ -41,25 +40,37 @@ class JsonLDRenderer(renderers.JSONRenderer):
     format = "ld"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
+        assert isinstance(data, dict), "JsonLDRenderer.render expects a dict"
+        # context = {"as": "https://www.w3.org/ns/activitystreams"}
         logger.debug("ActivityRenderer.render: media_type:" + str(accepted_media_type))
 
-        assert isinstance(data, dict), "JsonLDRenderer.render expects a dict"
-
         data["@context"] = ["https://www.w3.org/ns/activitystreams"]
-        # if data.get("publicKey"):
-        #     data["@context"].append("https://w3id.org/security/v1")
+        if data.get("publicKey"):
+            data["@context"].append("https://w3id.org/security/v1")
+
+
+        logger.error(f"Data:\n\n{data}")
+        logger.error("\n\n\n\n\n\n\n\n")
+
 
         try:
-            from rdflib import Graph
-        except ImportError as e:
-            logger.error("JsonLDRenderer.render: rdflib not installed: " + str(e))
-            raise ImportError("rdflib is required for JsonLDRenderer")
-        except Exception as e:
-            logger.error("JsonLDRenderer.render: Unexpected error: " + str(e))
-            raise Exception("Unexpected error during rdflib import")
+            from pyld import jsonld
+            from .context import context
+            undata = jsonld.compact(data, context)  # noqa: F841
+
+        except ImportError:
+            raise ImportError("JsonLDRenderer requires pyld")
+
+        except jsonld.JsonLdError as e:
+            logger.error(f"JsonLDRenderer failed to compact data: {e}")
+            logger.error(f"data: {data}")
+            # raise ValueError(f"JsonLDRenderer failed to compact data: {e}")
+
+        if isinstance(data, dict):
+            data = dict(sorted(data.items()))
 
         return super().render(
-            dict(sorted(data.items())), accepted_media_type, renderer_context
+            data, accepted_media_type, renderer_context
         )
 
 
